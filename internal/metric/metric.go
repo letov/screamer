@@ -28,20 +28,23 @@ type Metric struct {
 	Value interface{}
 }
 
+var ErrUnknownMetricType = errors.New("unknown metric type")
+var ErrIncorrectMetricValue = errors.New("incorrect metric value")
+
 func NewMetric(mr Raw) (Metric, error) {
 	switch Label(mr.Label) {
 	case CounterLabel:
 		v, err := strconv.ParseInt(mr.Value, 0, 64)
 		if err != nil {
-			return Metric{}, err
+			return Metric{}, ErrIncorrectMetricValue
 		}
 		return Metric{Kind: Counter, Name: mr.Name, Value: v}, nil
 	case GougeLabel:
 		v, err := strconv.ParseFloat(mr.Value, 64)
 		if err != nil {
-			return Metric{}, err
+			return Metric{}, ErrIncorrectMetricValue
 		}
 		return Metric{Kind: Gauge, Name: mr.Name, Value: v}, nil
 	}
-	return Metric{}, errors.New("unknown metric type")
+	return Metric{}, ErrUnknownMetricType
 }

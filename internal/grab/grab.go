@@ -23,7 +23,7 @@ func Init() {
 
 func getRouter() *mux.Router {
 	router := mux.NewRouter()
-	router.HandleFunc(`/update/{label:[a-zA-Z]+}/{name:[a-zA-Z]+}/{value:[-+]?[0-9]*\.?[0-9]+}`, updateHandler)
+	router.HandleFunc(`/update/{label:[a-zA-Z]+}/{name:[a-zA-Z]+}/{value}`, updateHandler)
 	return router
 }
 
@@ -38,7 +38,11 @@ func updateHandler(res http.ResponseWriter, req *http.Request) {
 		Name:  params["name"],
 		Value: params["value"],
 	})
-	if err != nil {
+	switch err {
+	case metric.ErrUnknownMetricType:
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	case metric.ErrIncorrectMetricValue:
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
