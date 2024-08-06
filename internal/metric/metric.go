@@ -10,7 +10,7 @@ type Kind int
 
 const (
 	CounterLabel Label = "counter"
-	GougeLabel         = "gauge"
+	GougeLabel   Label = "gauge"
 )
 const (
 	Counter Kind = iota
