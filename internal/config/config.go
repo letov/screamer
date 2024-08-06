@@ -6,6 +6,8 @@ import (
 	"os"
 )
 
+var config *Config
+
 type Config struct {
 	Port string
 }
@@ -15,9 +17,14 @@ func Init() {
 	if err != nil {
 		log.Fatal("Error loading .env file")
 	}
+	config = newConfig()
 }
 
-func NewConfig() *Config {
+func GetConfig() *Config {
+	return config
+}
+
+func newConfig() *Config {
 	return &Config{
 		Port: getEnv("PORT", "8080"),
 	}

@@ -5,38 +5,43 @@ import (
 	"strconv"
 )
 
-const (
-	COUNTER_LABEL string = "counter"
-	GAUGE_LABEL          = "gauge"
-)
-
-type MetricType int
+type Label string
+type Kind int
 
 const (
-	COUNTER MetricType = iota
-	GAUGE
+	CounterLabel Label = "counter"
+	GougeLabel         = "gauge"
+)
+const (
+	Counter Kind = iota
+	Gauge
 )
 
+type Raw struct {
+	Label string
+	Name  string
+	Value string
+}
 type Metric struct {
-	Type  MetricType
+	Kind  Kind
 	Name  string
 	Value interface{}
 }
 
-func GetMetric(metricLabel, name, value string) (Metric, error) {
-	switch metricLabel {
-	case COUNTER_LABEL:
-		v, err := strconv.ParseInt(value, 0, 64)
+func NewMetric(mr Raw) (Metric, error) {
+	switch Label(mr.Label) {
+	case CounterLabel:
+		v, err := strconv.ParseInt(mr.Value, 0, 64)
 		if err != nil {
 			return Metric{}, err
 		}
-		return Metric{Type: COUNTER, Name: name, Value: v}, nil
-	case GAUGE_LABEL:
-		v, err := strconv.ParseFloat(value, 64)
+		return Metric{Kind: Counter, Name: mr.Name, Value: v}, nil
+	case GougeLabel:
+		v, err := strconv.ParseFloat(mr.Value, 64)
 		if err != nil {
 			return Metric{}, err
 		}
-		return Metric{Type: GAUGE, Name: name, Value: v}, nil
+		return Metric{Kind: Gauge, Name: mr.Name, Value: v}, nil
 	}
 	return Metric{}, errors.New("unknown metric type")
 }
