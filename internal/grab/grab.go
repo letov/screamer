@@ -40,6 +40,8 @@ func updateHandler(res http.ResponseWriter, req *http.Request) {
 	})
 	switch err {
 	case metric.ErrUnknownMetricType:
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
 	case metric.ErrIncorrectMetricValue:
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
