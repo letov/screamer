@@ -1,21 +1,26 @@
 package metric
 
 import (
-	"errors"
-	"strconv"
+	"screamer/internal/metric/validators"
 )
 
-type Label string
-type Kind int
+type Ident int
 
 const (
-	CounterLabel Label = "counter"
-	GougeLabel   Label = "gauge"
+	CounterIdent Ident = iota
+	GaugeIdent
 )
-const (
-	Counter Kind = iota
-	Gauge
-)
+
+var metricValidators = map[string]MetricValidator{
+	validators.CounterLabel: {
+		Ident:     CounterIdent,
+		Validator: validators.CounterValidator,
+	},
+	validators.GaugeLabel: {
+		Ident:     GaugeIdent,
+		Validator: validators.GaugeValidator,
+	},
+}
 
 type Raw struct {
 	Label string
@@ -23,28 +28,26 @@ type Raw struct {
 	Value string
 }
 type Metric struct {
-	Kind  Kind
+	Ident Ident
 	Name  string
 	Value interface{}
 }
 
-var ErrUnknownMetricType = errors.New("unknown metric type")
-var ErrIncorrectMetricValue = errors.New("incorrect metric value")
+type MetricValidator struct {
+	Ident     Ident
+	Validator func(value string) (interface{}, error)
+}
 
 func NewMetric(mr Raw) (Metric, error) {
-	switch Label(mr.Label) {
-	case CounterLabel:
-		v, err := strconv.ParseInt(mr.Value, 0, 64)
-		if err != nil {
-			return Metric{}, ErrIncorrectMetricValue
-		}
-		return Metric{Kind: Counter, Name: mr.Name, Value: v}, nil
-	case GougeLabel:
-		v, err := strconv.ParseFloat(mr.Value, 64)
-		if err != nil {
-			return Metric{}, ErrIncorrectMetricValue
-		}
-		return Metric{Kind: Gauge, Name: mr.Name, Value: v}, nil
+	v, ok := metricValidators[mr.Label]
+	if !ok {
+		return Metric{}, validators.ErrUnknownMetricType
 	}
-	return Metric{}, ErrUnknownMetricType
+
+	vv, err := v.Validator(mr.Value)
+	if err != nil {
+		return Metric{}, validators.ErrIncorrectMetricValue
+	}
+
+	return Metric{Ident: v.Ident, Name: mr.Name, Value: vv}, nil
 }
