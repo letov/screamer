@@ -4,6 +4,7 @@ import (
 	"github.com/stretchr/testify/assert"
 	"net/http"
 	"net/http/httptest"
+	"screamer/internal/storage"
 	"testing"
 )
 
@@ -54,6 +55,7 @@ func Test_updateHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			storage.Init()
 			req, err := http.NewRequest("POST", tt.args.url, nil)
 			if err != nil {
 				t.Fatal(err)

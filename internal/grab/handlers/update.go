@@ -21,6 +21,7 @@ func UpdateHandler(res http.ResponseWriter, req *http.Request) {
 		Name:  params["name"],
 		Value: params["value"],
 	})
+
 	switch err {
 	case validators.ErrUnknownMetricType:
 		http.Error(res, err.Error(), http.StatusBadRequest)
@@ -29,5 +30,15 @@ func UpdateHandler(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
-	_ = storage.GetStorage().Add(m)
+
+	s := storage.GetStorage()
+	if s == nil {
+		http.Error(res, "there is no init storage", http.StatusBadRequest)
+		return
+	}
+	err = s.Add(m)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
 }
