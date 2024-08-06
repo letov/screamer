@@ -23,7 +23,7 @@ func Init() {
 
 func getRouter() *mux.Router {
 	router := mux.NewRouter()
-	router.HandleFunc(`/update/{label:[a-z]+}/{name:[a-z]+}/{value:[-+]?[0-9]*\.?[0-9]+}`, updateHandler)
+	router.HandleFunc(`/update/{label:[a-zA-Z]+}/{name:[a-zA-Z]+}/{value:[-+]?[0-9]*\.?[0-9]+}`, updateHandler)
 	return router
 }
 
