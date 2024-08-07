@@ -1,24 +1,24 @@
 package metric
 
 import (
-	"screamer/internal/metric/validators"
+	"screamer/internal/metric/kinds"
 )
 
-type Ident int
+type Kind int
 
 const (
-	CounterIdent Ident = iota
-	GaugeIdent
+	Counter Kind = iota
+	Gauge
 )
 
-var metricValidators = map[string]MetricValidator{
-	validators.CounterLabel: {
-		Ident:     CounterIdent,
-		Validator: validators.CounterValidator,
+var Validators = map[string]Validator{
+	kinds.CounterLabel: {
+		Kind: Counter,
+		Func: kinds.CounterValidator,
 	},
-	validators.GaugeLabel: {
-		Ident:     GaugeIdent,
-		Validator: validators.GaugeValidator,
+	kinds.GaugeLabel: {
+		Kind: Gauge,
+		Func: kinds.GaugeValidator,
 	},
 }
 
@@ -28,26 +28,26 @@ type Raw struct {
 	Value string
 }
 type Metric struct {
-	Ident Ident
+	Kind  Kind
 	Name  string
 	Value interface{}
 }
 
-type MetricValidator struct {
-	Ident     Ident
-	Validator func(value string) (interface{}, error)
+type Validator struct {
+	Kind Kind
+	Func func(value string) (interface{}, error)
 }
 
 func NewMetric(mr Raw) (Metric, error) {
-	v, ok := metricValidators[mr.Label]
+	c, ok := Validators[mr.Label]
 	if !ok {
-		return Metric{}, validators.ErrUnknownMetricType
+		return Metric{}, kinds.ErrUnknownMetricType
 	}
 
-	vv, err := v.Validator(mr.Value)
+	v, err := c.Func(mr.Value)
 	if err != nil {
-		return Metric{}, validators.ErrIncorrectMetricValue
+		return Metric{}, kinds.ErrIncorrectMetricValue
 	}
 
-	return Metric{Ident: v.Ident, Name: mr.Name, Value: vv}, nil
+	return Metric{Kind: c.Kind, Name: mr.Name, Value: v}, nil
 }

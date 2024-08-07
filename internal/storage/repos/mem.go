@@ -31,8 +31,8 @@ func NewMemStorage() *MemStorage {
 }
 
 func (s *MemStorage) Add(m metric.Metric) error {
-	switch m.Ident {
-	case metric.CounterIdent:
+	switch m.Kind {
+	case metric.Counter:
 		data, ok := m.Value.(int64)
 		if !ok {
 			return ErrInvalidDataType
@@ -43,7 +43,7 @@ func (s *MemStorage) Add(m metric.Metric) error {
 			Value:     data,
 		})
 		return nil
-	case metric.GaugeIdent:
+	case metric.Gauge:
 		data, ok := m.Value.(float64)
 		if !ok {
 			return ErrInvalidDataType

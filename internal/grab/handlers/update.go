@@ -4,7 +4,7 @@ import (
 	"github.com/gorilla/mux"
 	"net/http"
 	"screamer/internal/metric"
-	"screamer/internal/metric/validators"
+	"screamer/internal/metric/kinds"
 	"screamer/internal/storage"
 )
 
@@ -23,10 +23,10 @@ func UpdateHandler(res http.ResponseWriter, req *http.Request) {
 	})
 
 	switch err {
-	case validators.ErrUnknownMetricType:
+	case kinds.ErrUnknownMetricType:
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
-	case validators.ErrIncorrectMetricValue:
+	case kinds.ErrIncorrectMetricValue:
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
