@@ -11,7 +11,7 @@ import (
 func Run() {
 	c := config.GetConfig()
 	var i = 0
-	for true {
+	for {
 		if i%c.PollInterval == 0 {
 			collector.UpdateMetrics()
 		}
