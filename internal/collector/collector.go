@@ -6,6 +6,7 @@ import (
 	"math/rand"
 	"reflect"
 	"runtime"
+	"screamer/internal/config"
 )
 
 var runtimeMetrics = []string{
@@ -60,6 +61,7 @@ func GetMetrics() (*Gauge, *Counter) {
 }
 
 func updateRuntimeMetrics() {
+	c := config.GetConfig()
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	for _, fieldName := range runtimeMetrics {
@@ -68,8 +70,8 @@ func updateRuntimeMetrics() {
 		v, err := toFloat64(field)
 		if err == nil {
 			gauge[fieldName] = v
-		} else {
-			log.Fatal(err.Error())
+		} else if c.AgentLogEnable {
+			log.Println("Cant parse metric", fieldName, err.Error())
 		}
 	}
 }
