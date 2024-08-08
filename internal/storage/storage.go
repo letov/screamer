@@ -1,9 +1,21 @@
 package storage
 
-type MemStorage struct {
-	storage map[string]float64
+import (
+	"screamer/internal/metric"
+	"screamer/internal/storage/repos"
+)
+
+type Storage interface {
+	Add(m metric.Metric) error
+	Debug() string
 }
 
-func (s MemStorage) Add(name string, v float64) {
-	s.storage[name] = v
+var storage Storage
+
+func Init() {
+	storage = repos.NewMemStorage()
+}
+
+func GetStorage() Storage {
+	return storage
 }

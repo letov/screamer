@@ -5,10 +5,13 @@ import (
 	mux "github.com/gorilla/mux"
 	"net/http"
 	config "screamer/internal/config"
-	metric "screamer/internal/metric"
+	handlers "screamer/internal/grab/handlers"
 )
 
-type Grab struct{}
+var hs = []GrabHandler{
+	{Route: handlers.UpdateRoute, Handler: handlers.UpdateHandler},
+	{Route: handlers.DebugRoute, Handler: handlers.DebugHandler},
+}
 
 func Init() {
 	c := config.GetConfig()
@@ -21,30 +24,15 @@ func Init() {
 	}
 }
 
-func getRouter() *mux.Router {
-	router := mux.NewRouter()
-	router.HandleFunc(`/update/{label:[a-zA-Z]+}/{name:[a-zA-Z]+}/{value}`, updateHandler)
-	return router
+type GrabHandler struct {
+	Route   string
+	Handler func(res http.ResponseWriter, req *http.Request)
 }
 
-func updateHandler(res http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		http.Error(res, "", http.StatusNotFound)
-		return
+func getRouter() *mux.Router {
+	router := mux.NewRouter()
+	for _, h := range hs {
+		router.HandleFunc(h.Route, h.Handler)
 	}
-	params := mux.Vars(req)
-	m, err := metric.NewMetric(metric.Raw{
-		Label: params["label"],
-		Name:  params["name"],
-		Value: params["value"],
-	})
-	switch err {
-	case metric.ErrUnknownMetricType:
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	case metric.ErrIncorrectMetricValue:
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
-	fmt.Println(m)
+	return router
 }

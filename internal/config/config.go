@@ -4,12 +4,18 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
+	"strconv"
 )
 
 var config *Config
 
 type Config struct {
-	Port string
+	Port            string
+	PollInterval    int
+	ReportInterval  int
+	ServerUrl       string
+	AgentLogEnable  bool
+	ServerLogEnable bool
 }
 
 func Init() {
@@ -26,7 +32,21 @@ func GetConfig() *Config {
 
 func newConfig() *Config {
 	return &Config{
-		Port: getEnv("PORT", "8080"),
+		Port:            getEnv("PORT", "8080"),
+		PollInterval:    getEnvInt("POLL_INTERVAL", 2),
+		ReportInterval:  getEnvInt("REPORT_INTERVAL", 10),
+		ServerUrl:       getEnv("SERVER_URL", "http://localhost:8080"),
+		AgentLogEnable:  getEnvInt("AGENT_LOG_ENABLE", 1) == 1,
+		ServerLogEnable: getEnvInt("SERVER_LOG_ENABLE", 1) == 1,
+	}
+}
+
+func getEnvInt(key string, def int) int {
+	v, e := strconv.Atoi(getEnv(key, strconv.Itoa(def)))
+	if e != nil {
+		return def
+	} else {
+		return v
 	}
 }
 
