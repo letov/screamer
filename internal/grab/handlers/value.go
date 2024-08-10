@@ -3,20 +3,14 @@ package handlers
 import (
 	"github.com/go-chi/chi/v5"
 	"net/http"
-	"screamer/internal/common"
 	"screamer/internal/metric"
 	"screamer/internal/storage"
-	"slices"
+	"screamer/internal/storage/repos/mem_kinds"
 )
 
 func ValueMetric(res http.ResponseWriter, req *http.Request) {
 	label := chi.URLParam(req, "label")
 	name := chi.URLParam(req, "name")
-
-	if !isValidMetricName(name) {
-		http.Error(res, ErrNoMetric.Error(), http.StatusNotFound)
-		return
-	}
 
 	k, err := metric.LabelToKind(label)
 	if err != nil {
@@ -31,7 +25,11 @@ func ValueMetric(res http.ResponseWriter, req *http.Request) {
 	}
 	v, err := s.GetLastAsString(k, name)
 	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
+		if err == mem_kinds.ErrEmptyMetric {
+			http.Error(res, err.Error(), http.StatusNotFound)
+		} else {
+			http.Error(res, err.Error(), http.StatusBadRequest)
+		}
 		return
 	}
 	_, err = res.Write([]byte(v))
@@ -39,8 +37,4 @@ func ValueMetric(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
-}
-
-func isValidMetricName(n string) bool {
-	return slices.Contains(*common.GetAllInit(), n)
 }

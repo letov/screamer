@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"runtime"
 	"screamer/internal/collector/collector_maps"
-	"screamer/internal/common"
 	"screamer/internal/config"
 	"screamer/internal/metric/kinds"
 )
@@ -27,27 +26,22 @@ type MetricMaps struct {
 var metricMap MetricMaps
 
 func Init() {
-	gaugeInit := *common.GetGaugeInit()
-	counterInit := *common.GetCounterInit()
-
 	metricMap = MetricMaps{
-		Counter: collector_maps.NewCounterMap(&gaugeInit),
-		Gauge:   collector_maps.NewGaugeMap(&counterInit),
+		Counter: collector_maps.NewCounterMap(),
+		Gauge:   collector_maps.NewGaugeMap(),
 	}
 }
 
 func UpdateMetrics() {
 	updateRuntimeMetrics()
-	_ = metricMap.Gauge.Update(common.RandomMetric, rand.Float64())
-	increaseCountMetric(common.PollCountMetric)
+	_ = metricMap.Gauge.Update(RandomMetric, rand.Float64())
+	increaseCountMetric(PollCountMetric)
 }
 
 func Export() map[kinds.Label]MetricExport {
-	g := metricMap.Gauge.Export()
-	c := metricMap.Counter.Export()
 	return map[kinds.Label]MetricExport{
-		kinds.GaugeLabel:   g,
-		kinds.CounterLabel: c,
+		kinds.GaugeLabel:   metricMap.Gauge.Export(),
+		kinds.CounterLabel: metricMap.Counter.Export(),
 	}
 }
 
@@ -55,7 +49,7 @@ func updateRuntimeMetrics() {
 	c := config.GetConfig()
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	for _, fieldName := range common.RuntimeMetrics {
+	for _, fieldName := range RuntimeMetrics {
 		value := reflect.ValueOf(m)
 		field := value.FieldByName(fieldName)
 		v, err := toFloat64(field)

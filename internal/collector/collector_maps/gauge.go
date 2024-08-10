@@ -8,15 +8,9 @@ type GaugeMap struct {
 	Map Gauge
 }
 
-func NewGaugeMap(init *[]string) *GaugeMap {
-	initMap := make(Gauge)
-
-	for _, l := range *init {
-		initMap[l] = 0
-	}
-
+func NewGaugeMap() *GaugeMap {
 	return &GaugeMap{
-		Map: initMap,
+		Map: make(Gauge),
 	}
 }
 

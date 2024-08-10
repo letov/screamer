@@ -8,15 +8,9 @@ type CounterMap struct {
 	Map Counter
 }
 
-func NewCounterMap(init *[]string) *CounterMap {
-	initMap := make(Counter)
-
-	for _, l := range *init {
-		initMap[l] = 0
-	}
-
+func NewCounterMap() *CounterMap {
 	return &CounterMap{
-		Map: initMap,
+		Map: make(Counter),
 	}
 }
 

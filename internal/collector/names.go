@@ -1,4 +1,4 @@
-package common
+package collector
 
 var RuntimeMetrics = []string{
 	"Alloc",
@@ -32,18 +32,3 @@ var RuntimeMetrics = []string{
 
 const RandomMetric = "RandomValue"
 const PollCountMetric = "PollCount"
-
-func GetGaugeInit() *[]string {
-	a := append(RuntimeMetrics, RandomMetric)
-	return &a
-}
-
-func GetCounterInit() *[]string {
-	a := []string{PollCountMetric}
-	return &a
-}
-
-func GetAllInit() *[]string {
-	a := append(*GetGaugeInit(), *GetCounterInit()...)
-	return &a
-}

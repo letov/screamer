@@ -9,6 +9,7 @@ type MetricStorage interface {
 	Add(n string, v interface{}) error
 	Get(n string) (interface{}, error)
 	GetAsString(n string) (string, error)
+	GetAllLastAsString() (*map[string]string, error)
 }
 
 type MemStorage struct {
@@ -51,4 +52,14 @@ func (s *MemStorage) GetLastAsString(k metric.Kind, n string) (string, error) {
 		return s.Gauge.GetAsString(n)
 	}
 	return "", mem_kinds.ErrUnknownMetricaIdent
+}
+
+func (s *MemStorage) GetAllLastAsString(k metric.Kind) (*map[string]string, error) {
+	switch k {
+	case metric.Counter:
+		return s.Counter.GetAllLastAsString()
+	case metric.Gauge:
+		return s.Gauge.GetAllLastAsString()
+	}
+	return nil, mem_kinds.ErrUnknownMetricaIdent
 }

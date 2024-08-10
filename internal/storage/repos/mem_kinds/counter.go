@@ -52,3 +52,17 @@ func (s *CounterStorage) GetAsString(n string) (string, error) {
 	}
 	return fmt.Sprintf("%v", v), nil
 }
+
+func (s *CounterStorage) GetAllLastAsString() (*map[string]string, error) {
+	res := make(map[string]string)
+
+	for n, vs := range s.Storage {
+		l := len(vs)
+		if len(vs) > 0 {
+			v := vs[l-1].Value
+			res[n] = fmt.Sprintf("%v", v)
+		}
+	}
+
+	return &res, nil
+}
