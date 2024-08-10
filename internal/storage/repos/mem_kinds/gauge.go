@@ -52,7 +52,3 @@ func (s *GaugeStorage) GetAsString(n string) (string, error) {
 	}
 	return fmt.Sprintf("%v", v), nil
 }
-
-func (s *GaugeStorage) Debug() string {
-	return fmt.Sprintf("%v", s.Storage)
-}

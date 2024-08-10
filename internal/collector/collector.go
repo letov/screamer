@@ -6,92 +6,61 @@ import (
 	"reflect"
 	"runtime"
 	"screamer/internal/collector/collector_maps"
+	"screamer/internal/common"
 	"screamer/internal/config"
 	"screamer/internal/metric/kinds"
 )
 
-var runtimeMetrics = []string{
-	"Alloc",
-	"BuckHashSys",
-	"Frees",
-	"GCCPUFraction",
-	"GCSys",
-	"HeapAlloc",
-	"HeapIdle",
-	"HeapInuse",
-	"HeapObjects",
-	"HeapReleased",
-	"HeapSys",
-	"LastGC",
-	"Lookups",
-	"MCacheInuse",
-	"MCacheSys",
-	"MSpanInuse",
-	"MSpanSys",
-	"Mallocs",
-	"NextGC",
-	"NumForcedGC",
-	"NumGC",
-	"OtherSys",
-	"PauseTotalNs",
-	"StackInuse",
-	"StackSys",
-	"Sys",
-	"TotalAlloc",
-}
-
 type MetricExport = map[string]string
 
-const randomMetric = "RandomValue"
-const pollCountMetric = "PollCount"
-
-type MetricList interface {
+type MetricMap interface {
 	Update(n string, v interface{}) error
 	Get(n string) (interface{}, error)
-	Export() *MetricExport
+	Export() MetricExport
 }
 
-type MetricLists struct {
-	Counter MetricList
-	Gauge   MetricList
+type MetricMaps struct {
+	Counter MetricMap
+	Gauge   MetricMap
 }
 
-var metricList MetricLists
+var metricMap MetricMaps
 
 func Init() {
-	metricList = MetricLists{
-		Counter: collector_maps.NewCounterMap(),
-		Gauge:   collector_maps.NewGaugeMap(),
+	gaugeInit := *common.GetGaugeInit()
+	counterInit := *common.GetCounterInit()
+
+	metricMap = MetricMaps{
+		Counter: collector_maps.NewCounterMap(&gaugeInit),
+		Gauge:   collector_maps.NewGaugeMap(&counterInit),
 	}
 }
 
 func UpdateMetrics() {
 	updateRuntimeMetrics()
-	updateRandMetric()
-	updatePollCountMetric()
+	_ = metricMap.Gauge.Update(common.RandomMetric, rand.Float64())
+	increaseCountMetric(common.PollCountMetric)
 }
 
-func Export() map[kinds.Label]*MetricExport {
-	return map[kinds.Label]*MetricExport{
-		kinds.GaugeLabel:   metricList.Gauge.Export(),
-		kinds.CounterLabel: metricList.Counter.Export(),
+func Export() map[kinds.Label]MetricExport {
+	g := metricMap.Gauge.Export()
+	c := metricMap.Counter.Export()
+	return map[kinds.Label]MetricExport{
+		kinds.GaugeLabel:   g,
+		kinds.CounterLabel: c,
 	}
-}
-
-func GetMetricNames() []string {
-	return append(runtimeMetrics, randomMetric, pollCountMetric)
 }
 
 func updateRuntimeMetrics() {
 	c := config.GetConfig()
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
-	for _, fieldName := range runtimeMetrics {
+	for _, fieldName := range common.RuntimeMetrics {
 		value := reflect.ValueOf(m)
 		field := value.FieldByName(fieldName)
 		v, err := toFloat64(field)
 		if err == nil {
-			_ = metricList.Gauge.Update(fieldName, v)
+			_ = metricMap.Gauge.Update(fieldName, v)
 		} else if c.AgentLogEnable {
 			log.Println("Cant parse metric", fieldName, err.Error())
 		}
@@ -110,17 +79,13 @@ func toFloat64(field reflect.Value) (float64, error) {
 	return 0, collector_maps.ErrKindExists
 }
 
-func updatePollCountMetric() {
-	pc, _ := metricList.Counter.Get(pollCountMetric)
+func increaseCountMetric(n string) {
+	m, _ := metricMap.Counter.Get(n)
 	var v int64
-	if pc == nil {
+	if m == nil {
 		v = 0
 	} else {
-		v = pc.(int64) + 1
+		v = m.(int64) + 1
 	}
-	_ = metricList.Counter.Update(pollCountMetric, v)
-}
-
-func updateRandMetric() {
-	_ = metricList.Gauge.Update(randomMetric, rand.Float64())
+	_ = metricMap.Counter.Update(n, v)
 }

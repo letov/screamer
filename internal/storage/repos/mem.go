@@ -1,7 +1,6 @@
 package repos
 
 import (
-	"fmt"
 	"screamer/internal/metric"
 	"screamer/internal/storage/repos/mem_kinds"
 )
@@ -10,7 +9,6 @@ type MetricStorage interface {
 	Add(n string, v interface{}) error
 	Get(n string) (interface{}, error)
 	GetAsString(n string) (string, error)
-	Debug() string
 }
 
 type MemStorage struct {
@@ -35,7 +33,7 @@ func (s *MemStorage) Add(m metric.Metric) error {
 	return mem_kinds.ErrUnknownMetricaIdent
 }
 
-func (s *MemStorage) Get(k metric.Kind, n string) (interface{}, error) {
+func (s *MemStorage) GetLast(k metric.Kind, n string) (interface{}, error) {
 	switch k {
 	case metric.Counter:
 		return s.Counter.Get(n)
@@ -45,7 +43,7 @@ func (s *MemStorage) Get(k metric.Kind, n string) (interface{}, error) {
 	return nil, mem_kinds.ErrUnknownMetricaIdent
 }
 
-func (s *MemStorage) GetAsString(k metric.Kind, n string) (string, error) {
+func (s *MemStorage) GetLastAsString(k metric.Kind, n string) (string, error) {
 	switch k {
 	case metric.Counter:
 		return s.Counter.GetAsString(n)
@@ -53,8 +51,4 @@ func (s *MemStorage) GetAsString(k metric.Kind, n string) (string, error) {
 		return s.Gauge.GetAsString(n)
 	}
 	return "", mem_kinds.ErrUnknownMetricaIdent
-}
-
-func (s *MemStorage) Debug() string {
-	return fmt.Sprintf("StorageCounter: %v, StorageGauge: %v", s.Counter.Debug(), s.Gauge.Debug())
 }

@@ -52,7 +52,3 @@ func (s *CounterStorage) GetAsString(n string) (string, error) {
 	}
 	return fmt.Sprintf("%v", v), nil
 }
-
-func (s *CounterStorage) Debug() string {
-	return fmt.Sprintf("%v", s.Storage)
-}

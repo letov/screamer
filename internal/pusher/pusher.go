@@ -10,8 +10,8 @@ import (
 )
 
 func SendData() {
-	for l, me := range collector.Export() {
-		for k, v := range *me {
+	for l, e := range collector.Export() {
+		for k, v := range e {
 			request("update", string(l), k, v)
 		}
 	}

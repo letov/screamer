@@ -8,9 +8,15 @@ type GaugeMap struct {
 	Map Gauge
 }
 
-func NewGaugeMap() *GaugeMap {
+func NewGaugeMap(init *[]string) *GaugeMap {
+	initMap := make(Gauge)
+
+	for _, l := range *init {
+		initMap[l] = 0
+	}
+
 	return &GaugeMap{
-		Map: make(Gauge),
+		Map: initMap,
 	}
 }
 
@@ -31,10 +37,10 @@ func (m *GaugeMap) Get(n string) (interface{}, error) {
 	return v, nil
 }
 
-func (m *GaugeMap) Export() *map[string]string {
+func (m *GaugeMap) Export() map[string]string {
 	res := make(map[string]string)
 	for n, v := range m.Map {
 		res[n] = fmt.Sprintf("%f", v)
 	}
-	return &res
+	return res
 }

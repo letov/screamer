@@ -3,7 +3,7 @@ package handlers
 import (
 	"github.com/go-chi/chi/v5"
 	"net/http"
-	"screamer/internal/collector"
+	"screamer/internal/common"
 	"screamer/internal/metric"
 	"screamer/internal/storage"
 	"slices"
@@ -29,7 +29,7 @@ func ValueMetric(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, ErrNoStorage.Error(), http.StatusBadRequest)
 		return
 	}
-	v, err := s.GetAsString(k, name)
+	v, err := s.GetLastAsString(k, name)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
@@ -42,6 +42,5 @@ func ValueMetric(res http.ResponseWriter, req *http.Request) {
 }
 
 func isValidMetricName(n string) bool {
-	ns := collector.GetMetricNames()
-	return slices.Contains(ns, n)
+	return slices.Contains(*common.GetAllInit(), n)
 }
