@@ -4,7 +4,7 @@ import (
 	"strconv"
 )
 
-const GaugeLabel string = "gauge"
+const GaugeLabel Label = "gauge"
 
 func GaugeValidator(value string) (interface{}, error) {
 	v, err := strconv.ParseFloat(value, 64)

@@ -2,16 +2,13 @@ package grab
 
 import (
 	"fmt"
-	mux "github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 	"net/http"
-	config "screamer/internal/config"
+	"screamer/internal/config"
 	handlers "screamer/internal/grab/handlers"
+	"time"
 )
-
-var hs = []GrabHandler{
-	{Route: handlers.UpdateRoute, Handler: handlers.UpdateHandler},
-	{Route: handlers.DebugRoute, Handler: handlers.DebugHandler},
-}
 
 func Init() {
 	c := config.GetConfig()
@@ -24,15 +21,25 @@ func Init() {
 	}
 }
 
-type GrabHandler struct {
-	Route   string
-	Handler func(res http.ResponseWriter, req *http.Request)
-}
+func getRouter() *chi.Mux {
+	r := chi.NewRouter()
 
-func getRouter() *mux.Router {
-	router := mux.NewRouter()
-	for _, h := range hs {
-		router.HandleFunc(h.Route, h.Handler)
-	}
-	return router
+	r.Use(middleware.RequestID)
+	r.Use(middleware.RealIP)
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
+	r.Use(middleware.Timeout(60 * time.Second))
+
+	r.Route("/update", func(r chi.Router) {
+		r.Post("/{label:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}/{value}", handlers.UpdateMetric)
+	})
+
+	r.Route("/value", func(r chi.Router) {
+		r.Get("/{label:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}", handlers.ValueMetric)
+	})
+
+	r.Get("/debug", handlers.Debug)
+
+	return r
 }

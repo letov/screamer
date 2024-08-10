@@ -1,12 +1,13 @@
 package collector
 
 import (
-	"errors"
 	"log"
 	"math/rand"
 	"reflect"
 	"runtime"
+	"screamer/internal/collector/collector_maps"
 	"screamer/internal/config"
+	"screamer/internal/metric/kinds"
 )
 
 var runtimeMetrics = []string{
@@ -39,25 +40,46 @@ var runtimeMetrics = []string{
 	"TotalAlloc",
 }
 
-type Gauge = map[string]float64
-type Counter = map[string]int64
+type MetricExport = map[string]string
 
-var gauge Gauge
-var counter Counter
+const randomMetric = "RandomValue"
+const pollCountMetric = "PollCount"
+
+type MetricList interface {
+	Update(n string, v interface{}) error
+	Get(n string) (interface{}, error)
+	Export() *MetricExport
+}
+
+type MetricLists struct {
+	Counter MetricList
+	Gauge   MetricList
+}
+
+var metricList MetricLists
 
 func Init() {
-	gauge = make(map[string]float64)
-	counter = make(map[string]int64)
+	metricList = MetricLists{
+		Counter: collector_maps.NewCounterMap(),
+		Gauge:   collector_maps.NewGaugeMap(),
+	}
 }
 
 func UpdateMetrics() {
 	updateRuntimeMetrics()
-	gauge["RandomValue"] = rand.Float64()
-	counter["PollCount"]++
+	updateRandMetric()
+	updatePollCountMetric()
 }
 
-func GetMetrics() (*Gauge, *Counter) {
-	return &gauge, &counter
+func Export() map[kinds.Label]*MetricExport {
+	return map[kinds.Label]*MetricExport{
+		kinds.GaugeLabel:   metricList.Gauge.Export(),
+		kinds.CounterLabel: metricList.Counter.Export(),
+	}
+}
+
+func GetMetricNames() []string {
+	return append(runtimeMetrics, randomMetric, pollCountMetric)
 }
 
 func updateRuntimeMetrics() {
@@ -69,7 +91,7 @@ func updateRuntimeMetrics() {
 		field := value.FieldByName(fieldName)
 		v, err := toFloat64(field)
 		if err == nil {
-			gauge[fieldName] = v
+			_ = metricList.Gauge.Update(fieldName, v)
 		} else if c.AgentLogEnable {
 			log.Println("Cant parse metric", fieldName, err.Error())
 		}
@@ -85,5 +107,20 @@ func toFloat64(field reflect.Value) (float64, error) {
 	case reflect.Uint64:
 		return float64(field.Uint()), nil
 	}
-	return 0, errors.New("unknown metric kind")
+	return 0, collector_maps.ErrKindExists
+}
+
+func updatePollCountMetric() {
+	pc, _ := metricList.Counter.Get(pollCountMetric)
+	var v int64
+	if pc == nil {
+		v = 0
+	} else {
+		v = pc.(int64) + 1
+	}
+	_ = metricList.Counter.Update(pollCountMetric, v)
+}
+
+func updateRandMetric() {
+	_ = metricList.Gauge.Update(randomMetric, rand.Float64())
 }

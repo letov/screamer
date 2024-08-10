@@ -3,61 +3,58 @@ package repos
 import (
 	"fmt"
 	"screamer/internal/metric"
-	"time"
+	"screamer/internal/storage/repos/mem_kinds"
 )
 
-type MemCounter struct {
-	Timestamp int64
-	Name      string
-	Value     int64
-}
-
-type MemGauge struct {
-	Timestamp int64
-	Name      string
-	Value     float64
+type MetricStorage interface {
+	Add(n string, v interface{}) error
+	Get(n string) (interface{}, error)
+	GetAsString(n string) (string, error)
+	Debug() string
 }
 
 type MemStorage struct {
-	StorageCounter []MemCounter
-	StorageGauge   []MemGauge
+	Counter MetricStorage
+	Gauge   MetricStorage
 }
 
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
-		StorageCounter: []MemCounter{},
-		StorageGauge:   []MemGauge{},
+		Counter: mem_kinds.NewCounterStorage(),
+		Gauge:   mem_kinds.NewGaugeStorage(),
 	}
 }
 
 func (s *MemStorage) Add(m metric.Metric) error {
 	switch m.Kind {
 	case metric.Counter:
-		data, ok := m.Value.(int64)
-		if !ok {
-			return ErrInvalidDataType
-		}
-		s.StorageCounter = append(s.StorageCounter, MemCounter{
-			Timestamp: time.Now().Unix(),
-			Name:      m.Name,
-			Value:     data,
-		})
-		return nil
+		return s.Counter.Add(m.Name, m.Value)
 	case metric.Gauge:
-		data, ok := m.Value.(float64)
-		if !ok {
-			return ErrInvalidDataType
-		}
-		s.StorageGauge = append(s.StorageGauge, MemGauge{
-			Timestamp: time.Now().Unix(),
-			Name:      m.Name,
-			Value:     data,
-		})
-		return nil
+		return s.Gauge.Add(m.Name, m.Value)
 	}
-	return ErrUnknownMetricaIdent
+	return mem_kinds.ErrUnknownMetricaIdent
+}
+
+func (s *MemStorage) Get(k metric.Kind, n string) (interface{}, error) {
+	switch k {
+	case metric.Counter:
+		return s.Counter.Get(n)
+	case metric.Gauge:
+		return s.Gauge.Get(n)
+	}
+	return nil, mem_kinds.ErrUnknownMetricaIdent
+}
+
+func (s *MemStorage) GetAsString(k metric.Kind, n string) (string, error) {
+	switch k {
+	case metric.Counter:
+		return s.Counter.GetAsString(n)
+	case metric.Gauge:
+		return s.Gauge.GetAsString(n)
+	}
+	return "", mem_kinds.ErrUnknownMetricaIdent
 }
 
 func (s *MemStorage) Debug() string {
-	return fmt.Sprintf("StorageCounter: %v, StorageGauge: %v", s.StorageCounter, s.StorageGauge)
+	return fmt.Sprintf("StorageCounter: %v, StorageGauge: %v", s.Counter.Debug(), s.Gauge.Debug())
 }

@@ -1,39 +1,30 @@
 package handlers
 
 import (
-	"github.com/gorilla/mux"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 	"screamer/internal/metric"
-	"screamer/internal/metric/kinds"
 	"screamer/internal/storage"
 )
 
-const UpdateRoute = `/update/{label:[a-zA-Z]+}/{name:[a-zA-Z]+}/{value}`
+func UpdateMetric(res http.ResponseWriter, req *http.Request) {
+	label := chi.URLParam(req, "label")
+	name := chi.URLParam(req, "name")
 
-func UpdateHandler(res http.ResponseWriter, req *http.Request) {
-	if req.Method != http.MethodPost {
-		http.Error(res, "", http.StatusNotFound)
-		return
-	}
-	params := mux.Vars(req)
 	m, err := metric.NewMetric(metric.Raw{
-		Label: params["label"],
-		Name:  params["name"],
-		Value: params["value"],
+		Label: label,
+		Name:  name,
+		Value: chi.URLParam(req, "value"),
 	})
 
-	switch err {
-	case kinds.ErrUnknownMetricType:
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	case kinds.ErrIncorrectMetricValue:
+	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	s := storage.GetStorage()
 	if s == nil {
-		http.Error(res, "there is no init storage", http.StatusBadRequest)
+		http.Error(res, ErrNoStorage.Error(), http.StatusBadRequest)
 		return
 	}
 	err = s.Add(m)

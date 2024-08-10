@@ -4,7 +4,7 @@ import (
 	"strconv"
 )
 
-const CounterLabel string = "counter"
+const CounterLabel Label = "counter"
 
 func CounterValidator(value string) (interface{}, error) {
 	v, err := strconv.ParseInt(value, 0, 64)

@@ -11,7 +11,7 @@ const (
 	Gauge
 )
 
-var Validators = map[string]Validator{
+var Validators = map[kinds.Label]Validator{
 	kinds.CounterLabel: {
 		Kind: Counter,
 		Func: kinds.CounterValidator,
@@ -39,7 +39,7 @@ type Validator struct {
 }
 
 func NewMetric(mr Raw) (Metric, error) {
-	c, ok := Validators[mr.Label]
+	c, ok := Validators[kinds.Label(mr.Label)]
 	if !ok {
 		return Metric{}, kinds.ErrUnknownMetricType
 	}
@@ -50,4 +50,15 @@ func NewMetric(mr Raw) (Metric, error) {
 	}
 
 	return Metric{Kind: c.Kind, Name: mr.Name, Value: v}, nil
+}
+
+func LabelToKind(l string) (Kind, error) {
+	switch kinds.Label(l) {
+	case kinds.CounterLabel:
+		return Counter, nil
+	case kinds.GaugeLabel:
+		return Gauge, nil
+	default:
+		return Counter, kinds.ErrUnknownMetricType
+	}
 }
