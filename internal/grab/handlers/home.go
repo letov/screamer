@@ -35,7 +35,7 @@ func Home(res http.ResponseWriter, _ *http.Request) {
 	}
 
 	r := "<html><body>"
-	r += fmt.Sprintf("<h1>Metrics</h1>")
+	r += "<h1>Metrics</h1>"
 	for _, lv := range lvs {
 		r += fmt.Sprintf("<h2>%v</h2>", lv.Title)
 		m, err := s.GetAllLastAsString(lv.MetricKind)
