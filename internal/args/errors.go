@@ -2,4 +2,4 @@ package args
 
 import "errors"
 
-var ErrInvalidAddr = errors.New("Need address in a form host:port")
+var ErrInvalidAddr = errors.New("need address in a form host:port")
