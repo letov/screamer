@@ -11,7 +11,7 @@ import (
 )
 
 func Init() {
-	c := config.GetConfigServer()
+	c := config.GetConfigS()
 	router := getRouter()
 
 	addr := fmt.Sprintf(":%v", c.Port)

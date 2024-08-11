@@ -9,7 +9,7 @@ import (
 )
 
 func Run() {
-	c := config.GetConfigAgent()
+	c := config.GetConfigA()
 	var i = 0
 	for {
 		if i%c.PollInterval == 0 {

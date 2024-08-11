@@ -27,5 +27,3 @@ func (a *NetAddress) Set(s string) error {
 	a.Port = port
 	return nil
 }
-
-const UnsetIntValue = 0

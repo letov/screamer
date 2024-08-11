@@ -1,56 +1,72 @@
 package config
 
 import (
-	"fmt"
-	"screamer/internal/args"
+	"screamer/internal/config/args"
+	"screamer/internal/config/dotenv"
+	"screamer/internal/config/env"
 )
 
-var configAgent *ConfigAgent
+var configA *ConfigA
 
-type ConfigAgent struct {
+type ConfigA struct {
 	PollInterval   int
 	ReportInterval int
 	ServerURL      string
 	AgentLogEnable bool
 }
 
+type EnvSrcA struct {
+	ArgsA   *args.ArgsA
+	EnvA    *env.EnvA
+	DotenvA *dotenv.DotenvA
+}
+
 func InitAgent() {
-	Init()
-	configAgent = newConfigAgent()
+	args.InitAgent()
+	env.InitAgent()
+	dotenv.InitAgent()
+
+	envSrcA := EnvSrcA{
+		ArgsA:   args.GetArgsA(),
+		EnvA:    env.GetEnvA(),
+		DotenvA: dotenv.GetDotenvA(),
+	}
+
+	configA = &ConfigA{
+		PollInterval:   getPollInterval(&envSrcA),
+		ReportInterval: getReportInterval(&envSrcA),
+		ServerURL:      getServerURL(&envSrcA),
+		AgentLogEnable: envSrcA.DotenvA.AgentLogEnable,
+	}
 }
 
-func GetConfigAgent() *ConfigAgent {
-	return configAgent
+func GetConfigA() *ConfigA {
+	return configA
 }
 
-func newConfigAgent() *ConfigAgent {
-	a := args.GetArgsAgent()
-
-	var pollInterval int
-	if *a.PollInterval == 0 {
-		pollInterval = getEnvInt("POLL_INTERVAL", 2)
-	} else {
-		pollInterval = *a.PollInterval
+func getPollInterval(envSrcA *EnvSrcA) int {
+	if envSrcA.EnvA.PollInterval != 0 {
+		return envSrcA.EnvA.PollInterval
+	} else if *envSrcA.ArgsA.PollInterval != 0 {
+		return *envSrcA.ArgsA.PollInterval
 	}
+	return envSrcA.DotenvA.PollInterval
+}
 
-	var reportInterval int
-	if *a.ReportInterval == 0 {
-		reportInterval = getEnvInt("REPORT_INTERVAL", 10)
-	} else {
-		reportInterval = *a.ReportInterval
+func getReportInterval(envSrcA *EnvSrcA) int {
+	if envSrcA.EnvA.ReportInterval != 0 {
+		return envSrcA.EnvA.ReportInterval
+	} else if *envSrcA.ArgsA.ReportInterval != 0 {
+		return *envSrcA.ArgsA.ReportInterval
 	}
+	return envSrcA.DotenvA.ReportInterval
+}
 
-	var serverURL string
-	if a.NetAddress.Host == "" {
-		serverURL = getEnv("SERVER_URL", "http://localhost:8080")
-	} else {
-		serverURL = fmt.Sprintf("http://%v", a.NetAddress.String())
+func getServerURL(envSrcA *EnvSrcA) string {
+	if envSrcA.EnvA.Address != "" {
+		return envSrcA.EnvA.Address
+	} else if envSrcA.ArgsA.NetAddress.Host != "" {
+		return envSrcA.ArgsA.NetAddress.String()
 	}
-
-	return &ConfigAgent{
-		PollInterval:   pollInterval,
-		ReportInterval: reportInterval,
-		ServerURL:      serverURL,
-		AgentLogEnable: getEnvInt("AGENT_LOG_ENABLE", 1) == 1,
-	}
+	return envSrcA.DotenvA.Address
 }

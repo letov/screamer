@@ -28,7 +28,7 @@ var lvs = []LastValues{
 
 func Home(res http.ResponseWriter, _ *http.Request) {
 	s := storage.GetStorage()
-	c := config.GetConfigServer()
+	c := config.GetConfigS()
 	if s == nil {
 		http.Error(res, ErrNoStorage.Error(), http.StatusBadRequest)
 		return

@@ -1,38 +1,53 @@
 package config
 
 import (
-	"fmt"
-	"screamer/internal/args"
+	"screamer/internal/config/args"
+	"screamer/internal/config/dotenv"
+	"screamer/internal/config/env"
 )
 
-var configServer *ConfigServer
+var configS *ConfigS
 
-type ConfigServer struct {
+type ConfigS struct {
 	Port            string
 	ServerLogEnable bool
 }
 
+type EnvSrcS struct {
+	ArgsS   *args.ArgsS
+	EnvS    *env.EnvS
+	DotenvS *dotenv.DotenvS
+}
+
 func InitServer() {
-	Init()
-	configServer = newConfigServer()
+	args.InitServer()
+	env.InitServer()
+	dotenv.InitServer()
+
+	envSrcS := EnvSrcS{
+		ArgsS:   args.GetArgsS(),
+		EnvS:    env.GetEnvS(),
+		DotenvS: dotenv.GetDotenvS(),
+	}
+
+	configS = &ConfigS{
+		Port:            getPort(&envSrcS),
+		ServerLogEnable: envSrcS.DotenvS.ServerLogEnable,
+	}
 }
 
-func GetConfigServer() *ConfigServer {
-	return configServer
+func GetConfigS() *ConfigS {
+	return configS
 }
 
-func newConfigServer() *ConfigServer {
-	a := args.GetArgsServer()
-
-	var port string
-	if a.NetAddress.Host == "" {
-		port = getEnv("PORT", "8080")
+func getPort(envSrcS *EnvSrcS) string {
+	var serverURL string
+	if envSrcS.EnvS.Address != "" {
+		serverURL = envSrcS.EnvS.Address
+	} else if envSrcS.ArgsS.NetAddress.Host != "" {
+		serverURL = envSrcS.ArgsS.NetAddress.String()
 	} else {
-		port = fmt.Sprintf("%d", a.NetAddress.Port)
+		serverURL = envSrcS.DotenvS.Address
 	}
-
-	return &ConfigServer{
-		Port:            port,
-		ServerLogEnable: getEnvInt("SERVER_LOG_ENABLE", 1) == 1,
-	}
+	return getPortFromUrl(serverURL)
 }

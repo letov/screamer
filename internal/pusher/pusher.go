@@ -18,7 +18,7 @@ func SendData() {
 }
 
 func request(method, kind, name, value string) {
-	c := config.GetConfigAgent()
+	c := config.GetConfigA()
 	url := fmt.Sprintf("%v/%v/%v/%v/%v", c.ServerURL, method, kind, name, value)
 	r, err := http.Post(url, "text/plain", nil)
 	if err == nil {

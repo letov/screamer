@@ -1,32 +1,19 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"log"
-	"os"
 	"strconv"
+	"strings"
 )
 
-func Init() {
-	err := godotenv.Load()
-	if err != nil {
-		log.Fatal("Error loading .env file")
+func getPortFromUrl(serverURL string) string {
+	d := strings.Split(serverURL, ":")
+	if len(d) == 2 {
+		_, err := strconv.Atoi(d[1])
+		if err == nil {
+			return d[1]
+		}
 	}
-}
-
-func getEnvInt(key string, def int) int {
-	v, e := strconv.Atoi(getEnv(key, strconv.Itoa(def)))
-	if e != nil {
-		return def
-	} else {
-		return v
-	}
-}
-
-func getEnv(key string, def string) string {
-	if value, exists := os.LookupEnv(key); exists {
-		return value
-	}
-
-	return def
+	log.Fatal("Fail parse port value")
+	return ""
 }

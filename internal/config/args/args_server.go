@@ -4,19 +4,19 @@ import (
 	"flag"
 )
 
-type ArgsServer struct {
+type ArgsS struct {
 	NetAddress *NetAddress
 }
 
-var argsServer *ArgsServer
+var argsS *ArgsS
 
 func InitServer() {
 	netAddress := new(NetAddress)
 	flag.Var(netAddress, "a", "Server address host:port")
-	argsServer = &ArgsServer{NetAddress: netAddress}
+	argsS = &ArgsS{NetAddress: netAddress}
 	flag.Parse()
 }
 
-func GetArgsServer() *ArgsServer {
-	return argsServer
+func GetArgsS() *ArgsS {
+	return argsS
 }
