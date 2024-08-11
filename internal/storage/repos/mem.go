@@ -2,7 +2,7 @@ package repos
 
 import (
 	"screamer/internal/metric"
-	"screamer/internal/storage/repos/mem_kinds"
+	"screamer/internal/storage/repos/kinds"
 )
 
 type MetricStorage interface {
@@ -20,8 +20,8 @@ type MemStorage struct {
 
 func NewMemStorage() *MemStorage {
 	return &MemStorage{
-		Counter: mem_kinds.NewCounterStorage(),
-		Gauge:   mem_kinds.NewGaugeStorage(),
+		Counter: kinds.NewCounterStorage(),
+		Gauge:   kinds.NewGaugeStorage(),
 	}
 }
 
@@ -32,7 +32,7 @@ func (s *MemStorage) Add(m metric.Metric) (interface{}, error) {
 	case metric.Gauge:
 		return s.Gauge.Add(m.Name, m.Value)
 	}
-	return nil, mem_kinds.ErrUnknownMetricaIdent
+	return nil, kinds.ErrUnknownMetricaIdent
 }
 
 func (s *MemStorage) GetLast(k metric.Kind, n string) (interface{}, error) {
@@ -42,7 +42,7 @@ func (s *MemStorage) GetLast(k metric.Kind, n string) (interface{}, error) {
 	case metric.Gauge:
 		return s.Gauge.GetLast(n)
 	}
-	return nil, mem_kinds.ErrUnknownMetricaIdent
+	return nil, kinds.ErrUnknownMetricaIdent
 }
 
 func (s *MemStorage) GetLastAsString(k metric.Kind, n string) (string, error) {
@@ -52,7 +52,7 @@ func (s *MemStorage) GetLastAsString(k metric.Kind, n string) (string, error) {
 	case metric.Gauge:
 		return s.Gauge.GetLastAsString(n)
 	}
-	return "", mem_kinds.ErrUnknownMetricaIdent
+	return "", kinds.ErrUnknownMetricaIdent
 }
 
 func (s *MemStorage) GetAllLastAsString(k metric.Kind) (*map[string]string, error) {
@@ -62,5 +62,5 @@ func (s *MemStorage) GetAllLastAsString(k metric.Kind) (*map[string]string, erro
 	case metric.Gauge:
 		return s.Gauge.GetAllLastAsString()
 	}
-	return nil, mem_kinds.ErrUnknownMetricaIdent
+	return nil, kinds.ErrUnknownMetricaIdent
 }

@@ -10,7 +10,7 @@ var configAgent *ConfigAgent
 type ConfigAgent struct {
 	PollInterval   int
 	ReportInterval int
-	ServerUrl      string
+	ServerURL      string
 	AgentLogEnable bool
 }
 
@@ -40,17 +40,17 @@ func newConfigAgent() *ConfigAgent {
 		reportInterval = *a.ReportInterval
 	}
 
-	var serverUrl string
+	var serverURL string
 	if a.NetAddress.Host == "" {
-		serverUrl = getEnv("SERVER_URL", "http://localhost:8080")
+		serverURL = getEnv("SERVER_URL", "http://localhost:8080")
 	} else {
-		serverUrl = fmt.Sprintf("http://%v", a.NetAddress.String())
+		serverURL = fmt.Sprintf("http://%v", a.NetAddress.String())
 	}
 
 	return &ConfigAgent{
 		PollInterval:   pollInterval,
 		ReportInterval: reportInterval,
-		ServerUrl:      serverUrl,
+		ServerURL:      serverURL,
 		AgentLogEnable: getEnvInt("AGENT_LOG_ENABLE", 1) == 1,
 	}
 }

@@ -1,4 +1,4 @@
-package collector_maps
+package maps
 
 import "fmt"
 

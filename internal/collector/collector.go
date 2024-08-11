@@ -5,7 +5,7 @@ import (
 	"math/rand"
 	"reflect"
 	"runtime"
-	"screamer/internal/collector/collector_maps"
+	"screamer/internal/collector/maps"
 	"screamer/internal/config"
 	"screamer/internal/metric/kinds"
 )
@@ -27,8 +27,8 @@ var metrics Metrics
 
 func Init() {
 	metrics = Metrics{
-		Counter: collector_maps.NewCounterMap(),
-		Gauge:   collector_maps.NewGaugeMap(),
+		Counter: maps.NewCounterMap(),
+		Gauge:   maps.NewGaugeMap(),
 	}
 }
 
@@ -70,7 +70,7 @@ func toFloat64(field reflect.Value) (float64, error) {
 	case reflect.Uint64:
 		return float64(field.Uint()), nil
 	}
-	return 0, collector_maps.ErrKindExists
+	return 0, maps.ErrKindExists
 }
 
 func increaseCountMetric(n string) {

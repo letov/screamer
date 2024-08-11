@@ -5,7 +5,7 @@ import (
 	"net/http"
 	"screamer/internal/metric"
 	"screamer/internal/storage"
-	"screamer/internal/storage/repos/mem_kinds"
+	"screamer/internal/storage/repos/kinds"
 )
 
 func ValueMetric(res http.ResponseWriter, req *http.Request) {
@@ -25,7 +25,7 @@ func ValueMetric(res http.ResponseWriter, req *http.Request) {
 	}
 	v, err := s.GetLastAsString(k, name)
 	if err != nil {
-		if err == mem_kinds.ErrEmptyMetric {
+		if err == kinds.ErrEmptyMetric {
 			http.Error(res, err.Error(), http.StatusNotFound)
 		} else {
 			http.Error(res, err.Error(), http.StatusBadRequest)

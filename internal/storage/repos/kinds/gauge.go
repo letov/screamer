@@ -1,4 +1,4 @@
-package mem_kinds
+package kinds
 
 import (
 	"fmt"
