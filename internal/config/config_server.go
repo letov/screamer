@@ -25,7 +25,7 @@ func newConfigServer() *ConfigServer {
 	a := args.GetArgsServer()
 
 	var port string
-	if a.NetAddress.Port == UnsetIntValue {
+	if a.NetAddress.Host == "" {
 		port = getEnv("PORT", "8080")
 	} else {
 		port = fmt.Sprintf("%d", a.NetAddress.Port)

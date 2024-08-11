@@ -30,5 +30,3 @@ func getEnv(key string, def string) string {
 
 	return def
 }
-
-const UnsetIntValue = 0
