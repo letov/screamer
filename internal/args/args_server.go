@@ -13,8 +13,8 @@ var argsServer *ArgsServer
 func InitServer() {
 	netAddress := new(NetAddress)
 	flag.Var(netAddress, "a", "Server address host:port")
-	flag.Parse()
 	argsServer = &ArgsServer{NetAddress: netAddress}
+	flag.Parse()
 }
 
 func GetArgsServer() *ArgsServer {
