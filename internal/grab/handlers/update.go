@@ -10,11 +10,12 @@ import (
 func UpdateMetric(res http.ResponseWriter, req *http.Request) {
 	label := chi.URLParam(req, "label")
 	name := chi.URLParam(req, "name")
+	value := chi.URLParam(req, "value")
 
 	m, err := metric.NewMetric(metric.Raw{
 		Label: label,
 		Name:  name,
-		Value: chi.URLParam(req, "value"),
+		Value: value,
 	})
 
 	if err != nil {

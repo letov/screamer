@@ -40,10 +40,12 @@ func (s *CounterStorage) Increase(n string, v interface{}) (interface{}, error) 
 		return nil, ErrInvalidDataType
 	}
 	cur, err := s.GetLast(n)
-	if err == ErrEmptyMetric {
-		cur = 0
-	} else {
-		return nil, err
+	if err != nil {
+		if err == ErrEmptyMetric {
+			cur = int64(0)
+		} else {
+			return nil, err
+		}
 	}
 	incr := cur.(int64) + data
 	return s.Add(n, incr)
