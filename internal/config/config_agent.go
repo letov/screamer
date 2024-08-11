@@ -1,6 +1,7 @@
 package config
 
 import (
+	"fmt"
 	"screamer/internal/config/args"
 	"screamer/internal/config/dotenv"
 	"screamer/internal/config/env"
@@ -63,10 +64,13 @@ func getReportInterval(envSrcA *EnvSrcA) int {
 }
 
 func getServerURL(envSrcA *EnvSrcA) string {
+	var serverURL string
 	if envSrcA.EnvA.Address != "" {
-		return envSrcA.EnvA.Address
+		serverURL = envSrcA.EnvA.Address
 	} else if envSrcA.ArgsA.NetAddress.Host != "" {
-		return envSrcA.ArgsA.NetAddress.String()
+		serverURL = envSrcA.ArgsA.NetAddress.String()
+	} else {
+		serverURL = envSrcA.DotenvA.Address
 	}
-	return envSrcA.DotenvA.Address
+	return fmt.Sprintf("http://%v", serverURL)
 }
