@@ -49,5 +49,5 @@ func getPort(envSrcS *EnvSrcS) string {
 	} else {
 		serverURL = envSrcS.DotenvS.Address
 	}
-	return getPortFromUrl(serverURL)
+	return getPortFromURL(serverURL)
 }
