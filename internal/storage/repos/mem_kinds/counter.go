@@ -22,19 +22,34 @@ func NewCounterStorage() *CounterStorage {
 	}
 }
 
-func (s *CounterStorage) Add(n string, v interface{}) error {
+func (s *CounterStorage) Add(n string, v interface{}) (interface{}, error) {
 	data, ok := v.(int64)
 	if !ok {
-		return ErrInvalidDataType
+		return nil, ErrInvalidDataType
 	}
 	s.Storage[n] = append(s.Storage[n], Counter{
 		Timestamp: time.Now().Unix(),
 		Value:     data,
 	})
-	return nil
+	return data, nil
 }
 
-func (s *CounterStorage) Get(n string) (interface{}, error) {
+func (s *CounterStorage) Increase(n string, v interface{}) (interface{}, error) {
+	data, ok := v.(int64)
+	if !ok {
+		return nil, ErrInvalidDataType
+	}
+	cur, err := s.GetLast(n)
+	if err == ErrEmptyMetric {
+		cur = 0
+	} else {
+		return nil, err
+	}
+	incr := cur.(int64) + data
+	return s.Add(n, incr)
+}
+
+func (s *CounterStorage) GetLast(n string) (interface{}, error) {
 	if _, ok := s.Storage[n]; !ok {
 		return nil, ErrEmptyMetric
 	}
@@ -45,8 +60,8 @@ func (s *CounterStorage) Get(n string) (interface{}, error) {
 	return s.Storage[n][l-1].Value, nil
 }
 
-func (s *CounterStorage) GetAsString(n string) (string, error) {
-	v, err := s.Get(n)
+func (s *CounterStorage) GetLastAsString(n string) (string, error) {
+	v, err := s.GetLast(n)
 	if err != nil {
 		return "", err
 	}

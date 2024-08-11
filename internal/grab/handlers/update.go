@@ -27,7 +27,7 @@ func UpdateMetric(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, ErrNoStorage.Error(), http.StatusBadRequest)
 		return
 	}
-	err = s.Add(m)
+	_, err = s.Add(m)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

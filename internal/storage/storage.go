@@ -6,7 +6,7 @@ import (
 )
 
 type Storage interface {
-	Add(m metric.Metric) error
+	Add(m metric.Metric) (interface{}, error)
 	GetLast(k metric.Kind, n string) (interface{}, error)
 	GetLastAsString(k metric.Kind, n string) (string, error)
 	GetAllLastAsString(k metric.Kind) (*map[string]string, error)

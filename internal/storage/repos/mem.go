@@ -6,9 +6,10 @@ import (
 )
 
 type MetricStorage interface {
-	Add(n string, v interface{}) error
-	Get(n string) (interface{}, error)
-	GetAsString(n string) (string, error)
+	Add(n string, v interface{}) (interface{}, error)
+	Increase(n string, v interface{}) (interface{}, error)
+	GetLast(n string) (interface{}, error)
+	GetLastAsString(n string) (string, error)
 	GetAllLastAsString() (*map[string]string, error)
 }
 
@@ -24,22 +25,22 @@ func NewMemStorage() *MemStorage {
 	}
 }
 
-func (s *MemStorage) Add(m metric.Metric) error {
+func (s *MemStorage) Add(m metric.Metric) (interface{}, error) {
 	switch m.Kind {
 	case metric.Counter:
-		return s.Counter.Add(m.Name, m.Value)
+		return s.Counter.Increase(m.Name, m.Value)
 	case metric.Gauge:
 		return s.Gauge.Add(m.Name, m.Value)
 	}
-	return mem_kinds.ErrUnknownMetricaIdent
+	return nil, mem_kinds.ErrUnknownMetricaIdent
 }
 
 func (s *MemStorage) GetLast(k metric.Kind, n string) (interface{}, error) {
 	switch k {
 	case metric.Counter:
-		return s.Counter.Get(n)
+		return s.Counter.GetLast(n)
 	case metric.Gauge:
-		return s.Gauge.Get(n)
+		return s.Gauge.GetLast(n)
 	}
 	return nil, mem_kinds.ErrUnknownMetricaIdent
 }
@@ -47,9 +48,9 @@ func (s *MemStorage) GetLast(k metric.Kind, n string) (interface{}, error) {
 func (s *MemStorage) GetLastAsString(k metric.Kind, n string) (string, error) {
 	switch k {
 	case metric.Counter:
-		return s.Counter.GetAsString(n)
+		return s.Counter.GetLastAsString(n)
 	case metric.Gauge:
-		return s.Gauge.GetAsString(n)
+		return s.Gauge.GetLastAsString(n)
 	}
 	return "", mem_kinds.ErrUnknownMetricaIdent
 }

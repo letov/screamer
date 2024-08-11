@@ -22,19 +22,23 @@ func NewGaugeStorage() *GaugeStorage {
 	}
 }
 
-func (s *GaugeStorage) Add(n string, v interface{}) error {
+func (s *GaugeStorage) Add(n string, v interface{}) (interface{}, error) {
 	data, ok := v.(float64)
 	if !ok {
-		return ErrInvalidDataType
+		return nil, ErrInvalidDataType
 	}
 	s.Storage[n] = append(s.Storage[n], Gauge{
 		Timestamp: time.Now().Unix(),
 		Value:     data,
 	})
-	return nil
+	return data, nil
 }
 
-func (s *GaugeStorage) Get(n string) (interface{}, error) {
+func (s *GaugeStorage) Increase(_ string, _ interface{}) (interface{}, error) {
+	return nil, ErrNoMethod
+}
+
+func (s *GaugeStorage) GetLast(n string) (interface{}, error) {
 	if _, ok := s.Storage[n]; !ok {
 		return nil, ErrEmptyMetric
 	}
@@ -45,8 +49,8 @@ func (s *GaugeStorage) Get(n string) (interface{}, error) {
 	return s.Storage[n][l-1].Value, nil
 }
 
-func (s *GaugeStorage) GetAsString(n string) (string, error) {
-	v, err := s.Get(n)
+func (s *GaugeStorage) GetLastAsString(n string) (string, error) {
+	v, err := s.GetLast(n)
 	if err != nil {
 		return "", err
 	}
