@@ -1,13 +1,15 @@
 package main
 
 import (
+	"screamer/internal/args"
 	"screamer/internal/collector"
 	"screamer/internal/config"
 	"screamer/internal/loop"
 )
 
 func init() {
-	config.Init()
+	args.InitAgent()
+	config.InitAgent()
 	collector.Init()
 }
 

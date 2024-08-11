@@ -46,7 +46,7 @@ func Export() map[kinds.Label]MetricExport {
 }
 
 func updateRuntimeMetrics() {
-	c := config.GetConfig()
+	c := config.GetConfigAgent()
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	for _, fieldName := range RuntimeMetrics {
