@@ -33,4 +33,5 @@ func UpdateMetric(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
+	_, err = res.Write([]byte(""))
 }
