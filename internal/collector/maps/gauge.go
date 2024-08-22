@@ -1,11 +1,38 @@
 package maps
 
-import "fmt"
+import (
+	"fmt"
+	"screamer/internal/metric/kinds"
+)
 
 type Gauge = map[string]float64
 
 type GaugeMap struct {
 	Map Gauge
+}
+
+func (m *GaugeMap) ExportJsonMetrics() []*JsonMetric {
+	res := make([]*JsonMetric, 0)
+	for n := range m.Map {
+		el, err := m.GetJsonMetric(n)
+		if err == nil {
+			res = append(res, el)
+		}
+	}
+	return res
+}
+
+func (m *GaugeMap) GetJsonMetric(n string) (*JsonMetric, error) {
+	v, ok := m.Map[n]
+	if !ok {
+		return nil, ErrNotExists
+	}
+	return &JsonMetric{
+		ID:    n,
+		MType: string(kinds.GaugeLabel),
+		Delta: nil,
+		Value: &v,
+	}, nil
 }
 
 func NewGaugeMap() *GaugeMap {
