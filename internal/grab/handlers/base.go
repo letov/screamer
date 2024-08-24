@@ -13,7 +13,7 @@ type JsonMetric struct {
 }
 
 func GetMarshal(v interface{}, jm *JsonMetric) ([]byte, error) {
-	var body []byte = nil
+	var body []byte
 	var err error = nil
 	switch val := v.(type) {
 	case int64:
