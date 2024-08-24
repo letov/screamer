@@ -11,16 +11,16 @@ type CounterMap struct {
 	Map Counter
 }
 
-//func (m *CounterMap) ExportJsonMetrics() []*JsonMetric {
-//	res := make([]*JsonMetric, 0)
-//	for n := range m.Map {
-//		el, err := m.GetJsonMetric(n)
-//		if err == nil {
-//			res = append(res, el)
-//		}
-//	}
-//	return res
-//}
+func (m *CounterMap) ExportJsonMetrics() []*JsonMetric {
+	res := make([]*JsonMetric, 0)
+	for n := range m.Map {
+		el, err := m.GetJsonMetric(n)
+		if err == nil {
+			res = append(res, el)
+		}
+	}
+	return res
+}
 
 func (m *CounterMap) GetJsonMetric(n string) (*JsonMetric, error) {
 	v, ok := m.Map[n]
