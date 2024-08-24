@@ -54,8 +54,7 @@ func Home(res http.ResponseWriter, _ *http.Request) {
 	}
 	r += "</body></html>"
 
-	res.WriteHeader(http.StatusOK)
-	res.Header().Set("Content-Type", "text/html; charset=utf-8")
+	res.Header().Set("Content-Type", "text/html")
 	_, err := res.Write([]byte(r))
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)

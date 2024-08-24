@@ -34,8 +34,7 @@ func ValueMetricOld(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res.WriteHeader(http.StatusOK)
-	res.Header().Set("Content-Type", "text/plain; charset=utf-8")
+	res.Header().Set("Content-Type", "text/plain")
 	_, err = res.Write([]byte(v))
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
