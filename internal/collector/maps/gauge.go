@@ -2,7 +2,6 @@ package maps
 
 import (
 	"fmt"
-	"screamer/internal/metric/kinds"
 )
 
 type Gauge = map[string]float64
@@ -22,18 +21,18 @@ type GaugeMap struct {
 //	return res
 //}
 
-func (m *GaugeMap) GetJsonMetric(n string) (*JsonMetric, error) {
-	v, ok := m.Map[n]
-	if !ok {
-		return nil, ErrNotExists
-	}
-	return &JsonMetric{
-		ID:    n,
-		MType: string(kinds.GaugeLabel),
-		Delta: nil,
-		Value: &v,
-	}, nil
-}
+//func (m *GaugeMap) GetJsonMetric(n string) (*JsonMetric, error) {
+//	v, ok := m.Map[n]
+//	if !ok {
+//		return nil, ErrNotExists
+//	}
+//	return &JsonMetric{
+//		ID:    n,
+//		MType: string(kinds.GaugeLabel),
+//		Delta: nil,
+//		Value: &v,
+//	}, nil
+//}
 
 func NewGaugeMap() *GaugeMap {
 	return &GaugeMap{

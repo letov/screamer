@@ -2,7 +2,6 @@ package maps
 
 import (
 	"fmt"
-	"screamer/internal/metric/kinds"
 )
 
 type Counter = map[string]int64
@@ -22,18 +21,18 @@ type CounterMap struct {
 //	return res
 //}
 
-func (m *CounterMap) GetJsonMetric(n string) (*JsonMetric, error) {
-	v, ok := m.Map[n]
-	if !ok {
-		return nil, ErrNotExists
-	}
-	return &JsonMetric{
-		ID:    n,
-		MType: string(kinds.CounterLabel),
-		Delta: &v,
-		Value: nil,
-	}, nil
-}
+//func (m *CounterMap) GetJsonMetric(n string) (*JsonMetric, error) {
+//	v, ok := m.Map[n]
+//	if !ok {
+//		return nil, ErrNotExists
+//	}
+//	return &JsonMetric{
+//		ID:    n,
+//		MType: string(kinds.CounterLabel),
+//		Delta: &v,
+//		Value: nil,
+//	}, nil
+//}
 
 func NewCounterMap() *CounterMap {
 	return &CounterMap{
