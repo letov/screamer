@@ -34,9 +34,15 @@ func getRouter() *chi.Mux {
 
 	r.Get("/", handlers.Home)
 
-	r.Post("/update", handlers.UpdateMetric)
+	r.Route("/update", func(r chi.Router) {
+		r.Post("/", handlers.UpdateMetric)
+		r.Post("/{label:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}/{value}", handlers.UpdateMetricOld)
+	})
 
-	r.Post("/value", handlers.ValueMetric)
+	r.Route("/value", func(r chi.Router) {
+		r.Post("/", handlers.ValueMetric)
+		r.Get("/{label:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}", handlers.ValueMetricOld)
+	})
 
 	return r
 }
