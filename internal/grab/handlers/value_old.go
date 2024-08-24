@@ -1,29 +1,18 @@
 package handlers
 
 import (
-	"encoding/json"
-	"io"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 	"screamer/internal/metric"
 	"screamer/internal/storage"
 	"screamer/internal/storage/repos/kinds"
 )
 
-func ValueMetric(res http.ResponseWriter, req *http.Request) {
-	data, err := io.ReadAll(req.Body)
+func ValueMetricOld(res http.ResponseWriter, req *http.Request) {
+	label := chi.URLParam(req, "label")
+	name := chi.URLParam(req, "name")
 
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	var jm JsonMetric
-	if err := json.Unmarshal(data, &jm); err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	k, err := metric.LabelToKind(jm.MType)
+	k, err := metric.LabelToKind(label)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
@@ -34,7 +23,8 @@ func ValueMetric(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, ErrNoStorage.Error(), http.StatusBadRequest)
 		return
 	}
-	v, err := s.GetLast(k, jm.ID)
+
+	v, err := s.GetLastAsString(k, name)
 	if err != nil {
 		if err == kinds.ErrEmptyMetric {
 			http.Error(res, err.Error(), http.StatusNotFound)
@@ -44,14 +34,7 @@ func ValueMetric(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	body, err := GetMarshal(v, &jm)
-
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	_, err = res.Write(body)
+	_, err = res.Write([]byte(v))
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

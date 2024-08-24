@@ -11,11 +11,14 @@ import (
 )
 
 type MetricExport = map[string]string
+type JsonMetricExport = []*maps.JsonMetric
 
 type Metric interface {
 	Update(n string, v interface{}) error
 	Get(n string) (interface{}, error)
+	GetJsonMetric(n string) (*maps.JsonMetric, error)
 	Export() MetricExport
+	ExportJsonMetrics() []*maps.JsonMetric
 }
 
 type Metrics struct {
@@ -42,6 +45,13 @@ func Export() map[kinds.Label]MetricExport {
 	return map[kinds.Label]MetricExport{
 		kinds.GaugeLabel:   metrics.Gauge.Export(),
 		kinds.CounterLabel: metrics.Counter.Export(),
+	}
+}
+
+func ExportJsonMetrics() map[kinds.Label]JsonMetricExport {
+	return map[kinds.Label]JsonMetricExport{
+		kinds.GaugeLabel:   metrics.Gauge.ExportJsonMetrics(),
+		kinds.CounterLabel: metrics.Counter.ExportJsonMetrics(),
 	}
 }
 

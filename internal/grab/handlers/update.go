@@ -1,20 +1,38 @@
 package handlers
 
 import (
-	"github.com/go-chi/chi/v5"
+	"encoding/json"
+	"fmt"
+	"io"
 	"net/http"
 	"screamer/internal/metric"
 	"screamer/internal/storage"
 )
 
 func UpdateMetric(res http.ResponseWriter, req *http.Request) {
-	label := chi.URLParam(req, "label")
-	name := chi.URLParam(req, "name")
-	value := chi.URLParam(req, "value")
+	data, err := io.ReadAll(req.Body)
+
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var jm JsonMetric
+	if err := json.Unmarshal(data, &jm); err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	var value string
+	if jm.Value != nil {
+		value = fmt.Sprintf("%v", *jm.Value)
+	} else {
+		value = fmt.Sprintf("%v", *jm.Delta)
+	}
 
 	m, err := metric.NewMetric(metric.Raw{
-		Label: label,
-		Name:  name,
+		Label: jm.MType,
+		Name:  jm.ID,
 		Value: value,
 	})
 
@@ -28,11 +46,22 @@ func UpdateMetric(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, ErrNoStorage.Error(), http.StatusBadRequest)
 		return
 	}
-	_, err = s.Add(m)
+	newV, err := s.Add(m)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	_, _ = res.Write([]byte(""))
+	body, err := GetMarshal(newV, &jm)
+
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	_, err = res.Write(body)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
 }
