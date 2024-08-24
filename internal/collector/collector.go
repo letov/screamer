@@ -17,7 +17,7 @@ type MetricExport = map[string]string
 type Metric interface {
 	Update(n string, v interface{}) error
 	Get(n string) (interface{}, error)
-	//GetJsonMetric(n string) (*maps.JsonMetric, error)
+	GetJsonMetric(n string) (*maps.JsonMetric, error)
 	Export() MetricExport
 	//ExportJsonMetrics() JsonMetricExport
 }
