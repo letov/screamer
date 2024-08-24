@@ -59,6 +59,8 @@ func UpdateMetric(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
+	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
 	_, err = res.Write(body)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
