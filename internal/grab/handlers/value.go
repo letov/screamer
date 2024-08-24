@@ -51,7 +51,8 @@ func ValueMetric(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	res.Header().Set("Content-Type", "application/json")
+	res.WriteHeader(http.StatusOK)
+	res.Header().Set("Content-Type", "application/json; charset=utf-8")
 	_, err = res.Write(body)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
