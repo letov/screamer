@@ -11,7 +11,6 @@ import (
 )
 
 type MetricExport = map[string]string
-type JsonMetricExport = []*maps.JsonMetric
 
 type Metric interface {
 	Update(n string, v interface{}) error
@@ -48,8 +47,8 @@ func Export() map[kinds.Label]MetricExport {
 	}
 }
 
-func ExportJsonMetrics() map[kinds.Label]JsonMetricExport {
-	return map[kinds.Label]JsonMetricExport{
+func ExportJsonMetrics() map[kinds.Label][]*maps.JsonMetric {
+	return map[kinds.Label][]*maps.JsonMetric{
 		kinds.GaugeLabel:   metrics.Gauge.ExportJsonMetrics(),
 		kinds.CounterLabel: metrics.Counter.ExportJsonMetrics(),
 	}
