@@ -19,7 +19,7 @@ type Metric interface {
 	Get(n string) (interface{}, error)
 	GetJsonMetric(n string) (*maps.JsonMetric, error)
 	Export() MetricExport
-	ExportJsonMetrics() []*maps.JsonMetric
+	//ExportJsonMetrics() JsonMetricExport
 }
 
 type Metrics struct {
@@ -49,12 +49,12 @@ func Export() map[kinds.Label]MetricExport {
 	}
 }
 
-func ExportJsonMetrics() map[kinds.Label][]*maps.JsonMetric {
-	return map[kinds.Label][]*maps.JsonMetric{
-		kinds.GaugeLabel:   metrics.Gauge.ExportJsonMetrics(),
-		kinds.CounterLabel: metrics.Counter.ExportJsonMetrics(),
-	}
-}
+//func ExportJsonMetrics() map[kinds.Label]JsonMetricExport {
+//	return map[kinds.Label]JsonMetricExport{
+//		kinds.GaugeLabel:   metrics.Gauge.ExportJsonMetrics(),
+//		kinds.CounterLabel: metrics.Counter.ExportJsonMetrics(),
+//	}
+//}
 
 func updateRuntimeMetrics() {
 	c := config.GetConfigA()

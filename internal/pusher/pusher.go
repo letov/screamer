@@ -7,18 +7,17 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"screamer/internal/collector"
 	"screamer/internal/collector/maps"
 	"screamer/internal/config"
 )
 
-func SendData() {
-	for _, jsms := range collector.ExportJsonMetrics() {
-		for _, jsm := range jsms {
-			request("update", jsm)
-		}
-	}
-}
+//func SendData() {
+//	for _, jsms := range collector.ExportJsonMetrics() {
+//		for _, jsm := range jsms {
+//			request("update", jsm)
+//		}
+//	}
+//}
 
 func request(method string, jsm *maps.JsonMetric) {
 	c := config.GetConfigA()
