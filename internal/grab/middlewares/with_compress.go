@@ -18,6 +18,7 @@ type gzipWriter struct {
 
 func (w gzipWriter) Write(b []byte) (int, error) {
 	if slices.Contains(w.Types, strings.Split(w.Header().Get("Content-Type"), ":")[0]) {
+		w.Header().Set("Content-Encoding", "gzip")
 		return w.Writer.Write(b)
 	}
 
@@ -42,7 +43,6 @@ func Compress(types []string) func(next http.Handler) http.Handler {
 			}
 			defer gz.Close()
 
-			w.Header().Set("Content-Encoding", "gzip")
 			next.ServeHTTP(gzipWriter{Types: types, ResponseWriter: w, Writer: gz}, r)
 		})
 	}
