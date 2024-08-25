@@ -34,6 +34,7 @@ func ValueMetric(res http.ResponseWriter, req *http.Request) {
 		http.Error(res, ErrNoStorage.Error(), http.StatusBadRequest)
 		return
 	}
+
 	v, err := s.GetLast(k, jm.ID)
 	if err != nil {
 		if err == kinds.ErrEmptyMetric {

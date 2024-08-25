@@ -70,7 +70,7 @@ func (s *CounterStorage) GetLastAsString(n string) (string, error) {
 	return fmt.Sprintf("%v", v), nil
 }
 
-func (s *CounterStorage) GetAllLastAsString() (*map[string]string, error) {
+func (s *CounterStorage) GetAllLastAsString() (*MetricList, error) {
 	res := make(map[string]string)
 
 	for n, vs := range s.Storage {

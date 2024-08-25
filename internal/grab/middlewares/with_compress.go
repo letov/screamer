@@ -37,7 +37,7 @@ func Compress(types []string) func(next http.Handler) http.Handler {
 			if err != nil {
 				c := config.GetConfigS()
 				if c.ServerLogEnable {
-					log.Println("gzip error:", err.Error())
+					log.Println("Gzip error:", err.Error())
 				}
 				return
 			}

@@ -62,3 +62,14 @@ func LabelToKind(l string) (Kind, error) {
 		return Counter, kinds.ErrUnknownMetricType
 	}
 }
+
+func KindToLabel(k Kind) (string, error) {
+	switch k {
+	case Counter:
+		return string(kinds.CounterLabel), nil
+	case Gauge:
+		return string(kinds.GaugeLabel), nil
+	default:
+		return "", kinds.ErrUnknownMetricType
+	}
+}

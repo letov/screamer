@@ -3,7 +3,7 @@ package main
 import (
 	"screamer/internal/collector"
 	"screamer/internal/config"
-	"screamer/internal/loop"
+	"screamer/internal/loop-agent"
 )
 
 func init() {
@@ -12,5 +12,5 @@ func init() {
 }
 
 func main() {
-	loop.Run()
+	loop_agent.Run()
 }

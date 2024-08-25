@@ -10,6 +10,9 @@ var dotenvS *DotenvS
 type DotenvS struct {
 	Address         string
 	ServerLogEnable bool
+	StoreInterval   int
+	FileStoragePath string
+	Restore         bool
 }
 
 func InitServer() {
@@ -20,6 +23,9 @@ func InitServer() {
 	dotenvS = &DotenvS{
 		Address:         getEnv("ADDRESS", "localhost:8080"),
 		ServerLogEnable: getEnvInt("SERVER_LOG_ENABLE", 1) == 1,
+		StoreInterval:   getEnvInt("STORE_INTERVAL", 300),
+		FileStoragePath: getEnv("FILE_STORAGE_PATH", "./store/storage"),
+		Restore:         getEnvInt("RESTORE", 1) == 1,
 	}
 }
 

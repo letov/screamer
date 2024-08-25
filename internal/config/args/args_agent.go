@@ -17,8 +17,8 @@ func InitAgent() {
 	flag.Var(netAddress, "a", "Server address host:port")
 	argsA = &ArgsA{
 		NetAddress:     netAddress,
-		PollInterval:   flag.Int("p", 0, "pollInterval desc"),
-		ReportInterval: flag.Int("r", 0, "reportInterval desc"),
+		PollInterval:   flag.Int("p", 0, "PollInterval desc"),
+		ReportInterval: flag.Int("r", 0, "ReportInterval desc"),
 	}
 	flag.Parse()
 }

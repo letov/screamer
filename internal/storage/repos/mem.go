@@ -10,7 +10,7 @@ type MetricStorage interface {
 	Increase(n string, v interface{}) (interface{}, error)
 	GetLast(n string) (interface{}, error)
 	GetLastAsString(n string) (string, error)
-	GetAllLastAsString() (*map[string]string, error)
+	GetAllLastAsString() (*kinds.MetricList, error)
 }
 
 type MemStorage struct {
@@ -55,7 +55,7 @@ func (s *MemStorage) GetLastAsString(k metric.Kind, n string) (string, error) {
 	return "", kinds.ErrUnknownMetricaIdent
 }
 
-func (s *MemStorage) GetAllLastAsString(k metric.Kind) (*map[string]string, error) {
+func (s *MemStorage) GetAllLastAsString(k metric.Kind) (*kinds.MetricList, error) {
 	switch k {
 	case metric.Counter:
 		return s.Counter.GetAllLastAsString()

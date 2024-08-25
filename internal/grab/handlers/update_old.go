@@ -3,6 +3,8 @@ package handlers
 import (
 	"github.com/go-chi/chi/v5"
 	"net/http"
+	"screamer/internal/backup"
+	"screamer/internal/config"
 	"screamer/internal/metric"
 	"screamer/internal/storage"
 )
@@ -40,5 +42,10 @@ func UpdateMetricOld(res http.ResponseWriter, req *http.Request) {
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
+	}
+
+	c := config.GetConfigS()
+	if c.Restore && c.StoreInterval == 0 {
+		backup.Save()
 	}
 }
