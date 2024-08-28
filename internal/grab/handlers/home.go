@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"screamer/internal/config"
 	"screamer/internal/metric"
+	"screamer/internal/server/config"
 	"screamer/internal/storage"
 	"sort"
 )
@@ -28,7 +28,7 @@ var lvs = []LastValues{
 
 func Home(res http.ResponseWriter, _ *http.Request) {
 	s := storage.GetStorage()
-	c := config.GetConfigS()
+	c := config.GetConfig()
 	if s == nil {
 		http.Error(res, ErrNoStorage.Error(), http.StatusBadRequest)
 		return
@@ -48,7 +48,7 @@ func Home(res http.ResponseWriter, _ *http.Request) {
 			for _, k := range keys {
 				r += fmt.Sprintf("<p>%v: %v</p>", k, (*m)[k])
 			}
-		} else if c.ServerLogEnable {
+		} else if *c.ServerLogEnable {
 			log.Println("Get all metrics error:", err.Error())
 		}
 	}

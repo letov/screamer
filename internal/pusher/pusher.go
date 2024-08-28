@@ -7,9 +7,9 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"screamer/internal/agent/config"
 	"screamer/internal/collector"
 	"screamer/internal/collector/maps"
-	"screamer/internal/config"
 )
 
 func SendData() {
@@ -21,8 +21,8 @@ func SendData() {
 }
 
 func request(method string, jsm *maps.JsonMetric) {
-	c := config.GetConfigA()
-	url := fmt.Sprintf("%v/%v", c.ServerURL, method)
+	c := config.GetConfig()
+	url := fmt.Sprintf("%v/%v", c.NetAddress.String(), method)
 	body, _ := json.Marshal(&jsm)
 
 	r, err := http.Post(url, "application/json", bytes.NewBuffer(body))
@@ -33,7 +33,7 @@ func request(method string, jsm *maps.JsonMetric) {
 		}(r.Body)
 	}
 
-	if c.AgentLogEnable {
+	if *c.AgentLogEnable {
 		if err != nil {
 			log.Println("Request error", err.Error())
 		} else if r.StatusCode != http.StatusOK {

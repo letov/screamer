@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"log"
 	"os"
-	"screamer/internal/config"
 	"screamer/internal/metric"
+	"screamer/internal/server/config"
 	"screamer/internal/storage"
 	"screamer/internal/storage/repos/kinds"
 )
@@ -28,13 +28,13 @@ var ks = []metric.Kind{
 
 func Save() {
 	s := storage.GetStorage()
-	c := config.GetConfigS()
+	c := config.GetConfig()
 	for _, k := range ks {
 		ml, err := s.GetAllLastAsString(k)
 		if err == nil {
-			err = toFile(ml, k, c.FileStoragePath)
+			err = toFile(ml, k, *c.FileStoragePath)
 		}
-		if err != nil && c.ServerLogEnable {
+		if err != nil && *c.ServerLogEnable {
 			log.Println("Save backup error:", err.Error())
 		}
 	}

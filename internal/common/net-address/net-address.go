@@ -1,6 +1,7 @@
-package args
+package net_address
 
 import (
+	"errors"
 	"strconv"
 	"strings"
 )
@@ -11,7 +12,7 @@ type NetAddress struct {
 }
 
 func (a NetAddress) String() string {
-	return a.Host + ":" + strconv.Itoa(a.Port)
+	return "http://" + a.Host + ":" + strconv.Itoa(a.Port)
 }
 
 func (a *NetAddress) Set(s string) error {
@@ -27,3 +28,5 @@ func (a *NetAddress) Set(s string) error {
 	a.Port = port
 	return nil
 }
+
+var ErrInvalidAddr = errors.New("need address in a form host:port")

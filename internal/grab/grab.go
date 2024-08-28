@@ -5,17 +5,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"net/http"
-	"screamer/internal/config"
 	"screamer/internal/grab/handlers"
 	"screamer/internal/grab/middlewares"
+	"screamer/internal/server/config"
 	"time"
 )
 
 func Init() {
-	c := config.GetConfigS()
+	c := config.GetConfig()
 	router := getRouter()
 
-	addr := fmt.Sprintf(":%v", c.Port)
+	addr := fmt.Sprintf(":%v", (*c).NetAddress.Port)
 	err := http.ListenAndServe(addr, router)
 	if err != nil {
 		panic(err)

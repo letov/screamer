@@ -6,8 +6,8 @@ import (
 	"io"
 	"net/http"
 	"screamer/internal/backup"
-	"screamer/internal/config"
 	"screamer/internal/metric"
+	"screamer/internal/server/config"
 	"screamer/internal/storage"
 )
 
@@ -68,8 +68,8 @@ func UpdateMetric(res http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	c := config.GetConfigS()
-	if c.Restore && c.StoreInterval == 0 {
+	c := config.GetConfig()
+	if *c.Restore && *c.StoreInterval == 0 {
 		backup.Save()
 	}
 }

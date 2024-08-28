@@ -5,8 +5,8 @@ import (
 	"math/rand"
 	"reflect"
 	"runtime"
+	"screamer/internal/agent/config"
 	"screamer/internal/collector/maps"
-	"screamer/internal/config"
 	"screamer/internal/metric/kinds"
 )
 
@@ -56,7 +56,7 @@ func ExportJsonMetrics() map[kinds.Label]JsonMetricExport {
 }
 
 func updateRuntimeMetrics() {
-	c := config.GetConfigA()
+	c := config.GetConfig()
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	for _, fieldName := range RuntimeMetrics {
@@ -65,7 +65,7 @@ func updateRuntimeMetrics() {
 		v, err := toFloat64(field)
 		if err == nil {
 			_ = metrics.Gauge.Update(fieldName, v)
-		} else if c.AgentLogEnable {
+		} else if *c.AgentLogEnable {
 			log.Println("Cant parse metric", fieldName, err.Error())
 		}
 	}

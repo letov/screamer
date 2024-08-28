@@ -5,7 +5,7 @@ import (
 	"io"
 	"log"
 	"net/http"
-	"screamer/internal/config"
+	"screamer/internal/server/config"
 	"slices"
 	"strings"
 )
@@ -35,8 +35,8 @@ func Compress(types []string) func(next http.Handler) http.Handler {
 
 			gz, err := gzip.NewWriterLevel(w, gzip.BestSpeed)
 			if err != nil {
-				c := config.GetConfigS()
-				if c.ServerLogEnable {
+				c := config.GetConfig()
+				if *c.ServerLogEnable {
 					log.Println("Gzip error:", err.Error())
 				}
 				return
