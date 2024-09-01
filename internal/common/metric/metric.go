@@ -53,9 +53,9 @@ func (m *Metric) Json() (JsonMetric, error) {
 func (m *Metric) String() string {
 	switch m.Ident.Type {
 	case Counter:
-		return strconv.FormatFloat(m.Value, 'f', 0, 64)
+		return strconv.FormatFloat(m.Value, 'f', -1, 64)
 	case Gauge:
-		return strconv.FormatFloat(m.Value, 'f', 6, 64)
+		return strconv.FormatFloat(m.Value, 'f', -1, 64)
 	default:
 		return ""
 	}
