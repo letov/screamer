@@ -22,7 +22,7 @@ func newDotenv() preConfig {
 	return preConfig{
 		NetAddress:      netAddress,
 		StoreInterval:   getEnvInt("STORE_INTERVAL", 300),
-		FileStoragePath: getEnv("FILE_STORAGE_PATH", "data"),
+		FileStoragePath: getEnv("FILE_STORAGE_PATH", "/tmp/backup_file"),
 		Restore:         &r,
 		ServerLogEnable: &sle,
 	}

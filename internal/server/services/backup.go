@@ -2,7 +2,6 @@ package services
 
 import (
 	"encoding/json"
-	"fmt"
 	"log"
 	"os"
 	"screamer/internal/common/metric"
@@ -54,10 +53,7 @@ func (ps *BackupService) Load() {
 }
 
 func (ps *BackupService) toFile(ms []metric.Metric) error {
-	fp, err := ps.getFilePath()
-	if err != nil {
-		return err
-	}
+	fp := ps.config.FileStoragePath
 
 	jms := make([]metric.JsonMetric, 0)
 	for _, m := range ms {
@@ -74,10 +70,7 @@ func (ps *BackupService) toFile(ms []metric.Metric) error {
 }
 
 func (ps *BackupService) fromFile() ([]*metric.Metric, error) {
-	fp, err := ps.getFilePath()
-	if err != nil {
-		return []*metric.Metric{}, err
-	}
+	fp := ps.config.FileStoragePath
 
 	data, err := os.ReadFile(fp)
 	if err != nil {
@@ -104,14 +97,6 @@ func (ps *BackupService) processError(err error) {
 	if err != nil && ps.config.ServerLogEnable {
 		log.Println("Save backup error:", err.Error())
 	}
-}
-
-func (ps *BackupService) getFilePath() (string, error) {
-	cur, err := os.Getwd()
-	if err != nil {
-		return "", err
-	}
-	return fmt.Sprintf("%v/%v/backup", cur, ps.config.FileStoragePath), nil
 }
 
 func NewBackupService(c *config.Config, r repositories.Repository) *BackupService {

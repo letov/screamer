@@ -12,7 +12,7 @@ func newArgs() preConfig {
 	pre := preConfig{
 		NetAddress:      netAddress,
 		StoreInterval:   flag.Int("i", 300, "StoreInterval desc"),
-		FileStoragePath: flag.String("f", "data", "FileStoragePath desc"),
+		FileStoragePath: flag.String("f", "/tmp/backup_file", "FileStoragePath desc"),
 		Restore:         flag.Bool("r", true, "Restore desc"),
 		ServerLogEnable: flag.Bool("l", true, "ServerLogEnable desc"),
 	}
