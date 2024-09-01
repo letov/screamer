@@ -2,6 +2,7 @@ package config
 
 import (
 	"flag"
+	"fmt"
 	net_address "screamer/internal/common/net-address"
 )
 
@@ -17,6 +18,8 @@ func newArgs() preConfig {
 	}
 
 	set := newSetConfig()
+
+	flag.Parse()
 
 	flag.Visit(func(f *flag.Flag) {
 		switch f.Name {
@@ -48,7 +51,7 @@ func newArgs() preConfig {
 		pre.AgentLogEnable = nil
 	}
 
-	flag.Parse()
+	fmt.Println(pre)
 
 	return pre
 }
