@@ -30,19 +30,19 @@ type Metric struct {
 func (m *Metric) Json() (JsonMetric, error) {
 	switch m.Ident.Type {
 	case Counter:
-		return JsonMetric{
-			ID:    m.Ident.Name,
-			MType: m.Ident.Type.String(),
-			Delta: nil,
-			Value: &m.Value,
-		}, nil
-	case Gauge:
 		v := int64(m.Value)
 		return JsonMetric{
 			ID:    m.Ident.Name,
 			MType: m.Ident.Type.String(),
 			Delta: &v,
 			Value: nil,
+		}, nil
+	case Gauge:
+		return JsonMetric{
+			ID:    m.Ident.Name,
+			MType: m.Ident.Type.String(),
+			Delta: nil,
+			Value: &m.Value,
 		}, nil
 	default:
 		return JsonMetric{}, common.ErrTypeNotExists

@@ -9,6 +9,7 @@ import (
 	"screamer/internal/common/metric"
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
+	"strconv"
 )
 
 type ValueMetricHandler struct {
@@ -35,7 +36,30 @@ func (h *ValueMetricHandler) ValueMetricJson(res http.ResponseWriter, req *http.
 		return
 	}
 
-	h.processMetric(res, i)
+	m, err := h.processMetric(res, i)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	newJ, err := m.Json()
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	body, err := json.Marshal(newJ)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	res.Header().Set("Content-Type", "application/json")
+	_, err = res.Write(body)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
 }
 
 func (h *ValueMetricHandler) ValueMetricParams(res http.ResponseWriter, req *http.Request) {
@@ -48,10 +72,23 @@ func (h *ValueMetricHandler) ValueMetricParams(res http.ResponseWriter, req *htt
 		return
 	}
 
-	h.processMetric(res, i)
+	m, err := h.processMetric(res, i)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	vs := strconv.FormatFloat(m.Value, 'f', 6, 64)
+
+	res.Header().Set("Content-Type", "text/html")
+	_, err = res.Write([]byte(vs))
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
 }
 
-func (h *ValueMetricHandler) processMetric(res http.ResponseWriter, i metric.Ident) {
+func (h *ValueMetricHandler) processMetric(res http.ResponseWriter, i metric.Ident) (metric.Metric, error) {
 	m, err := h.repo.Get(i)
 	if err != nil {
 		if err == common.ErrMetricNotExists {
@@ -59,27 +96,10 @@ func (h *ValueMetricHandler) processMetric(res http.ResponseWriter, i metric.Ide
 		} else {
 			http.Error(res, err.Error(), http.StatusBadRequest)
 		}
-		return
+		return metric.Metric{}, err
 	}
 
-	newJm, err := m.Json()
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	body, err := json.Marshal(newJm)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	res.Header().Set("Content-Type", "application/json")
-	_, err = res.Write(body)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
+	return m, nil
 }
 
 func (h *ValueMetricHandler) GetHandlerJson() HandlerFunc {
