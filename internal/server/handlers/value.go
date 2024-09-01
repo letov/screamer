@@ -9,7 +9,6 @@ import (
 	"screamer/internal/common/metric"
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
-	"strconv"
 )
 
 type ValueMetricHandler struct {
@@ -78,10 +77,8 @@ func (h *ValueMetricHandler) ValueMetricParams(res http.ResponseWriter, req *htt
 		return
 	}
 
-	vs := strconv.FormatFloat(m.Value, 'f', 6, 64)
-
 	res.Header().Set("Content-Type", "text/html")
-	_, err = res.Write([]byte(vs))
+	_, err = res.Write([]byte(m.String()))
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

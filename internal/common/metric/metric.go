@@ -2,6 +2,7 @@ package metric
 
 import (
 	"screamer/internal/common"
+	"strconv"
 )
 
 type Type string
@@ -46,6 +47,17 @@ func (m *Metric) Json() (JsonMetric, error) {
 		}, nil
 	default:
 		return JsonMetric{}, common.ErrTypeNotExists
+	}
+}
+
+func (m *Metric) String() string {
+	switch m.Ident.Type {
+	case Counter:
+		return strconv.FormatFloat(m.Value, 'f', 0, 64)
+	case Gauge:
+		return strconv.FormatFloat(m.Value, 'f', 6, 64)
+	default:
+		return ""
 	}
 }
 
