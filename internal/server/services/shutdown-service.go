@@ -36,10 +36,6 @@ func (ss *ShutdownService) Run() {
 			case syscall.SIGQUIT:
 				ss.backupService.Save()
 				exit_chan <- 0
-
-			default:
-				ss.backupService.Save()
-				exit_chan <- 1
 			}
 		}
 	}()
