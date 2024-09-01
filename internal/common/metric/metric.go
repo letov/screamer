@@ -55,7 +55,7 @@ func (m *Metric) String() string {
 	case Counter:
 		return strconv.FormatFloat(m.Value, 'f', -1, 64)
 	case Gauge:
-		return strconv.FormatFloat(m.Value, 'f', -1, 64)
+		return strconv.FormatFloat(m.Value, 'g', 10, 64)
 	default:
 		return ""
 	}
@@ -130,8 +130,14 @@ func NewMetric(n string, v float64, t string) (*Metric, error) {
 func NewMetricFromJson(jm *JsonMetric) (*Metric, error) {
 	switch Type(jm.MType) {
 	case Counter:
-		return NewCounter(jm.ID, float64(*jm.Value)), nil
+		if jm.Delta == nil {
+			return nil, common.ErrEmptyValue
+		}
+		return NewCounter(jm.ID, float64(*jm.Delta)), nil
 	case Gauge:
+		if jm.Value == nil {
+			return nil, common.ErrEmptyValue
+		}
 		return NewGauge(jm.ID, *jm.Value), nil
 	default:
 		return nil, common.ErrMetricNotExists
