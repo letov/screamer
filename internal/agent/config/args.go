@@ -35,8 +35,6 @@ func newArgs() preConfig {
 		}
 	})
 
-	flag.Parse()
-
 	if !set.NetAddress {
 		pre.NetAddress = nil
 	}
@@ -49,6 +47,8 @@ func newArgs() preConfig {
 	if !set.AgentLogEnable {
 		pre.AgentLogEnable = nil
 	}
+
+	flag.Parse()
 
 	return pre
 }

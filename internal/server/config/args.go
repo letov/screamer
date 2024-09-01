@@ -19,6 +19,8 @@ func newArgs() preConfig {
 
 	set := newSetConfig()
 
+	flag.Parse()
+
 	flag.Visit(func(f *flag.Flag) {
 		switch f.Name {
 		case "a":
@@ -38,8 +40,6 @@ func newArgs() preConfig {
 			break
 		}
 	})
-
-	flag.Parse()
 
 	if !set.NetAddress {
 		pre.NetAddress = nil
