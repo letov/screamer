@@ -22,11 +22,11 @@ func (ss *SendingService) SendMetrics() {
 	ms := ss.repo.GetAll()
 
 	for _, m := range ms {
-		request(url, m, ss.config.AgentLogEnable)
+		ss.request(url, m)
 	}
 }
 
-func request(url string, m metric.Metric, needLog bool) {
+func (ss *SendingService) request(url string, m metric.Metric) {
 	j, _ := m.Json()
 	body, _ := json.Marshal(&j)
 
@@ -38,7 +38,7 @@ func request(url string, m metric.Metric, needLog bool) {
 		}(r.Body)
 	}
 
-	if needLog {
+	if ss.config.AgentLogEnable {
 		if err != nil {
 			log.Println("Request error", err.Error())
 		} else if r.StatusCode != http.StatusOK {
