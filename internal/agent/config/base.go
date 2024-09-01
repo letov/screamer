@@ -1,16 +1,16 @@
 package config
 
-import "screamer/internal/common/net-address"
+import "screamer/internal/common/netaddress"
 
 type Config struct {
-	NetAddress     net_address.NetAddress
+	NetAddress     netaddress.NetAddress
 	PollInterval   int
 	ReportInterval int
 	AgentLogEnable bool
 }
 
 type preConfig struct {
-	NetAddress     *net_address.NetAddress
+	NetAddress     *netaddress.NetAddress
 	PollInterval   *int
 	ReportInterval *int
 	AgentLogEnable *bool

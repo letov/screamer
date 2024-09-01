@@ -2,7 +2,7 @@ package config
 
 import (
 	"flag"
-	net_address "screamer/internal/common/net-address"
+	net_address "screamer/internal/common/netaddress"
 )
 
 func newArgs() preConfig {
@@ -33,7 +33,6 @@ func newArgs() preConfig {
 			break
 		case "l":
 			set.AgentLogEnable = true
-			break
 		}
 	})
 

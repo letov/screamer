@@ -4,10 +4,10 @@ import (
 	"go.uber.org/dig"
 	"screamer/internal/agent/config"
 	"screamer/internal/agent/events"
-	metric_sources "screamer/internal/agent/metric-sources"
+	metric_sources "screamer/internal/agent/metricsources"
 	"screamer/internal/agent/repositories"
 	"screamer/internal/agent/services"
-	event_loop "screamer/internal/common/event-loop"
+	event_loop "screamer/internal/common/eventloop"
 )
 
 func BuildContainer() *dig.Container {

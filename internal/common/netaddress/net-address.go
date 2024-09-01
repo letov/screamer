@@ -1,4 +1,4 @@
-package net_address
+package netaddress
 
 import (
 	"screamer/internal/common"

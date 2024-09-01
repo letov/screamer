@@ -4,7 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
-	"screamer/internal/common/net-address"
+	"screamer/internal/common/netaddress"
 	"strconv"
 )
 
@@ -13,7 +13,7 @@ func newDotenv() preConfig {
 		log.Fatal("Error loading .env file")
 	}
 
-	netAddress := new(net_address.NetAddress)
+	netAddress := new(netaddress.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))
 
 	ale := *getEnvInt("AGENT_LOG_ENABLE", 1) == 1

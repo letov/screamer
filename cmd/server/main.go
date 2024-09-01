@@ -1,7 +1,7 @@
 package main
 
 import (
-	event_loop "screamer/internal/common/event-loop"
+	event_loop "screamer/internal/common/eventloop"
 	"screamer/internal/server/di"
 	"screamer/internal/server/router"
 	"screamer/internal/server/services"

@@ -1,7 +1,7 @@
 package events
 
 import (
-	event_loop "screamer/internal/common/event-loop"
+	event_loop "screamer/internal/common/eventloop"
 	"screamer/internal/server/config"
 	"screamer/internal/server/services"
 )

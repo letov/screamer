@@ -4,7 +4,7 @@ import (
 	"github.com/joho/godotenv"
 	"log"
 	"os"
-	net_address "screamer/internal/common/net-address"
+	net_address "screamer/internal/common/netaddress"
 	"strconv"
 )
 

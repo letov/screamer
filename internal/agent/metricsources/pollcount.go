@@ -1,4 +1,4 @@
-package metric_sources
+package metricsources
 
 import (
 	"screamer/internal/common/metric"

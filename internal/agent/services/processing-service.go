@@ -3,7 +3,7 @@ package services
 import (
 	"log"
 	"screamer/internal/agent/config"
-	metric_sources "screamer/internal/agent/metric-sources"
+	metric_sources "screamer/internal/agent/metricsources"
 	"screamer/internal/agent/repositories"
 	"screamer/internal/common"
 	"screamer/internal/common/metric"

@@ -2,7 +2,7 @@ package di
 
 import (
 	"go.uber.org/dig"
-	event_loop "screamer/internal/common/event-loop"
+	event_loop "screamer/internal/common/eventloop"
 	"screamer/internal/server/config"
 	"screamer/internal/server/events"
 	"screamer/internal/server/handlers"

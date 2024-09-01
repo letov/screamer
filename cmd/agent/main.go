@@ -3,7 +3,7 @@ package main
 import (
 	"screamer/internal/agent/di"
 	"screamer/internal/agent/services"
-	event_loop "screamer/internal/common/event-loop"
+	event_loop "screamer/internal/common/eventloop"
 )
 
 func main() {
