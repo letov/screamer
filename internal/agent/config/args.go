@@ -2,7 +2,6 @@ package config
 
 import (
 	"flag"
-	"fmt"
 	net_address "screamer/internal/common/net-address"
 )
 
@@ -50,8 +49,6 @@ func newArgs() preConfig {
 	if !set.AgentLogEnable {
 		pre.AgentLogEnable = nil
 	}
-
-	fmt.Println(pre)
 
 	return pre
 }
