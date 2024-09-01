@@ -18,21 +18,21 @@ type Router struct {
 	valueHandler  *handlers.ValueMetricHandler
 }
 
-func (r *Router) Run() {
-	router := r.GetRouter()
+func (rtr *Router) Run() {
+	router := rtr.GetRouter()
 
-	addr := fmt.Sprintf(":%v", r.config.NetAddress.Port)
+	addr := fmt.Sprintf(":%v", rtr.config.NetAddress.Port)
 	err := http.ListenAndServe(addr, router)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func (r *Router) RunAsync() {
-	go r.Run()
+func (rtr *Router) RunAsync() {
+	go rtr.Run()
 }
 
-func (gr *Router) GetRouter() *chi.Mux {
+func (rtr *Router) GetRouter() *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Use(middleware.RequestID)
@@ -43,16 +43,16 @@ func (gr *Router) GetRouter() *chi.Mux {
 
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Get("/", gr.homeHandler.GetHandler())
+	r.Get("/", rtr.homeHandler.GetHandler())
 
 	r.Route("/update", func(r chi.Router) {
-		r.Post("/", gr.updateHandler.GetHandlerJson())
-		r.Post("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}/{value}", gr.updateHandler.GetHandlerParams())
+		r.Post("/", rtr.updateHandler.GetHandlerJson())
+		r.Post("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}/{value}", rtr.updateHandler.GetHandlerParams())
 	})
 
 	r.Route("/value", func(r chi.Router) {
-		r.Post("/", gr.valueHandler.GetHandlerJson())
-		r.Get("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}", gr.valueHandler.GetHandlerParams())
+		r.Post("/", rtr.valueHandler.GetHandlerJson())
+		r.Get("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}", rtr.valueHandler.GetHandlerParams())
 	})
 
 	return r
