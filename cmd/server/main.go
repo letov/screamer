@@ -2,7 +2,6 @@ package main
 
 import (
 	event_loop "screamer/internal/common/event-loop"
-	infinity_loop "screamer/internal/common/infinity-loop"
 	"screamer/internal/server/di"
 	"screamer/internal/server/router"
 	"screamer/internal/server/services"
@@ -23,6 +22,4 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-
-	infinity_loop.Run()
 }

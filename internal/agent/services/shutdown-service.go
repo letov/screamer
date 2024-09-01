@@ -7,7 +7,6 @@ import (
 )
 
 type ShutdownService struct {
-	backupService *BackupService
 }
 
 func (ss *ShutdownService) Run() {
@@ -18,15 +17,13 @@ func (ss *ShutdownService) Run() {
 
 	go func() {
 		_ = <-sigs
-		ss.backupService.Save()
+
 		done <- true
 	}()
 
 	<-done
 }
 
-func NewShutdownService(bs *BackupService) *ShutdownService {
-	return &ShutdownService{
-		backupService: bs,
-	}
+func NewShutdownService() *ShutdownService {
+	return &ShutdownService{}
 }
