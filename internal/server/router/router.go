@@ -28,6 +28,10 @@ func (r *Router) Run() {
 	}
 }
 
+func (r *Router) RunAsync() {
+	go r.Run()
+}
+
 func (gr *Router) GetRouter() *chi.Mux {
 	r := chi.NewRouter()
 

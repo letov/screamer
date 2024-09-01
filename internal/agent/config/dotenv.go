@@ -9,9 +9,7 @@ import (
 )
 
 func newDotenv() preConfig {
-	err := godotenv.Load(".env.agent")
-
-	if err != nil {
+	if err := godotenv.Load(".env.agent"); err != nil {
 		log.Fatal("Error loading .env file")
 	}
 

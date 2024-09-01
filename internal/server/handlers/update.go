@@ -8,12 +8,14 @@ import (
 	"screamer/internal/common/metric"
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
+	"screamer/internal/server/services"
 	"strconv"
 )
 
 type UpdateMetricHandler struct {
-	config *config.Config
-	repo   repositories.Repository
+	config        *config.Config
+	repo          repositories.Repository
+	backupService *services.BackupService
 }
 
 func (h *UpdateMetricHandler) UpdateMetricJson(res http.ResponseWriter, req *http.Request) {
@@ -73,29 +75,21 @@ func (h *UpdateMetricHandler) processMetric(res http.ResponseWriter, m *metric.M
 		return
 	}
 
-	newJm, err := newM.Json()
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	body, err := json.Marshal(newJm)
+	body, err := newM.Bytes()
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	res.Header().Set("Content-Type", "application/json")
-	_, err = res.Write(body)
-	if err != nil {
+	if _, err = res.Write(body); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	//c := config.GetConfig()
-	//if *c.Restore && *c.StoreInterval == 0 {
-	//	backup.Save()
-	//}
+	if h.config.Restore && h.config.StoreInterval == 0 {
+		h.backupService.Save()
+	}
 }
 
 func (h *UpdateMetricHandler) GetHandlerJson() HandlerFunc {
@@ -106,9 +100,10 @@ func (h *UpdateMetricHandler) GetHandlerParams() HandlerFunc {
 	return h.UpdateMetricParams
 }
 
-func NewUpdateMetricHandler(c *config.Config, r repositories.Repository) *UpdateMetricHandler {
+func NewUpdateMetricHandler(c *config.Config, r repositories.Repository, bs *services.BackupService) *UpdateMetricHandler {
 	return &UpdateMetricHandler{
-		config: c,
-		repo:   r,
+		config:        c,
+		repo:          r,
+		backupService: bs,
 	}
 }

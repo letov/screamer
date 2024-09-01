@@ -1,6 +1,7 @@
 package metric
 
 import (
+	"encoding/json"
 	"screamer/internal/common"
 	"strconv"
 )
@@ -48,6 +49,15 @@ func (m *Metric) Json() (JsonMetric, error) {
 	default:
 		return JsonMetric{}, common.ErrTypeNotExists
 	}
+}
+
+func (m *Metric) Bytes() ([]byte, error) {
+	jm, err := m.Json()
+	if err != nil {
+		return []byte{}, err
+	}
+
+	return json.Marshal(jm)
 }
 
 func (m *Metric) String() string {

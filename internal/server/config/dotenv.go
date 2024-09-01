@@ -1,7 +1,6 @@
 package config
 
 import (
-	"fmt"
 	"github.com/joho/godotenv"
 	"log"
 	"os"
@@ -10,11 +9,7 @@ import (
 )
 
 func newDotenv() preConfig {
-	f, _ := os.Getwd()
-	fmt.Println(f)
-	err := godotenv.Load(".env.server")
-
-	if err != nil {
+	if err := godotenv.Load(".env.server"); err != nil {
 		log.Println("Error loading .env file")
 	}
 

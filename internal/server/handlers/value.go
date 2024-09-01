@@ -41,21 +41,14 @@ func (h *ValueMetricHandler) ValueMetricJson(res http.ResponseWriter, req *http.
 		return
 	}
 
-	newJ, err := m.Json()
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	body, err := json.Marshal(newJ)
+	body, err := m.Bytes()
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	res.Header().Set("Content-Type", "application/json")
-	_, err = res.Write(body)
-	if err != nil {
+	if _, err = res.Write(body); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
@@ -78,8 +71,7 @@ func (h *ValueMetricHandler) ValueMetricParams(res http.ResponseWriter, req *htt
 	}
 
 	res.Header().Set("Content-Type", "text/html")
-	_, err = res.Write([]byte(m.String()))
-	if err != nil {
+	if _, err = res.Write([]byte(m.String())); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}

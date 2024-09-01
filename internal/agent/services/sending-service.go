@@ -2,7 +2,6 @@ package services
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"log"
@@ -27,8 +26,7 @@ func (ss *SendingService) SendMetrics() {
 }
 
 func (ss *SendingService) request(url string, m metric.Metric) {
-	j, _ := m.Json()
-	body, _ := json.Marshal(&j)
+	body, _ := m.Bytes()
 
 	r, err := http.Post(url, "application/json", bytes.NewBuffer(body))
 	if err == nil {

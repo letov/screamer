@@ -14,8 +14,7 @@ func getRuntimeMetrics() []*metric.Metric {
 	for _, n := range *getRuntimeMetricNames() {
 		value := reflect.ValueOf(m)
 		field := value.FieldByName(n)
-		v, err := toFloat64(field)
-		if err == nil {
+		if v, err := toFloat64(field); err == nil {
 			metrics = append(metrics, metric.NewGauge(n, v))
 		}
 	}
