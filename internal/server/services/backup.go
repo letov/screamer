@@ -16,8 +16,8 @@ type BackupService struct {
 	sync.Mutex
 }
 
-type JsonMetricList struct {
-	Array []metric.JsonMetric
+type JSONMetricList struct {
+	Array []metric.JSONMetric
 }
 
 func (ps *BackupService) Save() {
@@ -45,14 +45,14 @@ func (ps *BackupService) Load() {
 func (ps *BackupService) toFile(ms []metric.Metric) error {
 	fp := ps.config.FileStoragePath
 
-	jms := make([]metric.JsonMetric, 0)
+	jms := make([]metric.JSONMetric, 0)
 	for _, m := range ms {
-		j, err := m.Json()
+		j, err := m.JSON()
 		ps.processError(err)
 		jms = append(jms, j)
 	}
 
-	jml := &JsonMetricList{Array: jms}
+	jml := &JSONMetricList{Array: jms}
 	body, err := json.MarshalIndent(jml, "", "   ")
 	ps.processError(err)
 
@@ -67,7 +67,7 @@ func (ps *BackupService) fromFile() ([]*metric.Metric, error) {
 		return nil, err
 	}
 
-	jml := &JsonMetricList{}
+	jml := &JSONMetricList{}
 	err = json.Unmarshal(data, jml)
 	if err != nil {
 		return nil, err
@@ -75,7 +75,7 @@ func (ps *BackupService) fromFile() ([]*metric.Metric, error) {
 
 	res := make([]*metric.Metric, 0)
 	for _, jm := range jml.Array {
-		m, err := metric.NewMetricFromJson(&jm)
+		m, err := metric.NewMetricFromJSON(&jm)
 		ps.processError(err)
 		res = append(res, m)
 	}

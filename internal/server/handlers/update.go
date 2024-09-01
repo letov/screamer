@@ -18,7 +18,7 @@ type UpdateMetricHandler struct {
 	backupService *services.BackupService
 }
 
-func (h *UpdateMetricHandler) UpdateMetricJson(res http.ResponseWriter, req *http.Request) {
+func (h *UpdateMetricHandler) UpdateMetricJSON(res http.ResponseWriter, req *http.Request) {
 	data, err := io.ReadAll(req.Body)
 
 	if err != nil {
@@ -26,13 +26,13 @@ func (h *UpdateMetricHandler) UpdateMetricJson(res http.ResponseWriter, req *htt
 		return
 	}
 
-	var jm metric.JsonMetric
+	var jm metric.JSONMetric
 	if err := json.Unmarshal(data, &jm); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	m, err := metric.NewMetricFromJson(&jm)
+	m, err := metric.NewMetricFromJSON(&jm)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
@@ -92,8 +92,8 @@ func (h *UpdateMetricHandler) processMetric(res http.ResponseWriter, m *metric.M
 	}
 }
 
-func (h *UpdateMetricHandler) GetHandlerJson() HandlerFunc {
-	return h.UpdateMetricJson
+func (h *UpdateMetricHandler) GetHandlerJSON() HandlerFunc {
+	return h.UpdateMetricJSON
 }
 
 func (h *UpdateMetricHandler) GetHandlerParams() HandlerFunc {

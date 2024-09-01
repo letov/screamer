@@ -16,7 +16,7 @@ func (ss *ShutdownService) Run() {
 	done := make(chan bool, 1)
 
 	go func() {
-		_ = <-sigs
+		<-sigs
 
 		done <- true
 	}()

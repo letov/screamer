@@ -24,13 +24,10 @@ func newArgs() preConfig {
 		switch f.Name {
 		case "a":
 			set.NetAddress = true
-			break
 		case "p":
 			set.PollInterval = true
-			break
 		case "r":
 			set.ReportInterval = true
-			break
 		case "l":
 			set.AgentLogEnable = true
 		}

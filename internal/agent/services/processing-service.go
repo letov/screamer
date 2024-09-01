@@ -25,13 +25,10 @@ func (ps *ProcessingService) UpdateMetrics() {
 		switch m.Ident.Type {
 		case metric.Counter:
 			_, err = ps.repo.Increase(m.Ident, 1)
-			break
 		case metric.Gauge:
 			_, err = ps.repo.Update(*m)
-			break
 		default:
 			err = common.ErrTypeNotExists
-			break
 		}
 		if err != nil && ps.config.AgentLogEnable {
 			log.Println("Update metric error", err.Error())

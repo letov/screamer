@@ -25,19 +25,14 @@ func newArgs() preConfig {
 		switch f.Name {
 		case "a":
 			set.NetAddress = true
-			break
 		case "i":
 			set.StoreInterval = true
-			break
 		case "f":
 			set.FileStoragePath = true
-			break
 		case "r":
 			set.Restore = true
-			break
 		case "l":
 			set.ServerLogEnable = true
-			break
 		}
 	})
 

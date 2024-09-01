@@ -16,20 +16,20 @@ type ValueMetricHandler struct {
 	repo   repositories.Repository
 }
 
-func (h *ValueMetricHandler) ValueMetricJson(res http.ResponseWriter, req *http.Request) {
+func (h *ValueMetricHandler) ValueMetricJSON(res http.ResponseWriter, req *http.Request) {
 	data, err := io.ReadAll(req.Body)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	var jm metric.JsonMetric
+	var jm metric.JSONMetric
 	if err := json.Unmarshal(data, &jm); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	i, err := metric.NewMetricIdentFromJson(&jm)
+	i, err := metric.NewMetricIdentFromJSON(&jm)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
@@ -91,8 +91,8 @@ func (h *ValueMetricHandler) processMetric(res http.ResponseWriter, i metric.Ide
 	return m, nil
 }
 
-func (h *ValueMetricHandler) GetHandlerJson() HandlerFunc {
-	return h.ValueMetricJson
+func (h *ValueMetricHandler) GetHandlerJSON() HandlerFunc {
+	return h.ValueMetricJSON
 }
 
 func (h *ValueMetricHandler) GetHandlerParams() HandlerFunc {

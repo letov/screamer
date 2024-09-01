@@ -17,7 +17,7 @@ type Ident struct {
 	Name string
 }
 
-type JsonMetric struct {
+type JSONMetric struct {
 	ID    string   `json:"id"`
 	MType string   `json:"type"`
 	Delta *int64   `json:"delta,omitempty"`
@@ -29,30 +29,30 @@ type Metric struct {
 	Value float64
 }
 
-func (m *Metric) Json() (JsonMetric, error) {
+func (m *Metric) JSON() (JSONMetric, error) {
 	switch m.Ident.Type {
 	case Counter:
 		v := int64(m.Value)
-		return JsonMetric{
+		return JSONMetric{
 			ID:    m.Ident.Name,
 			MType: m.Ident.Type.String(),
 			Delta: &v,
 			Value: nil,
 		}, nil
 	case Gauge:
-		return JsonMetric{
+		return JSONMetric{
 			ID:    m.Ident.Name,
 			MType: m.Ident.Type.String(),
 			Delta: nil,
 			Value: &m.Value,
 		}, nil
 	default:
-		return JsonMetric{}, common.ErrTypeNotExists
+		return JSONMetric{}, common.ErrTypeNotExists
 	}
 }
 
 func (m *Metric) Bytes() ([]byte, error) {
-	jm, err := m.Json()
+	jm, err := m.JSON()
 	if err != nil {
 		return []byte{}, err
 	}
@@ -101,7 +101,7 @@ func NewMetricIdent(n string, t string) (Ident, error) {
 	}
 }
 
-func NewMetricIdentFromJson(jm *JsonMetric) (Ident, error) {
+func NewMetricIdentFromJSON(jm *JSONMetric) (Ident, error) {
 	switch Type(jm.MType) {
 	case Counter:
 		return newCounterIdent(jm.ID), nil
@@ -137,7 +137,7 @@ func NewMetric(n string, v float64, t string) (*Metric, error) {
 	}
 }
 
-func NewMetricFromJson(jm *JsonMetric) (*Metric, error) {
+func NewMetricFromJSON(jm *JSONMetric) (*Metric, error) {
 	switch Type(jm.MType) {
 	case Counter:
 		if jm.Delta == nil {
