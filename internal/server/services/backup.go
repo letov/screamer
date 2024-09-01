@@ -21,16 +21,6 @@ type JsonMetricList struct {
 }
 
 func (ps *BackupService) Save() {
-	if err := os.RemoveAll(ps.config.FileStoragePath); err != nil {
-		ps.processError(err)
-		return
-	}
-
-	if err := os.MkdirAll(ps.config.FileStoragePath, 0777); err != nil {
-		ps.processError(err)
-		return
-	}
-
 	ps.Lock()
 	err := ps.toFile(ps.repo.GetAll())
 	ps.processError(err)
