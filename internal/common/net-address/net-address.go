@@ -1,7 +1,7 @@
 package net_address
 
 import (
-	"errors"
+	"screamer/internal/common"
 	"strconv"
 	"strings"
 )
@@ -18,7 +18,7 @@ func (a NetAddress) String() string {
 func (a *NetAddress) Set(s string) error {
 	hp := strings.Split(s, ":")
 	if len(hp) != 2 {
-		return ErrInvalidAddr
+		return common.ErrInvalidAddr
 	}
 	port, err := strconv.Atoi(hp[1])
 	if err != nil {
@@ -28,5 +28,3 @@ func (a *NetAddress) Set(s string) error {
 	a.Port = port
 	return nil
 }
-
-var ErrInvalidAddr = errors.New("need address in a form host:port")

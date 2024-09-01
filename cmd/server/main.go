@@ -1,33 +1,21 @@
 package main
 
 import (
-	"screamer/internal/grab"
-	"screamer/internal/logger"
-	"screamer/internal/server/config"
-	"screamer/internal/storage"
+	infinity_loop "screamer/internal/common/infinity-loop"
+	"screamer/internal/server/di"
+	"screamer/internal/server/router"
 )
 
-func init() {
-	config.Init()
-	storage.Init()
-	logger.Init()
-	go grab.Init()
-}
-
 func main() {
-	defer stopped()
-	for {
+	container := di.BuildContainer()
 
+	err := container.Invoke(func(router *router.Router) {
+		router.Run()
+	})
+
+	if err != nil {
+		panic(err)
 	}
 
-	//c := config.GetConfigA()
-	//
-	//event_loop.Run([]*event_loop.Event{
-	//	event_loop.NewEvent(c.PollInterval, collector.UpdateMetrics),
-	//	event_loop.NewEvent(c.ReportInterval, pusher.SendData),
-	//})
-}
-
-func stopped() {
-
+	infinity_loop.Run()
 }

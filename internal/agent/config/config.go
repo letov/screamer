@@ -1,76 +1,50 @@
 package config
 
 import (
-	"screamer/internal/agent/config/args"
-	"screamer/internal/agent/config/base"
-	"screamer/internal/agent/config/dotenv"
-	"screamer/internal/agent/config/env"
+	"reflect"
 	net_address "screamer/internal/common/net-address"
 )
 
-var config *base.Config
-
-type EnvSrc struct {
-	Args   *base.Config
-	Env    *base.Config
-	Dotenv *base.Config
+type configSource struct {
+	Args   preConfig
+	Env    preConfig
+	Dotenv preConfig
 }
 
-func Init() {
-	args.Init()
-	env.Init()
-	dotenv.Init()
-
-	envSrc := EnvSrc{
-		Args:   args.GetArgs(),
-		Env:    env.GetEnv(),
-		Dotenv: dotenv.GetDotenv(),
+func NewConfig() *Config {
+	cs := configSource{
+		Args:   newArgs(),
+		Env:    newEnv(),
+		Dotenv: newDotenv(),
 	}
 
-	config = &base.Config{
-		NetAddress:     getNetAddress(envSrc),
-		PollInterval:   getPollInterval(envSrc),
-		ReportInterval: getReportInterval(envSrc),
-		AgentLogEnable: getAgentLogEnable(envSrc),
+	return &Config{
+		NetAddress:     getPriorConfigValue(cs, "NetAddress").(net_address.NetAddress),
+		PollInterval:   getPriorConfigValue(cs, "PollInterval").(int),
+		ReportInterval: getPriorConfigValue(cs, "ReportInterval").(int),
+		AgentLogEnable: getPriorConfigValue(cs, "AgentLogEnable").(bool),
 	}
 }
 
-func GetConfig() *base.Config {
-	return config
+func getPriorConfigValue(cs configSource, fieldName string) interface{} {
+	ev := getConfigValue(cs.Env, fieldName)
+	if ev != nil {
+		return ev
+	}
+
+	av := getConfigValue(cs.Args, fieldName)
+	if av != nil {
+		return av
+	}
+
+	return getConfigValue(cs.Dotenv, fieldName)
 }
 
-func getNetAddress(envSrc EnvSrc) *net_address.NetAddress {
-	if envSrc.Env.NetAddress != nil {
-		return envSrc.Env.NetAddress
-	} else if envSrc.Args.NetAddress != nil {
-		return envSrc.Args.NetAddress
+func getConfigValue(pre preConfig, fieldName string) interface{} {
+	value := reflect.ValueOf(pre)
+	fp := value.FieldByName(fieldName)
+	if fp.IsNil() {
+		return nil
 	}
-	return envSrc.Dotenv.NetAddress
-}
-
-func getPollInterval(envSrc EnvSrc) *int {
-	if envSrc.Env.PollInterval != nil {
-		return envSrc.Env.PollInterval
-	} else if envSrc.Args.PollInterval != nil {
-		return envSrc.Args.PollInterval
-	}
-	return envSrc.Dotenv.PollInterval
-}
-
-func getReportInterval(envSrc EnvSrc) *int {
-	if envSrc.Env.ReportInterval != nil {
-		return envSrc.Env.ReportInterval
-	} else if envSrc.Args.ReportInterval != nil {
-		return envSrc.Args.ReportInterval
-	}
-	return envSrc.Dotenv.ReportInterval
-}
-
-func getAgentLogEnable(envSrc EnvSrc) *bool {
-	if envSrc.Env.AgentLogEnable != nil {
-		return envSrc.Env.AgentLogEnable
-	} else if envSrc.Args.AgentLogEnable != nil {
-		return envSrc.Args.AgentLogEnable
-	}
-	return envSrc.Dotenv.AgentLogEnable
+	return reflect.Indirect(fp).Interface()
 }

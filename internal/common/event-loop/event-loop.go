@@ -9,6 +9,10 @@ type Event struct {
 	Event    func()
 }
 
+type EventLoop struct {
+	Events []*Event
+}
+
 func intToSecond(i int) time.Duration {
 	return time.Duration(int64(i)) * time.Second
 }
@@ -20,8 +24,14 @@ func NewEvent(s int, e func()) *Event {
 	}
 }
 
-func Run(events []*Event) {
-	for _, event := range events {
+func NewEventLoop(es []*Event) *EventLoop {
+	return &EventLoop{
+		Events: es,
+	}
+}
+
+func (el *EventLoop) Run() {
+	for _, event := range el.Events {
 		ticker := time.NewTicker(event.Duration)
 		event := event
 		go func() {
