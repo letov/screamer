@@ -1,16 +1,20 @@
 package main
 
 import (
-	"screamer/internal/collector"
-	"screamer/internal/config"
-	"screamer/internal/loop"
+	"screamer/internal/agent/di"
+	"screamer/internal/agent/services"
+	event_loop "screamer/internal/common/eventloop"
 )
 
-func init() {
-	config.InitAgent()
-	collector.Init()
-}
-
 func main() {
-	loop.Run()
+	container := di.BuildContainer()
+
+	err := container.Invoke(func(el *event_loop.EventLoop, ss *services.ShutdownService) {
+		el.Run()
+		ss.Run()
+	})
+
+	if err != nil {
+		panic(err)
+	}
 }
