@@ -21,6 +21,7 @@ func newDotenv() preConfig {
 
 	return preConfig{
 		NetAddress:      netAddress,
+		DBAddress:       getEnv("FILE_STORAGE_PATH", "postgres://my_user:my_pass@localhost:25432/my_db"),
 		StoreInterval:   getEnvInt("STORE_INTERVAL", 300),
 		FileStoragePath: getEnv("FILE_STORAGE_PATH", "/tmp/backup_file"),
 		Restore:         &r,

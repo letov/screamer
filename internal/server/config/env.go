@@ -18,6 +18,11 @@ func newEnv() preConfig {
 		}
 	}
 
+	d, exists := os.LookupEnv("DATABASE_DSN")
+	if exists {
+		pre.FileStoragePath = &d
+	}
+
 	si, exists := os.LookupEnv("STORE_INTERVAL")
 	if exists {
 		i, err := strconv.Atoi(si)

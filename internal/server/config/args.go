@@ -11,6 +11,7 @@ func newArgs() preConfig {
 
 	pre := preConfig{
 		NetAddress:      netAddress,
+		DBAddress:       flag.String("d", "postgres://my_user:my_pass@localhost:25432/my_db", "DBAddress desc"),
 		StoreInterval:   flag.Int("i", 300, "StoreInterval desc"),
 		FileStoragePath: flag.String("f", "/tmp/backup_file", "FileStoragePath desc"),
 		Restore:         flag.Bool("r", true, "Restore desc"),
@@ -25,6 +26,8 @@ func newArgs() preConfig {
 		switch f.Name {
 		case "a":
 			set.NetAddress = true
+		case "d":
+			set.DBAddress = true
 		case "i":
 			set.StoreInterval = true
 		case "f":
@@ -38,6 +41,9 @@ func newArgs() preConfig {
 
 	if !set.NetAddress {
 		pre.NetAddress = nil
+	}
+	if !set.DBAddress {
+		pre.DBAddress = nil
 	}
 	if !set.StoreInterval {
 		pre.StoreInterval = nil
