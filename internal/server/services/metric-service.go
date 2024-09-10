@@ -2,6 +2,7 @@ package services
 
 import (
 	"encoding/json"
+	"fmt"
 	"screamer/internal/common/metric"
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
@@ -26,7 +27,7 @@ func (ms *MetricService) UpdateMetricJSON(body *[]byte) (res *[]byte, err error)
 		return nil, err
 	}
 
-	return ms.processMetric(m)
+	return ms.processUpdateMetric(m)
 }
 
 func (ms *MetricService) UpdateMetricParams(n string, vs string, t string) (res *[]byte, err error) {
@@ -40,10 +41,10 @@ func (ms *MetricService) UpdateMetricParams(n string, vs string, t string) (res 
 		return nil, err
 	}
 
-	return ms.processMetric(m)
+	return ms.processUpdateMetric(m)
 }
 
-func (ms *MetricService) processMetric(m *metric.Metric) (res *[]byte, err error) {
+func (ms *MetricService) processUpdateMetric(m *metric.Metric) (res *[]byte, err error) {
 	var newM metric.Metric
 
 	if m.Ident.Type == metric.Counter {
@@ -61,6 +62,50 @@ func (ms *MetricService) processMetric(m *metric.Metric) (res *[]byte, err error
 
 	body, err := newM.Bytes()
 	return &body, err
+}
+
+func (ms *MetricService) ValueMetricJSON(body *[]byte) (res *[]byte, err error) {
+	var jm metric.JSONMetric
+	err = json.Unmarshal(*body, &jm)
+	if err != nil {
+		return nil, err
+	}
+
+	i, err := metric.NewMetricIdentFromJSON(&jm)
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := ms.repo.Get(i)
+	bs := []byte(m.String())
+
+	return &bs, err
+}
+
+func (ms *MetricService) ValueMetricParams(n string, t string) (res *[]byte, err error) {
+	i, err := metric.NewMetricIdent(n, t)
+	if err != nil {
+		return nil, err
+	}
+
+	m, err := ms.repo.Get(i)
+	bs := []byte(m.String())
+
+	return &bs, err
+}
+
+func (ms *MetricService) Home() (res *[]byte) {
+	r := "<html><body>"
+	r += "<h1>Metrics</h1>"
+	metrics := ms.repo.GetAll()
+	for _, m := range metrics {
+		r += fmt.Sprintf("<p>%v: %v</p>", m.Ident.Name, m.Value)
+	}
+	r += "</body></html>"
+
+	bs := []byte(r)
+
+	return &bs
 }
 
 func NewMetricService(c *config.Config, r repositories.Repository, bs *BackupService) *MetricService {

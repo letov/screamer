@@ -1,41 +1,27 @@
 package handlers
 
 import (
-	"fmt"
 	"net/http"
-	"screamer/internal/server/config"
-	"screamer/internal/server/repositories"
+	"screamer/internal/server/services"
 )
 
 type HomeHandler struct {
-	config *config.Config
-	repo   repositories.Repository
+	ms *services.MetricService
 }
 
 func (h *HomeHandler) Home(res http.ResponseWriter, _ *http.Request) {
-	r := "<html><body>"
-	r += "<h1>Metrics</h1>"
-	ms := h.repo.GetAll()
-	for _, m := range ms {
-		r += fmt.Sprintf("<p>%v: %v</p>", m.Ident.Name, m.Value)
-	}
-	r += "</body></html>"
+	body := h.ms.Home()
 
 	res.Header().Set("Content-Type", "text/html")
-	_, err := res.Write([]byte(r))
+	_, err := res.Write(*body)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 }
 
-func (h *HomeHandler) GetHandler() HandlerFunc {
-	return h.Home
-}
-
-func NewHomeHandler(c *config.Config, r repositories.Repository) *HomeHandler {
+func NewHomeHandler(ms *services.MetricService) *HomeHandler {
 	return &HomeHandler{
-		config: c,
-		repo:   r,
+		ms: ms,
 	}
 }

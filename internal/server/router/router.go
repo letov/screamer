@@ -43,7 +43,7 @@ func (rtr *Router) GetRouter() *chi.Mux {
 
 	r.Use(middleware.Timeout(60 * time.Second))
 
-	r.Get("/", rtr.homeHandler.GetHandler())
+	r.Get("/", rtr.homeHandler.Home)
 
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", rtr.updateHandler.UpdateMetricJSON)
@@ -51,8 +51,8 @@ func (rtr *Router) GetRouter() *chi.Mux {
 	})
 
 	r.Route("/value", func(r chi.Router) {
-		r.Post("/", rtr.valueHandler.GetHandlerJSON())
-		r.Get("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}", rtr.valueHandler.GetHandlerParams())
+		r.Post("/", rtr.valueHandler.ValueMetricJSON)
+		r.Get("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}", rtr.valueHandler.ValueMetricParams)
 	})
 
 	return r
