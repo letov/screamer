@@ -1,20 +1,14 @@
 package main
 
 import (
+	"go.uber.org/fx"
 	"screamer/internal/agent/di"
-	"screamer/internal/agent/services"
 	event_loop "screamer/internal/common/eventloop"
 )
 
 func main() {
-	container := di.BuildContainer()
-
-	err := container.Invoke(func(el *event_loop.EventLoop, ss *services.ShutdownService) {
-		el.Run()
-		ss.Run()
-	})
-
-	if err != nil {
-		panic(err)
-	}
+	fx.New(
+		di.InjectApp(),
+		fx.Invoke(func(*event_loop.EventLoop) {}),
+	).Run()
 }

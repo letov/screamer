@@ -3,8 +3,8 @@ package services
 import (
 	"bytes"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
-	"log"
 	"net/http"
 	"screamer/internal/agent/config"
 	"screamer/internal/agent/repositories"
@@ -14,6 +14,7 @@ import (
 type SendingService struct {
 	config *config.Config
 	repo   repositories.Repository
+	log    *zap.SugaredLogger
 }
 
 func (ss *SendingService) SendMetrics() {
@@ -36,21 +37,20 @@ func (ss *SendingService) request(url string, m metric.Metric) {
 		}(r.Body)
 	}
 
-	if ss.config.AgentLogEnable {
-		if err != nil {
-			log.Println("Request error", err.Error())
-		} else if r.StatusCode != http.StatusOK {
-			log.Println("Bad status", r.StatusCode)
-		} else {
-			data, _ := io.ReadAll(r.Body)
-			log.Println("Answer", string(data))
-		}
+	if err != nil {
+		ss.log.Warn("Request error", err.Error())
+	} else if r.StatusCode != http.StatusOK {
+		ss.log.Warn("Bad status", r.StatusCode)
+	} else {
+		data, _ := io.ReadAll(r.Body)
+		ss.log.Info("Answer", string(data))
 	}
 }
 
-func NewSendingService(config *config.Config, repo repositories.Repository) *SendingService {
+func NewSendingService(log *zap.SugaredLogger, config *config.Config, repo repositories.Repository) *SendingService {
 	return &SendingService{
 		config: config,
 		repo:   repo,
+		log:    log,
 	}
 }

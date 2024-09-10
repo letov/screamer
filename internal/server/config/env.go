@@ -45,14 +45,5 @@ func newEnv() preConfig {
 		}
 	}
 
-	sle, exists := os.LookupEnv("SERVER_LOG_ENABLE")
-	if exists {
-		i, err := strconv.Atoi(sle)
-		if err == nil {
-			b := i == 1
-			pre.Restore = &b
-		}
-	}
-
 	return pre
 }

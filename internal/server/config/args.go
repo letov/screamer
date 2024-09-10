@@ -15,7 +15,6 @@ func newArgs() preConfig {
 		StoreInterval:   flag.Int("i", 300, "StoreInterval desc"),
 		FileStoragePath: flag.String("f", "/tmp/backup_file", "FileStoragePath desc"),
 		Restore:         flag.Bool("r", true, "Restore desc"),
-		ServerLogEnable: flag.Bool("l", true, "ServerLogEnable desc"),
 	}
 
 	set := newSetConfig()
@@ -34,8 +33,6 @@ func newArgs() preConfig {
 			set.FileStoragePath = true
 		case "r":
 			set.Restore = true
-		case "l":
-			set.ServerLogEnable = true
 		}
 	})
 
@@ -53,9 +50,6 @@ func newArgs() preConfig {
 	}
 	if !set.Restore {
 		pre.Restore = nil
-	}
-	if !set.ServerLogEnable {
-		pre.ServerLogEnable = nil
 	}
 
 	return pre

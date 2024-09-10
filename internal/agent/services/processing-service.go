@@ -1,7 +1,7 @@
 package services
 
 import (
-	"log"
+	"go.uber.org/zap"
 	"screamer/internal/agent/config"
 	metric_sources "screamer/internal/agent/metricsources"
 	"screamer/internal/agent/repositories"
@@ -13,6 +13,7 @@ type ProcessingService struct {
 	config        *config.Config
 	repo          repositories.Repository
 	metricSources []metric_sources.MetricSource
+	log           *zap.SugaredLogger
 }
 
 func (ps *ProcessingService) UpdateMetrics() {
@@ -30,16 +31,17 @@ func (ps *ProcessingService) UpdateMetrics() {
 		default:
 			err = common.ErrTypeNotExists
 		}
-		if err != nil && ps.config.AgentLogEnable {
-			log.Println("Update metric error", err.Error())
+		if err != nil {
+			ps.log.Warn("Update metric error", err.Error())
 		}
 	}
 }
 
-func NewProcessingService(config *config.Config, repo repositories.Repository, metricSources []metric_sources.MetricSource) *ProcessingService {
+func NewProcessingService(log *zap.SugaredLogger, config *config.Config, repo repositories.Repository, metricSources []metric_sources.MetricSource) *ProcessingService {
 	return &ProcessingService{
 		config:        config,
 		repo:          repo,
 		metricSources: metricSources,
+		log:           log,
 	}
 }

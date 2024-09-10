@@ -8,7 +8,7 @@ import (
 
 func NewEvents(c *config.Config, ps *services.ProcessingService, ss *services.SendingService) []*event_loop.Event {
 	return []*event_loop.Event{
-		event_loop.NewEvent(c.PollInterval, ps.UpdateMetrics),
-		event_loop.NewEvent(c.ReportInterval, ss.SendMetrics),
+		event_loop.NewEvent("UpdateMetrics", c.PollInterval, ps.UpdateMetrics),
+		event_loop.NewEvent("SendMetrics", c.ReportInterval, ss.SendMetrics),
 	}
 }

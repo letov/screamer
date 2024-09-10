@@ -13,7 +13,6 @@ func newDotenv() preConfig {
 	netAddress := new(net_address.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))
 
-	sle := *getEnvInt("SERVER_LOG_ENABLE", 1) == 1
 	r := *getEnvInt("RESTORE", 1) == 1
 
 	return preConfig{
@@ -22,7 +21,6 @@ func newDotenv() preConfig {
 		StoreInterval:   getEnvInt("STORE_INTERVAL", 300),
 		FileStoragePath: getEnv("FILE_STORAGE_PATH", "/tmp/backup_file"),
 		Restore:         &r,
-		ServerLogEnable: &sle,
 	}
 }
 

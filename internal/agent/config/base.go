@@ -6,21 +6,18 @@ type Config struct {
 	NetAddress     netaddress.NetAddress
 	PollInterval   int
 	ReportInterval int
-	AgentLogEnable bool
 }
 
 type preConfig struct {
 	NetAddress     *netaddress.NetAddress
 	PollInterval   *int
 	ReportInterval *int
-	AgentLogEnable *bool
 }
 
 type setConfig struct {
 	NetAddress     bool
 	PollInterval   bool
 	ReportInterval bool
-	AgentLogEnable bool
 }
 
 func newPreConfig() preConfig {
@@ -28,7 +25,6 @@ func newPreConfig() preConfig {
 		NetAddress:     nil,
 		PollInterval:   nil,
 		ReportInterval: nil,
-		AgentLogEnable: nil,
 	}
 }
 
@@ -37,6 +33,5 @@ func newSetConfig() setConfig {
 		NetAddress:     false,
 		PollInterval:   false,
 		ReportInterval: false,
-		AgentLogEnable: false,
 	}
 }

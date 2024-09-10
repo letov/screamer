@@ -8,7 +8,6 @@ type Config struct {
 	StoreInterval   int
 	FileStoragePath string
 	Restore         bool
-	ServerLogEnable bool
 }
 
 type preConfig struct {
@@ -17,7 +16,6 @@ type preConfig struct {
 	StoreInterval   *int
 	FileStoragePath *string
 	Restore         *bool
-	ServerLogEnable *bool
 }
 
 type setConfig struct {
@@ -26,7 +24,6 @@ type setConfig struct {
 	StoreInterval   bool
 	FileStoragePath bool
 	Restore         bool
-	ServerLogEnable bool
 }
 
 func newPreConfig() preConfig {
@@ -36,7 +33,6 @@ func newPreConfig() preConfig {
 		StoreInterval:   nil,
 		FileStoragePath: nil,
 		Restore:         nil,
-		ServerLogEnable: nil,
 	}
 }
 
@@ -47,6 +43,5 @@ func newSetConfig() setConfig {
 		StoreInterval:   false,
 		FileStoragePath: false,
 		Restore:         false,
-		ServerLogEnable: false,
 	}
 }

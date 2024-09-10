@@ -27,9 +27,7 @@ func (ps *BackupService) Save() {
 	err := ps.toFile(ps.repo.GetAll())
 	ps.processError(err)
 
-	if ps.config.ServerLogEnable {
-		ps.log.Info("Saved backup")
-	}
+	ps.log.Info("Saved backup")
 }
 
 func (ps *BackupService) Load() {
@@ -44,9 +42,7 @@ func (ps *BackupService) Load() {
 		ps.processError(err)
 	}
 
-	if ps.config.ServerLogEnable {
-		ps.log.Info("Loaded backup")
-	}
+	ps.log.Info("Loaded backup")
 }
 
 func (ps *BackupService) toFile(ms []metric.Metric) error {
@@ -94,7 +90,7 @@ func (ps *BackupService) fromFile() ([]*metric.Metric, error) {
 }
 
 func (ps *BackupService) processError(err error) {
-	if err != nil && ps.config.ServerLogEnable {
+	if err != nil {
 		ps.log.Warn("Save backup error:", err.Error())
 	}
 }

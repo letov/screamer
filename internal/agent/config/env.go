@@ -31,13 +31,5 @@ func newEnv() preConfig {
 		}
 	}
 
-	ale, exists := os.LookupEnv("AGENT_LOG_ENABLE")
-	if exists {
-		if i, err := strconv.Atoi(ale); err == nil {
-			b := i == 1
-			pre.AgentLogEnable = &b
-		}
-	}
-
 	return pre
 }

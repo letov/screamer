@@ -13,13 +13,10 @@ func newDotenv() preConfig {
 	netAddress := new(netaddress.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))
 
-	ale := *getEnvInt("AGENT_LOG_ENABLE", 1) == 1
-
 	return preConfig{
 		NetAddress:     netAddress,
 		PollInterval:   getEnvInt("POLL_INTERVAL", 2),
 		ReportInterval: getEnvInt("REPORT_INTERVAL", 10),
-		AgentLogEnable: &ale,
 	}
 }
 

@@ -22,7 +22,6 @@ func NewConfig() *Config {
 		NetAddress:     getPriorConfigValue(cs, "NetAddress").(net_address.NetAddress),
 		PollInterval:   getPriorConfigValue(cs, "PollInterval").(int),
 		ReportInterval: getPriorConfigValue(cs, "ReportInterval").(int),
-		AgentLogEnable: getPriorConfigValue(cs, "AgentLogEnable").(bool),
 	}
 }
 
