@@ -96,14 +96,7 @@ func (ms *MetricService) ValueMetricParams(n string, t string) (res *[]byte, err
 	}
 
 	m, err := ms.repo.Get(i)
-	if err != nil {
-		return nil, err
-	}
-
-	bs, err := m.Bytes()
-	if err != nil {
-		return nil, err
-	}
+	bs := []byte(m.String())
 
 	return &bs, err
 }

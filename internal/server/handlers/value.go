@@ -50,7 +50,7 @@ func (h *ValueMetricHandler) ValueMetricParams(res http.ResponseWriter, req *htt
 		return
 	}
 
-	res.Header().Set("Content-Type", "application/json")
+	res.Header().Set("Content-Type", "text/html")
 	if _, err = res.Write(*body); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
