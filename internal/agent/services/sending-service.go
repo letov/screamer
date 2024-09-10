@@ -17,7 +17,7 @@ type SendingService struct {
 }
 
 func (ss *SendingService) SendMetrics() {
-	url := fmt.Sprintf("%v/update", ss.config.NetAddress.String())
+	url := fmt.Sprintf("http://%v/update", ss.config.NetAddress.String())
 	ms := ss.repo.GetAll()
 
 	for _, m := range ms {
