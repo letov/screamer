@@ -29,7 +29,7 @@ func (h *ValueMetricHandler) ValueMetricJSON(res http.ResponseWriter, req *http.
 		return
 	}
 
-	res.Header().Set("Content-Type", "text/html")
+	res.Header().Set("Content-Type", "application/json")
 	if _, err = res.Write(*body); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
@@ -50,7 +50,7 @@ func (h *ValueMetricHandler) ValueMetricParams(res http.ResponseWriter, req *htt
 		return
 	}
 
-	res.Header().Set("Content-Type", "text/html")
+	res.Header().Set("Content-Type", "application/json")
 	if _, err = res.Write(*body); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

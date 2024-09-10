@@ -77,7 +77,14 @@ func (ms *MetricService) ValueMetricJSON(body *[]byte) (res *[]byte, err error) 
 	}
 
 	m, err := ms.repo.Get(i)
-	bs := []byte(m.String())
+	if err != nil {
+		return nil, err
+	}
+
+	bs, err := m.Bytes()
+	if err != nil {
+		return nil, err
+	}
 
 	return &bs, err
 }
@@ -89,7 +96,14 @@ func (ms *MetricService) ValueMetricParams(n string, t string) (res *[]byte, err
 	}
 
 	m, err := ms.repo.Get(i)
-	bs := []byte(m.String())
+	if err != nil {
+		return nil, err
+	}
+
+	bs, err := m.Bytes()
+	if err != nil {
+		return nil, err
+	}
 
 	return &bs, err
 }
