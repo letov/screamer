@@ -21,10 +21,9 @@ type JSONMetricList struct {
 }
 
 func (ps *BackupService) Save() {
-	ps.Lock()
 	err := ps.toFile(ps.repo.GetAll())
 	ps.processError(err)
-	ps.Unlock()
+
 	if ps.config.ServerLogEnable {
 		log.Println("Save backup")
 	}
@@ -37,12 +36,11 @@ func (ps *BackupService) Load() {
 		return
 	}
 
-	ps.Lock()
 	for _, m := range ms {
 		_, err = ps.repo.Add(*m)
 		ps.processError(err)
 	}
-	ps.Unlock()
+
 	if ps.config.ServerLogEnable {
 		log.Println("Load backup")
 	}
@@ -62,7 +60,10 @@ func (ps *BackupService) toFile(ms []metric.Metric) error {
 	body, err := json.MarshalIndent(jml, "", "   ")
 	ps.processError(err)
 
-	return os.WriteFile(fp, body, 0777)
+	ps.Lock()
+	err = os.WriteFile(fp, body, 0777)
+	ps.Unlock()
+	return err
 }
 
 func (ps *BackupService) fromFile() ([]*metric.Metric, error) {

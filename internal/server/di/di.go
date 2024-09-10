@@ -17,6 +17,7 @@ func BuildContainer() *dig.Container {
 	_ = container.Provide(config.NewConfig)
 	_ = container.Provide(repositories.NewMemoryRepository)
 
+	_ = container.Provide(services.NewMetricService)
 	_ = container.Provide(services.NewBackupService)
 	_ = container.Provide(services.NewLoadService)
 	_ = container.Provide(services.NewShutdownService)
