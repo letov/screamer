@@ -2,16 +2,13 @@ package config
 
 import (
 	"github.com/joho/godotenv"
-	"log"
 	"os"
 	"screamer/internal/common/netaddress"
 	"strconv"
 )
 
 func newDotenv() preConfig {
-	if err := godotenv.Load(".env.agent"); err != nil {
-		log.Fatal("Error loading .env file")
-	}
+	_ = godotenv.Load(".env.agent")
 
 	netAddress := new(netaddress.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))

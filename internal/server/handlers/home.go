@@ -9,7 +9,7 @@ type HomeHandler struct {
 	ms *services.MetricService
 }
 
-func (h *HomeHandler) Home(res http.ResponseWriter, _ *http.Request) {
+func (h *HomeHandler) Handler(res http.ResponseWriter, _ *http.Request) {
 	body := h.ms.Home()
 
 	res.Header().Set("Content-Type", "text/html")

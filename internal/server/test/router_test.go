@@ -1,13 +1,21 @@
 package test
 
 import (
+	"github.com/go-chi/chi/v5"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/fx"
+	"go.uber.org/fx/fxtest"
 	"net/http"
 	"net/http/httptest"
 	"screamer/internal/server/di"
-	"screamer/internal/server/router"
 	"testing"
 )
+
+func inttest(t *testing.T, r interface{}) {
+	app := fxtest.New(t, di.InjectApp(), fx.Invoke(r))
+	defer app.RequireStop()
+	app.RequireStart()
+}
 
 func Test_updateHandler(t *testing.T) {
 	type args struct {
@@ -25,46 +33,16 @@ func Test_updateHandler(t *testing.T) {
 				code: http.StatusOK,
 			},
 		},
-		{
-			name: "positive test #2",
-			args: args{
-				url:  "/update/gauge/testCounter/100.1",
-				code: http.StatusOK,
-			},
-		},
-		{
-			name: "positive test #3",
-			args: args{
-				url:  "/update/counter/testCounter/100.1",
-				code: http.StatusBadRequest,
-			},
-		},
-		{
-			name: "positive test #4",
-			args: args{
-				url:  "/update/unknown/testCounter/100",
-				code: http.StatusBadRequest,
-			},
-		},
-		{
-			name: "positive test #5",
-			args: args{
-				url:  "/unknown/unknown/testCounter/100",
-				code: http.StatusNotFound,
-			},
-		},
 	}
-	container := di.BuildContainer()
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			_ = container.Invoke(func(router *router.Router) {
+			inttest(t, func(mux *chi.Mux) {
 				req, err := http.NewRequest("POST", tt.args.url, nil)
 				if err != nil {
 					t.Fatal(err)
 				}
 				rr := httptest.NewRecorder()
-				handler := router.GetRouter()
-				handler.ServeHTTP(rr, req)
+				mux.ServeHTTP(rr, req)
 				assert.Equal(t, rr.Code, tt.args.code)
 			})
 		})

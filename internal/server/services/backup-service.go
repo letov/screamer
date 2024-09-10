@@ -1,8 +1,10 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
-	"log"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 	"os"
 	"screamer/internal/common/metric"
 	"screamer/internal/server/config"
@@ -13,6 +15,7 @@ import (
 type BackupService struct {
 	config *config.Config
 	repo   repositories.Repository
+	log    *zap.SugaredLogger
 	sync.Mutex
 }
 
@@ -25,7 +28,7 @@ func (ps *BackupService) Save() {
 	ps.processError(err)
 
 	if ps.config.ServerLogEnable {
-		log.Println("Save backup")
+		ps.log.Info("Saved backup")
 	}
 }
 
@@ -42,7 +45,7 @@ func (ps *BackupService) Load() {
 	}
 
 	if ps.config.ServerLogEnable {
-		log.Println("Load backup")
+		ps.log.Info("Loaded backup")
 	}
 }
 
@@ -92,13 +95,29 @@ func (ps *BackupService) fromFile() ([]*metric.Metric, error) {
 
 func (ps *BackupService) processError(err error) {
 	if err != nil && ps.config.ServerLogEnable {
-		log.Println("Save backup error:", err.Error())
+		ps.log.Warn("Save backup error:", err.Error())
 	}
 }
 
-func NewBackupService(c *config.Config, r repositories.Repository) *BackupService {
-	return &BackupService{
+func NewBackupService(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config, r repositories.Repository) *BackupService {
+	srv := &BackupService{
 		config: c,
 		repo:   r,
+		log:    log,
 	}
+
+	lc.Append(fx.Hook{
+		OnStart: func(ctx context.Context) error {
+			log.Info("Loading backup")
+			srv.Load()
+			return nil
+		},
+		OnStop: func(ctx context.Context) error {
+			log.Info("Saving backup")
+			srv.Save()
+			return nil
+		},
+	})
+
+	return srv
 }

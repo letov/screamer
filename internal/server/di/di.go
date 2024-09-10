@@ -1,34 +1,38 @@
 package di
 
 import (
-	"go.uber.org/dig"
+	"go.uber.org/fx"
 	event_loop "screamer/internal/common/eventloop"
+	"screamer/internal/common/logger"
 	"screamer/internal/server/config"
 	"screamer/internal/server/events"
 	"screamer/internal/server/handlers"
+	"screamer/internal/server/httpserver"
+	"screamer/internal/server/mux"
 	"screamer/internal/server/repositories"
-	"screamer/internal/server/router"
 	"screamer/internal/server/services"
 )
 
-func BuildContainer() *dig.Container {
-	container := dig.New()
+func InjectApp() fx.Option {
+	return fx.Provide(
+		config.NewConfig,
+		logger.NewLogger,
 
-	_ = container.Provide(config.NewConfig)
-	_ = container.Provide(repositories.NewMemoryRepository)
+		repositories.NewMemoryRepository,
 
-	_ = container.Provide(services.NewMetricService)
-	_ = container.Provide(services.NewBackupService)
-	_ = container.Provide(services.NewLoadService)
-	_ = container.Provide(services.NewShutdownService)
+		services.NewMetricService,
+		services.NewBackupService,
 
-	_ = container.Provide(handlers.NewHomeHandler)
-	_ = container.Provide(handlers.NewUpdateMetricHandler)
-	_ = container.Provide(handlers.NewValueMetricHandler)
-	_ = container.Provide(router.NewRouter)
+		handlers.NewHomeHandler,
+		handlers.NewUpdateMetricHandler,
+		handlers.NewUpdateMetricOldHandler,
+		handlers.NewValueMetricHandler,
+		handlers.NewValueMetricOldHandler,
 
-	_ = container.Provide(event_loop.NewEventLoop)
-	_ = container.Provide(events.NewEvents)
+		event_loop.NewEventLoop,
+		events.NewEvents,
 
-	return container
+		mux.NewMux,
+		httpserver.NewHTTPServer,
+	)
 }

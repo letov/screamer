@@ -2,8 +2,8 @@ package middlewares
 
 import (
 	"github.com/go-chi/chi/v5/middleware"
-	"go.uber.org/zap"
 	"net/http"
+	"screamer/internal/common/logger"
 	"time"
 )
 
@@ -17,7 +17,7 @@ func Logger(next http.Handler) http.Handler {
 		next.ServeHTTP(ww, r)
 
 		duration := time.Since(start)
-		s := getSugarLogger()
+		s := logger.NewLogger()
 
 		s.Infoln(
 			"uri", uri,
@@ -27,19 +27,4 @@ func Logger(next http.Handler) http.Handler {
 			"size", ww.BytesWritten(),
 		)
 	})
-}
-
-func getSugarLogger() *zap.SugaredLogger {
-	var sugar zap.SugaredLogger
-
-	logger, err := zap.NewDevelopment()
-	if err != nil {
-		panic(err)
-	}
-	defer func(logger *zap.Logger) {
-		_ = logger.Sync()
-	}(logger)
-	sugar = *logger.Sugar()
-
-	return &sugar
 }
