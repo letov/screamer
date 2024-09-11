@@ -14,6 +14,7 @@ func NewMux(
 	uoh *handlers.UpdateMetricOldHandler,
 	vh *handlers.ValueMetricHandler,
 	voh *handlers.ValueMetricOldHandler,
+	ph *handlers.PingHandler,
 ) *chi.Mux {
 	r := chi.NewRouter()
 
@@ -26,6 +27,7 @@ func NewMux(
 	r.Use(middleware.Timeout(60 * time.Second))
 
 	r.Get("/", hh.Handler)
+	r.Get("/ping", ph.Handler)
 
 	r.Route("/update", func(r chi.Router) {
 		r.Post("/", uh.Handler)
