@@ -20,7 +20,7 @@ func newEnv() preConfig {
 
 	d, exists := os.LookupEnv("DATABASE_DSN")
 	if exists {
-		pre.FileStoragePath = &d
+		pre.DBAddress = &d
 	}
 
 	si, exists := os.LookupEnv("STORE_INTERVAL")

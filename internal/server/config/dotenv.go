@@ -8,7 +8,7 @@ import (
 )
 
 func newDotenv() preConfig {
-	_ = godotenv.Load(".env.agent")
+	_ = godotenv.Load(".env.server")
 
 	netAddress := new(net_address.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))
@@ -17,7 +17,7 @@ func newDotenv() preConfig {
 
 	return preConfig{
 		NetAddress:      netAddress,
-		DBAddress:       getEnv("DB_ADDRESS", "postgres://my_user:my_pass@localhost:25432/my_db"),
+		DBAddress:       getEnv("DATABASE_DSN", "postgres://my_user:my_pass@localhost:25432/my_db"),
 		StoreInterval:   getEnvInt("STORE_INTERVAL", 300),
 		FileStoragePath: getEnv("FILE_STORAGE_PATH", "/tmp/backup_file"),
 		Restore:         &r,
