@@ -2,6 +2,7 @@ package services
 
 import (
 	"bytes"
+	"context"
 	"fmt"
 	"go.uber.org/zap"
 	"io"
@@ -17,9 +18,9 @@ type SendingService struct {
 	log    *zap.SugaredLogger
 }
 
-func (ss *SendingService) SendMetrics() {
+func (ss *SendingService) SendMetrics(ctx context.Context) {
 	url := fmt.Sprintf("http://%v/update", ss.config.NetAddress.String())
-	ms := ss.repo.GetAll()
+	ms := ss.repo.GetAll(ctx)
 
 	for _, m := range ms {
 		ss.request(url, m)

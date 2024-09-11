@@ -7,14 +7,22 @@ import (
 	"time"
 )
 
+type FuncWithCtx = func(ctx context.Context)
+
 type Event struct {
 	Name     string
 	Duration time.Duration
-	Event    func()
+	Event    FuncWithCtx
+	Ctx      context.Context
+}
+
+type Events interface {
+	PushEvent(e *Event)
+	GetEvents() []*Event
 }
 
 type EventLoop struct {
-	events []*Event
+	events Events
 	log    *zap.SugaredLogger
 }
 
@@ -22,30 +30,35 @@ func intToSecond(i int) time.Duration {
 	return time.Duration(int64(i)) * time.Second
 }
 
-func NewEvent(n string, s int, e func()) *Event {
+func NewEvent(ctx context.Context, n string, s int, e FuncWithCtx, log *zap.SugaredLogger) *Event {
+	log.Info("Registered new event: ", n, " on every ", s, " sec")
+
 	return &Event{
 		Name:     n,
 		Duration: intToSecond(s),
 		Event:    e,
+		Ctx:      ctx,
 	}
 }
 
 func (el *EventLoop) Run() {
-	for _, event := range el.events {
+	for _, event := range el.events.GetEvents() {
 		ticker := time.NewTicker(event.Duration)
 		event := event
 		go func() {
 			for {
 				if _, ok := <-ticker.C; ok {
 					el.log.Info("Run event: ", event.Name)
-					event.Event()
+					ctxTimeout, cancel := context.WithTimeout(event.Ctx, event.Duration)
+					defer cancel()
+					event.Event(ctxTimeout)
 				}
 			}
 		}()
 	}
 }
 
-func NewEventLoop(lc fx.Lifecycle, log *zap.SugaredLogger, es []*Event) *EventLoop {
+func NewEventLoop(lc fx.Lifecycle, log *zap.SugaredLogger, es Events) *EventLoop {
 	el := &EventLoop{
 		events: es,
 		log:    log,

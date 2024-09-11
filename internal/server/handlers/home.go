@@ -1,8 +1,10 @@
 package handlers
 
 import (
+	"context"
 	"net/http"
 	"screamer/internal/server/services"
+	"time"
 )
 
 type HomeHandler struct {
@@ -10,7 +12,9 @@ type HomeHandler struct {
 }
 
 func (h *HomeHandler) Handler(res http.ResponseWriter, _ *http.Request) {
-	body := h.ms.Home()
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	body := h.ms.Home(ctx)
 
 	res.Header().Set("Content-Type", "text/html")
 	_, err := res.Write(*body)

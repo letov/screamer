@@ -23,14 +23,14 @@ type JSONMetricList struct {
 	Array []metric.JSONMetric
 }
 
-func (ps *BackupService) Save() {
-	err := ps.toFile(ps.repo.GetAll())
+func (ps *BackupService) Save(ctx context.Context) {
+	err := ps.toFile(ps.repo.GetAll(ctx))
 	ps.processError(err)
 
 	ps.log.Info("Saved backup")
 }
 
-func (ps *BackupService) Load() {
+func (ps *BackupService) Load(ctx context.Context) {
 	ms, err := ps.fromFile()
 	if err != nil {
 		ps.processError(err)
@@ -38,7 +38,7 @@ func (ps *BackupService) Load() {
 	}
 
 	for _, m := range ms {
-		_, err = ps.repo.Add(*m)
+		_, err = ps.repo.Add(ctx, *m)
 		ps.processError(err)
 	}
 
@@ -105,12 +105,12 @@ func NewBackupService(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config,
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			log.Info("Loading backup")
-			srv.Load()
+			srv.Load(ctx)
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
 			log.Info("Saving backup")
-			srv.Save()
+			srv.Save(ctx)
 			return nil
 		},
 	})

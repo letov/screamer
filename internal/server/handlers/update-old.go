@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"context"
 	"github.com/go-chi/chi/v5"
 	"net/http"
 	"screamer/internal/server/services"
+	"time"
 )
 
 type UpdateMetricOldHandler struct {
@@ -11,11 +13,14 @@ type UpdateMetricOldHandler struct {
 }
 
 func (h *UpdateMetricOldHandler) Handler(res http.ResponseWriter, req *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	n := chi.URLParam(req, "name")
 	v := chi.URLParam(req, "value")
 	t := chi.URLParam(req, "type")
 
-	body, err := h.ms.UpdateMetricParams(n, v, t)
+	body, err := h.ms.UpdateMetricParams(ctx, n, v, t)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

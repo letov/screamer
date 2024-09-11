@@ -1,9 +1,11 @@
 package handlers
 
 import (
+	"context"
 	"io"
 	"net/http"
 	"screamer/internal/server/services"
+	"time"
 )
 
 type UpdateMetricHandler struct {
@@ -11,13 +13,16 @@ type UpdateMetricHandler struct {
 }
 
 func (h *UpdateMetricHandler) Handler(res http.ResponseWriter, req *http.Request) {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
 	data, err := io.ReadAll(req.Body)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	body, err := h.ms.UpdateMetricJSON(&data)
+	body, err := h.ms.UpdateMetricJSON(ctx, &data)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

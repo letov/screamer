@@ -3,7 +3,6 @@ package db
 import (
 	"context"
 	"embed"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
@@ -20,36 +19,17 @@ type DB struct {
 //go:embed migrations/*.sql
 var embedMigrations embed.FS
 
-func (db *DB) getPool() *pgxpool.Pool {
+func (db *DB) GetPool() *pgxpool.Pool {
 	return db.pool
 }
 
-func (db *DB) setPool(pool *pgxpool.Pool) {
+func (db *DB) SetPool(pool *pgxpool.Pool) {
 	db.pool = pool
 }
 
-func (db *DB) GetConnection(ctx context.Context) (*pgxpool.Conn, error) {
-	c, err := db.pool.Acquire(ctx)
-	if err != nil {
-		return nil, err
-	}
-
-	return c, nil
-}
-
 func (db *DB) Ping(ctx context.Context) (err error) {
-	conn, err := db.GetConnection(ctx)
-	if err != nil {
-		return
-	}
-
-	defer func(conn *pgx.Conn, ctx context.Context) {
-		err := conn.Close(ctx)
-		if err != nil {
-			db.log.Warn(err)
-		}
-	}(conn.Conn(), ctx)
-	return conn.Ping(ctx)
+	pool := db.GetPool()
+	return pool.Ping(ctx)
 }
 
 func (db *DB) makeMigrations() {
@@ -59,7 +39,7 @@ func (db *DB) makeMigrations() {
 		panic(err)
 	}
 
-	sqlDB := stdlib.OpenDBFromPool(db.getPool())
+	sqlDB := stdlib.OpenDBFromPool(db.GetPool())
 	if err := goose.Up(sqlDB, "migrations"); err != nil {
 		panic(err)
 	}
@@ -87,7 +67,7 @@ func NewDB(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config) *DB {
 				log.Warn("Failed to create db pool: ", err)
 			}
 
-			db.setPool(pool)
+			db.SetPool(pool)
 			db.makeMigrations()
 
 			return nil

@@ -22,9 +22,9 @@ func NewMux(
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.Compress(5, "application/json", "text/html"))
-	r.Use(middlewares.Logger)
+	r.Use(middleware.Timeout(10 * time.Second))
 
-	r.Use(middleware.Timeout(60 * time.Second))
+	r.Use(middlewares.Logger)
 
 	r.Get("/", hh.Handler)
 	r.Get("/ping", ph.Handler)

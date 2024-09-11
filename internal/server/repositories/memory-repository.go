@@ -1,6 +1,7 @@
 package repositories
 
 import (
+	"context"
 	"math"
 	"screamer/internal/common"
 	"screamer/internal/common/metric"
@@ -12,7 +13,7 @@ type MemoryRepository struct {
 	sync.Mutex
 }
 
-func (mr *MemoryRepository) GetAll() []metric.Metric {
+func (mr *MemoryRepository) GetAll(_ context.Context) []metric.Metric {
 	res := make([]metric.Metric, 0)
 	mr.Lock()
 	for _, m := range mr.metrics {
@@ -25,14 +26,14 @@ func (mr *MemoryRepository) GetAll() []metric.Metric {
 	return res
 }
 
-func (mr *MemoryRepository) Add(m metric.Metric) (metric.Metric, error) {
+func (mr *MemoryRepository) Add(_ context.Context, m metric.Metric) (metric.Metric, error) {
 	mr.Lock()
 	mr.metrics[m.Ident] = append(mr.metrics[m.Ident], m)
 	mr.Unlock()
 	return m, nil
 }
 
-func (mr *MemoryRepository) Get(i metric.Ident) (metric.Metric, error) {
+func (mr *MemoryRepository) Get(_ context.Context, i metric.Ident) (metric.Metric, error) {
 	mv, ok := mr.metrics[i]
 	if !ok {
 		return metric.Metric{}, common.ErrMetricNotExists
@@ -43,22 +44,23 @@ func (mr *MemoryRepository) Get(i metric.Ident) (metric.Metric, error) {
 	return mv[len(mv)-1], nil
 }
 
-func (mr *MemoryRepository) Increase(m metric.Metric) (metric.Metric, error) {
+func (mr *MemoryRepository) Increase(ctx context.Context, m metric.Metric) (metric.Metric, error) {
 	var _, frac float64
 	_, frac = math.Modf(m.Value)
 	if frac != 0 {
 		return m, common.ErrInvalidValue
 	}
 
-	currentM, err := mr.Get(m.Ident)
+	currentM, err := mr.Get(ctx, m.Ident)
 	if err != nil && err == common.ErrMetricNotExists {
-		return mr.Add(*metric.NewCounter(m.Ident.Name, m.Value))
+		addM := *metric.NewCounter(m.Ident.Name, m.Value)
+		return mr.Add(ctx, addM)
 	}
 	if err != nil {
 		return currentM, err
 	}
 	m.Value += currentM.Value
-	return mr.Add(m)
+	return mr.Add(ctx, m)
 }
 
 func NewMemoryRepository() Repository {

@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"go.uber.org/zap"
 	"screamer/internal/agent/config"
 	metric_sources "screamer/internal/agent/metricsources"
@@ -16,7 +17,7 @@ type ProcessingService struct {
 	log           *zap.SugaredLogger
 }
 
-func (ps *ProcessingService) UpdateMetrics() {
+func (ps *ProcessingService) UpdateMetrics(ctx context.Context) {
 	ms := make([]*metric.Metric, 0)
 	for _, fn := range ps.metricSources {
 		ms = append(ms, fn()...)
@@ -25,9 +26,9 @@ func (ps *ProcessingService) UpdateMetrics() {
 		var err error
 		switch m.Ident.Type {
 		case metric.Counter:
-			_, err = ps.repo.Increase(m.Ident, 1)
+			_, err = ps.repo.Increase(ctx, m.Ident, 1)
 		case metric.Gauge:
-			_, err = ps.repo.Update(*m)
+			_, err = ps.repo.Update(ctx, *m)
 		default:
 			err = common.ErrTypeNotExists
 		}

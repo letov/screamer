@@ -1,6 +1,7 @@
 package services
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"screamer/internal/common/metric"
@@ -15,7 +16,7 @@ type MetricService struct {
 	backupService *BackupService
 }
 
-func (ms *MetricService) UpdateMetricJSON(body *[]byte) (res *[]byte, err error) {
+func (ms *MetricService) UpdateMetricJSON(ctx context.Context, body *[]byte) (res *[]byte, err error) {
 	var jm metric.JSONMetric
 	err = json.Unmarshal(*body, &jm)
 	if err != nil {
@@ -27,10 +28,10 @@ func (ms *MetricService) UpdateMetricJSON(body *[]byte) (res *[]byte, err error)
 		return nil, err
 	}
 
-	return ms.processUpdateMetric(m)
+	return ms.processUpdateMetric(ctx, m)
 }
 
-func (ms *MetricService) UpdateMetricParams(n string, vs string, t string) (res *[]byte, err error) {
+func (ms *MetricService) UpdateMetricParams(ctx context.Context, n string, vs string, t string) (res *[]byte, err error) {
 	v, err := strconv.ParseFloat(vs, 64)
 	if err != nil {
 		return nil, err
@@ -41,30 +42,30 @@ func (ms *MetricService) UpdateMetricParams(n string, vs string, t string) (res 
 		return nil, err
 	}
 
-	return ms.processUpdateMetric(m)
+	return ms.processUpdateMetric(ctx, m)
 }
 
-func (ms *MetricService) processUpdateMetric(m *metric.Metric) (res *[]byte, err error) {
+func (ms *MetricService) processUpdateMetric(ctx context.Context, m *metric.Metric) (res *[]byte, err error) {
 	var newM metric.Metric
 
 	if m.Ident.Type == metric.Counter {
-		newM, err = ms.repo.Increase(*m)
+		newM, err = ms.repo.Increase(ctx, *m)
 	} else {
-		newM, err = ms.repo.Add(*m)
+		newM, err = ms.repo.Add(ctx, *m)
 	}
 	if err != nil {
 		return nil, err
 	}
 
 	if ms.config.Restore && ms.config.StoreInterval == 0 {
-		ms.backupService.Save()
+		ms.backupService.Save(ctx)
 	}
 
 	body, err := newM.Bytes()
 	return &body, err
 }
 
-func (ms *MetricService) ValueMetricJSON(body *[]byte) (res *[]byte, err error) {
+func (ms *MetricService) ValueMetricJSON(ctx context.Context, body *[]byte) (res *[]byte, err error) {
 	var jm metric.JSONMetric
 	err = json.Unmarshal(*body, &jm)
 	if err != nil {
@@ -76,7 +77,7 @@ func (ms *MetricService) ValueMetricJSON(body *[]byte) (res *[]byte, err error) 
 		return nil, err
 	}
 
-	m, err := ms.repo.Get(i)
+	m, err := ms.repo.Get(ctx, i)
 	if err != nil {
 		return nil, err
 	}
@@ -89,22 +90,22 @@ func (ms *MetricService) ValueMetricJSON(body *[]byte) (res *[]byte, err error) 
 	return &bs, err
 }
 
-func (ms *MetricService) ValueMetricParams(n string, t string) (res *[]byte, err error) {
+func (ms *MetricService) ValueMetricParams(ctx context.Context, n string, t string) (res *[]byte, err error) {
 	i, err := metric.NewMetricIdent(n, t)
 	if err != nil {
 		return nil, err
 	}
 
-	m, err := ms.repo.Get(i)
+	m, err := ms.repo.Get(ctx, i)
 	bs := []byte(m.String())
 
 	return &bs, err
 }
 
-func (ms *MetricService) Home() (res *[]byte) {
+func (ms *MetricService) Home(ctx context.Context) (res *[]byte) {
 	r := "<html><body>"
 	r += "<h1>Metrics</h1>"
-	metrics := ms.repo.GetAll()
+	metrics := ms.repo.GetAll(ctx)
 	for _, m := range metrics {
 		r += fmt.Sprintf("<p>%v: %v</p>", m.Ident.Name, m.Value)
 	}

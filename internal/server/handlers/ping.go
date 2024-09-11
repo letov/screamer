@@ -4,6 +4,7 @@ import (
 	"context"
 	"net/http"
 	"screamer/internal/server/db"
+	"time"
 )
 
 type PingHandler struct {
@@ -11,7 +12,9 @@ type PingHandler struct {
 }
 
 func (h *PingHandler) Handler(res http.ResponseWriter, _ *http.Request) {
-	if err := h.db.Ping(context.Background()); err == nil {
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := h.db.Ping(ctx); err == nil {
 		res.WriteHeader(http.StatusOK)
 		return
 	} else {

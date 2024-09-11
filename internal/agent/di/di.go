@@ -29,7 +29,7 @@ func InjectApp() fx.Option {
 		handlers.NewValueMetricHandler,
 		handlers.NewValueMetricOldHandler,
 
-		event_loop.NewEventLoop,
 		events.NewEvents,
+		event_loop.NewEventLoop,
 	)
 }
