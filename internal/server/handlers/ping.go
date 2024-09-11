@@ -13,7 +13,7 @@ type PingHandler struct {
 func (h *PingHandler) Handler(res http.ResponseWriter, _ *http.Request) {
 	conn := h.db.GetConn()
 	if conn == nil {
-		http.Error(res, "No DB connection", http.StatusBadRequest)
+		http.Error(res, "No DB connection", http.StatusInternalServerError)
 		return
 	}
 
