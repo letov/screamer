@@ -42,6 +42,10 @@ func NewDB(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config) *DB {
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
+			if db.conn == nil {
+				return nil
+			}
+
 			log.Info("Close DB connection")
 
 			err := db.conn.Close()
