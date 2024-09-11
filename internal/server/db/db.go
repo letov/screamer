@@ -2,57 +2,103 @@ package db
 
 import (
 	"context"
-	"github.com/jackc/pgx"
+	"embed"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"github.com/jackc/pgx/v5/stdlib"
+	"github.com/pressly/goose/v3"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 	"screamer/internal/server/config"
 )
 
 type DB struct {
-	conn *pgx.Conn
+	pool *pgxpool.Pool
+	log  *zap.SugaredLogger
 }
 
-func (c *DB) GetConn() *pgx.Conn {
-	return c.conn
+//go:embed migrations/*.sql
+var embedMigrations embed.FS
+
+func (db *DB) getPool() *pgxpool.Pool {
+	return db.pool
 }
 
-func (c *DB) SetConn(conn *pgx.Conn) {
-	c.conn = conn
+func (db *DB) setPool(pool *pgxpool.Pool) {
+	db.pool = pool
+}
+
+func (db *DB) GetConnection(ctx context.Context) (*pgxpool.Conn, error) {
+	c, err := db.pool.Acquire(ctx)
+	if err != nil {
+		return nil, err
+	}
+
+	return c, nil
+}
+
+func (db *DB) Ping(ctx context.Context) (err error) {
+	conn, err := db.GetConnection(ctx)
+	if err != nil {
+		return
+	}
+
+	defer func(conn *pgx.Conn, ctx context.Context) {
+		err := conn.Close(ctx)
+		if err != nil {
+			db.log.Warn(err)
+		}
+	}(conn.Conn(), ctx)
+	return conn.Ping(ctx)
+}
+
+func (db *DB) makeMigrations() {
+	goose.SetBaseFS(embedMigrations)
+
+	if err := goose.SetDialect("postgres"); err != nil {
+		panic(err)
+	}
+
+	sqlDB := stdlib.OpenDBFromPool(db.getPool())
+	if err := goose.Up(sqlDB, "migrations"); err != nil {
+		panic(err)
+	}
+	if err := goose.Version(sqlDB, "migrations"); err != nil {
+		db.log.Fatal(err)
+	}
 }
 
 func NewDB(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config) *DB {
-	db := &DB{}
+	db := &DB{
+		log: log,
+	}
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			log.Info("Init DB connection")
+			log.Info("Init DB pool")
 
-			connConfig, err := pgx.ParseConnectionString(c.DBAddress)
+			poolConfig, err := pgxpool.ParseConfig(c.DBAddress)
 			if err != nil {
 				return err
 			}
 
-			conn, err := pgx.Connect(connConfig)
+			pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 			if err != nil {
-				log.Warn("Failed DB connection: ", err)
+				log.Warn("Failed to create db pool: ", err)
 			}
 
-			db.SetConn(conn)
+			db.setPool(pool)
+			db.makeMigrations()
 
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			if db.conn == nil {
+			if db.pool == nil {
 				return nil
 			}
 
-			log.Info("Close DB connection")
-
-			err := db.conn.Close()
-			if err != nil {
-				log.Warn("Failed close DB connection: ", err)
-			}
-
+			log.Info("Close DB pool")
+			db.pool.Close()
 			return nil
 		},
 	})
