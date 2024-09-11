@@ -46,7 +46,7 @@ func NewDB(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config) *DB {
 
 			err := db.conn.Close()
 			if err != nil {
-				return err
+				log.Warn("Failed close DB connection: ", err)
 			}
 
 			return nil
