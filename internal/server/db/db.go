@@ -8,6 +8,7 @@ import (
 	"github.com/pressly/goose/v3"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
+	"screamer/internal/common"
 	"screamer/internal/server/config"
 )
 
@@ -29,6 +30,10 @@ func (db *DB) SetPool(pool *pgxpool.Pool) {
 
 func (db *DB) Ping(ctx context.Context) (err error) {
 	pool := db.GetPool()
+	if pool == nil {
+		return common.ErrNoDbConnection
+	}
+
 	return pool.Ping(ctx)
 }
 
@@ -59,12 +64,20 @@ func NewDB(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config) *DB {
 
 			poolConfig, err := pgxpool.ParseConfig(c.DBAddress)
 			if err != nil {
-				return err
+				log.Warn("Failed to parce config: ", err)
+				return nil
 			}
 
 			pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 			if err != nil {
 				log.Warn("Failed to create db pool: ", err)
+				return nil
+			}
+
+			err = pool.Ping(ctx)
+			if err != nil {
+				log.Warn("Failed to ping db: ", err)
+				return nil
 			}
 
 			db.SetPool(pool)
