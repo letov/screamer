@@ -31,7 +31,7 @@ func (db *DB) SetPool(pool *pgxpool.Pool) {
 func (db *DB) Ping(ctx context.Context) (err error) {
 	pool := db.GetPool()
 	if pool == nil {
-		return common.ErrNoDbConnection
+		return common.ErrNoDBConnection
 	}
 
 	return pool.Ping(ctx)
