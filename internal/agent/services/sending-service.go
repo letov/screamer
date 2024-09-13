@@ -22,7 +22,9 @@ type SendingService struct {
 func (ss *SendingService) SendMetrics(ctx context.Context) {
 	ms := ss.repo.GetAll(ctx)
 
-	ss.requestAll(ms)
+	for _, m := range ms {
+		ss.requestOne(m)
+	}
 }
 
 func (ss *SendingService) requestOne(m metric.Metric) {

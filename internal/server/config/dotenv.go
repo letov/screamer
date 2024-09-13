@@ -8,7 +8,10 @@ import (
 )
 
 func newDotenv() preConfig {
-	_ = godotenv.Load(".env.server")
+	err := godotenv.Load(".env.server.local")
+	if err != nil {
+		_ = godotenv.Load(".env.server")
+	}
 
 	netAddress := new(net_address.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", ""))
