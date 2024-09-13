@@ -11,12 +11,12 @@ func newDotenv() preConfig {
 	_ = godotenv.Load(".env.agent")
 
 	netAddress := new(netaddress.NetAddress)
-	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))
+	_ = netAddress.Set(*getEnv("ADDRESS", ""))
 
 	return preConfig{
 		NetAddress:     netAddress,
-		PollInterval:   getEnvInt("POLL_INTERVAL", 2),
-		ReportInterval: getEnvInt("REPORT_INTERVAL", 10),
+		PollInterval:   getEnvInt("POLL_INTERVAL", 0),
+		ReportInterval: getEnvInt("REPORT_INTERVAL", 0),
 	}
 }
 

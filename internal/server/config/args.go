@@ -11,10 +11,10 @@ func newArgs() preConfig {
 
 	pre := preConfig{
 		NetAddress:      netAddress,
-		DBAddress:       flag.String("d", "postgres://my_user:my_pass@localhost:25432/my_db", "DBAddress desc"),
-		StoreInterval:   flag.Int("i", 300, "StoreInterval desc"),
-		FileStoragePath: flag.String("f", "/tmp/backup_file", "FileStoragePath desc"),
-		Restore:         flag.Bool("r", true, "Restore desc"),
+		DBAddress:       flag.String("d", "", "DBAddress desc"),
+		StoreInterval:   flag.Int("i", 0, "StoreInterval desc"),
+		FileStoragePath: flag.String("f", "", "FileStoragePath desc"),
+		Restore:         flag.Bool("r", false, "Restore desc"),
 	}
 
 	set := newSetConfig()

@@ -11,15 +11,15 @@ func newDotenv() preConfig {
 	_ = godotenv.Load(".env.server")
 
 	netAddress := new(net_address.NetAddress)
-	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))
+	_ = netAddress.Set(*getEnv("ADDRESS", ""))
 
 	r := *getEnvInt("RESTORE", 0) == 1
 
 	return preConfig{
 		NetAddress:      netAddress,
 		DBAddress:       getEnv("DATABASE_DSN", ""),
-		StoreInterval:   getEnvInt("STORE_INTERVAL", 300),
-		FileStoragePath: getEnv("FILE_STORAGE_PATH", "/tmp/backup_file"),
+		StoreInterval:   getEnvInt("STORE_INTERVAL", 0),
+		FileStoragePath: getEnv("FILE_STORAGE_PATH", ""),
 		Restore:         &r,
 	}
 }
