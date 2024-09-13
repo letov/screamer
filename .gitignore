@@ -25,5 +25,5 @@ vendor/
 .vscode
 /tmp/
 /data/
-!/.env.agent.local
-!/.env.server.local
+.env.agent.local
+.env.server.local
