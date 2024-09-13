@@ -11,9 +11,8 @@ import (
 )
 
 type MetricService struct {
-	config        *config.Config
-	repo          repositories.Repository
-	backupService *BackupService
+	config *config.Config
+	repo   repositories.Repository
 }
 
 func (ms *MetricService) UpdateMetricJSON(ctx context.Context, body *[]byte) (res *[]byte, err error) {
@@ -55,10 +54,6 @@ func (ms *MetricService) processUpdateMetric(ctx context.Context, m *metric.Metr
 	}
 	if err != nil {
 		return nil, err
-	}
-
-	if ms.config.Restore && ms.config.StoreInterval == 0 {
-		ms.backupService.Save(ctx)
 	}
 
 	body, err := newM.Bytes()
@@ -116,10 +111,9 @@ func (ms *MetricService) Home(ctx context.Context) (res *[]byte) {
 	return &bs
 }
 
-func NewMetricService(c *config.Config, r repositories.Repository, bs *BackupService) *MetricService {
+func NewMetricService(c *config.Config, r repositories.Repository) *MetricService {
 	return &MetricService{
-		config:        c,
-		repo:          r,
-		backupService: bs,
+		config: c,
+		repo:   r,
 	}
 }

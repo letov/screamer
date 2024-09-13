@@ -63,7 +63,7 @@ func (mr *MemoryRepository) Increase(ctx context.Context, m metric.Metric) (metr
 	return mr.Add(ctx, m)
 }
 
-func NewMemoryRepository() Repository {
+func NewMemoryRepository() *MemoryRepository {
 	return &MemoryRepository{
 		metrics: make(map[metric.Ident][]metric.Metric),
 	}

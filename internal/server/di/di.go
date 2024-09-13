@@ -2,6 +2,7 @@ package di
 
 import (
 	"go.uber.org/fx"
+	"go.uber.org/zap"
 	event_loop "screamer/internal/common/eventloop"
 	"screamer/internal/common/logger"
 	"screamer/internal/server/config"
@@ -18,12 +19,33 @@ func InjectApp() fx.Option {
 	return fx.Provide(
 		config.NewConfig,
 		logger.NewLogger,
-
-		repositories.NewMemoryRepository,
 		db.NewDB,
 
+		repositories.NewDBRepository,
+		repositories.NewFileRepository,
+		repositories.NewMemoryRepository,
+
+		func(
+			c *config.Config,
+			log *zap.SugaredLogger,
+			db *repositories.DBRepository,
+			fr *repositories.FileRepository,
+			mr *repositories.MemoryRepository,
+		) repositories.Repository {
+			switch true {
+			case len(c.DBAddress) > 0:
+				log.Info("DB as repo source")
+				return db
+			case c.Restore:
+				log.Info("FILE as repo source")
+				return fr
+			default:
+				log.Info("Memory as repo source")
+				return mr
+			}
+		},
+
 		services.NewMetricService,
-		services.NewBackupService,
 
 		handlers.NewHomeHandler,
 		handlers.NewUpdateMetricHandler,
