@@ -13,14 +13,18 @@ func newDotenv() preConfig {
 	netAddress := new(net_address.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", ""))
 
-	r := *getEnvInt("RESTORE", 0) == 1
+	r := *getEnv("RESTORE", "false")
+	br, err := strconv.ParseBool(r)
+	if err != nil {
+		br = false
+	}
 
 	return preConfig{
 		NetAddress:      netAddress,
 		DBAddress:       getEnv("DATABASE_DSN", ""),
 		StoreInterval:   getEnvInt("STORE_INTERVAL", 0),
 		FileStoragePath: getEnv("FILE_STORAGE_PATH", ""),
-		Restore:         &r,
+		Restore:         &br,
 	}
 }
 

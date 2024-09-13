@@ -38,9 +38,8 @@ func newEnv() preConfig {
 
 	r, exists := os.LookupEnv("RESTORE")
 	if exists {
-		i, err := strconv.Atoi(r)
+		b, err := strconv.ParseBool(r)
 		if err == nil {
-			b := i == 1
 			pre.Restore = &b
 		}
 	}
