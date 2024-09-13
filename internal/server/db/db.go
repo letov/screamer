@@ -10,6 +10,7 @@ import (
 	"go.uber.org/zap"
 	"screamer/internal/common"
 	"screamer/internal/server/config"
+	"time"
 )
 
 type DB struct {
@@ -58,38 +59,38 @@ func NewDB(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config) *DB {
 		log: log,
 	}
 
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if len(c.DBAddress) == 0 {
+		log.Info("Empty DB config")
+		return db
+	}
+
+	log.Info("Init DB pool")
+
+	poolConfig, err := pgxpool.ParseConfig(c.DBAddress)
+	if err != nil {
+		log.Warn("Failed to parce config: ", err)
+		return db
+	}
+
+	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
+	if err != nil {
+		log.Warn("Failed to create db pool: ", err)
+		return db
+	}
+
+	err = pool.Ping(ctx)
+	if err != nil {
+		log.Warn("Failed to ping db: ", err)
+		return db
+	}
+
+	db.SetPool(pool)
+	db.makeMigrations()
+
 	lc.Append(fx.Hook{
-		OnStart: func(ctx context.Context) error {
-			if len(c.DBAddress) == 0 {
-				log.Info("Empty DB config")
-				return nil
-			}
-
-			log.Info("Init DB pool")
-
-			poolConfig, err := pgxpool.ParseConfig(c.DBAddress)
-			if err != nil {
-				log.Warn("Failed to parce config: ", err)
-				return nil
-			}
-
-			pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
-			if err != nil {
-				log.Warn("Failed to create db pool: ", err)
-				return nil
-			}
-
-			err = pool.Ping(ctx)
-			if err != nil {
-				log.Warn("Failed to ping db: ", err)
-				return nil
-			}
-
-			db.SetPool(pool)
-			db.makeMigrations()
-
-			return nil
-		},
 		OnStop: func(ctx context.Context) error {
 			if db.pool == nil {
 				return nil
