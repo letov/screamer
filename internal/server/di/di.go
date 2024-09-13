@@ -49,6 +49,7 @@ func InjectApp() fx.Option {
 
 		handlers.NewHomeHandler,
 		handlers.NewUpdateMetricHandler,
+		handlers.NewUpdatesMetricHandler,
 		handlers.NewUpdateMetricOldHandler,
 		handlers.NewValueMetricHandler,
 		handlers.NewValueMetricOldHandler,

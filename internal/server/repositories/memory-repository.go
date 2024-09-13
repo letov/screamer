@@ -13,6 +13,11 @@ type MemoryRepository struct {
 	sync.Mutex
 }
 
+func (mr *MemoryRepository) BatchUpdate(_ context.Context, _ []metric.Metric) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 func (mr *MemoryRepository) GetAll(_ context.Context) []metric.Metric {
 	res := make([]metric.Metric, 0)
 	mr.Lock()

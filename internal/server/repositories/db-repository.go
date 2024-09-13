@@ -16,6 +16,28 @@ type DBRepository struct {
 	log  *zap.SugaredLogger
 }
 
+func (db *DBRepository) BatchUpdate(ctx context.Context, ms []metric.Metric) error {
+	tx, err := db.pool.Begin(ctx)
+	if err != nil {
+		return err
+	}
+	for _, m := range ms {
+		query := `INSERT INTO metrics (type, name, value) VALUES (@type, @name, @value)`
+		args := pgx.NamedArgs{
+			"type":  m.Ident.Type.String(),
+			"name":  m.Ident.Name,
+			"value": m.Value,
+		}
+		_, err := db.pool.Exec(ctx, query, args)
+		if err != nil {
+			_ = tx.Rollback(ctx)
+			return err
+		}
+	}
+
+	return tx.Commit(ctx)
+}
+
 func (db *DBRepository) GetAll(ctx context.Context) (ms []metric.Metric) {
 	ms = make([]metric.Metric, 0)
 

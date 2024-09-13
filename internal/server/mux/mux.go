@@ -11,6 +11,7 @@ import (
 func NewMux(
 	hh *handlers.HomeHandler,
 	uh *handlers.UpdateMetricHandler,
+	ush *handlers.UpdatesMetricHandler,
 	uoh *handlers.UpdateMetricOldHandler,
 	vh *handlers.ValueMetricHandler,
 	voh *handlers.ValueMetricOldHandler,
@@ -33,6 +34,8 @@ func NewMux(
 		r.Post("/", uh.Handler)
 		r.Post("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}/{value}", uoh.Handler)
 	})
+
+	r.Post("/updates", ush.Handler)
 
 	r.Route("/value", func(r chi.Router) {
 		r.Post("/", vh.Handler)

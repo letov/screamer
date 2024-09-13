@@ -15,6 +15,26 @@ type MetricService struct {
 	repo   repositories.Repository
 }
 
+func (ms *MetricService) UpdatesMetricJSON(ctx context.Context, body *[]byte) (err error) {
+	var jms []metric.JSONMetric
+	err = json.Unmarshal(*body, &jms)
+	if err != nil {
+		return
+	}
+
+	mList := make([]metric.Metric, 0)
+
+	for _, jm := range jms {
+		m, err := metric.NewMetricFromJSON(&jm)
+		if err != nil {
+			return err
+		}
+		mList = append(mList, *m)
+	}
+
+	return ms.repo.BatchUpdate(ctx, mList)
+}
+
 func (ms *MetricService) UpdateMetricJSON(ctx context.Context, body *[]byte) (res *[]byte, err error) {
 	var jm metric.JSONMetric
 	err = json.Unmarshal(*body, &jm)

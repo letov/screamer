@@ -18,6 +18,11 @@ type FileRepository struct {
 	sync.Mutex
 }
 
+func (fr *FileRepository) BatchUpdate(_ context.Context, _ []metric.Metric) error {
+	//TODO implement me
+	panic("implement me")
+}
+
 type JSONMetricList struct {
 	Array []metric.JSONMetric
 }
