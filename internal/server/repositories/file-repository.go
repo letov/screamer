@@ -54,9 +54,7 @@ func (fr *FileRepository) Increase(ctx context.Context, m metric.Metric) (metric
 
 func (fr *FileRepository) SaveAllToFile(ctx context.Context) {
 	err := fr.toFile(fr.GetAll(ctx))
-	if err != nil {
-		fr.l.Warn("Save to file error:", err.Error())
-	}
+	fr.processError(err)
 }
 
 func (fr *FileRepository) LoadAllFromFile(ctx context.Context) {
@@ -67,9 +65,7 @@ func (fr *FileRepository) LoadAllFromFile(ctx context.Context) {
 	}
 	for _, m := range ms {
 		_, err := fr.mr.Add(ctx, *m)
-		if err != nil {
-			fr.l.Warn("Load form file error:", err.Error())
-		}
+		fr.processError(err)
 	}
 }
 
@@ -119,7 +115,7 @@ func (fr *FileRepository) fromFile() ([]*metric.Metric, error) {
 
 func (fr *FileRepository) processError(err error) {
 	if err != nil {
-		fr.l.Warn("Save to file error:", err.Error())
+		fr.l.Warn("File process error:", err.Error())
 	}
 }
 

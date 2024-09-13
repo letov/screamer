@@ -60,6 +60,11 @@ func NewDB(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config) *DB {
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
+			if len(c.DBAddress) == 0 {
+				log.Info("Empty DB config")
+				return nil
+			}
+
 			log.Info("Init DB pool")
 
 			poolConfig, err := pgxpool.ParseConfig(c.DBAddress)

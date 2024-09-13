@@ -13,11 +13,11 @@ func newDotenv() preConfig {
 	netAddress := new(net_address.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))
 
-	r := *getEnvInt("RESTORE", 1) == 1
+	r := *getEnvInt("RESTORE", 0) == 1
 
 	return preConfig{
 		NetAddress:      netAddress,
-		DBAddress:       getEnv("DATABASE_DSN", "postgres://my_user:my_pass@localhost:25432/my_db"),
+		DBAddress:       getEnv("DATABASE_DSN", ""),
 		StoreInterval:   getEnvInt("STORE_INTERVAL", 300),
 		FileStoragePath: getEnv("FILE_STORAGE_PATH", "/tmp/backup_file"),
 		Restore:         &r,
