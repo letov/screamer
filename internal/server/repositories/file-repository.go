@@ -128,13 +128,17 @@ func NewFileRepository(lc fx.Lifecycle, c *config.Config, log *zap.SugaredLogger
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			log.Info("Loading from file")
-			fr.LoadAllFromFile(ctx)
+			if c.Restore {
+				log.Info("Loading from file")
+				fr.LoadAllFromFile(ctx)
+			}
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
-			log.Info("Saving to file")
-			fr.SaveAllToFile(ctx)
+			if c.Restore {
+				log.Info("Saving to file")
+				fr.SaveAllToFile(ctx)
+			}
 			return nil
 		},
 	})
