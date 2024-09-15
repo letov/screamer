@@ -7,8 +7,10 @@ import (
 	"go.uber.org/zap"
 	"os"
 	"screamer/internal/common/metric"
+	"screamer/internal/common/retry"
 	"screamer/internal/server/config"
 	"sync"
+	"time"
 )
 
 type FileRepository struct {
@@ -37,7 +39,7 @@ func (fr *FileRepository) Add(ctx context.Context, m metric.Metric) (metric.Metr
 		return newM, err
 	}
 	if fr.c.Restore && fr.c.StoreInterval == 0 {
-		err = fr.toFile(fr.GetAll(ctx))
+		err = fr.toFile(ctx, fr.GetAll(ctx))
 	}
 	return newM, err
 }
@@ -52,18 +54,18 @@ func (fr *FileRepository) Increase(ctx context.Context, m metric.Metric) (metric
 		return newM, err
 	}
 	if fr.c.Restore && fr.c.StoreInterval == 0 {
-		err = fr.toFile(fr.GetAll(ctx))
+		err = fr.toFile(ctx, fr.GetAll(ctx))
 	}
 	return newM, err
 }
 
 func (fr *FileRepository) SaveAllToFile(ctx context.Context) {
-	err := fr.toFile(fr.GetAll(ctx))
+	err := fr.toFile(ctx, fr.GetAll(ctx))
 	fr.processError(err)
 }
 
 func (fr *FileRepository) LoadAllFromFile(ctx context.Context) {
-	ms, err := fr.fromFile()
+	ms, err := fr.fromFile(ctx)
 	if err != nil {
 		fr.l.Warn("Load form file error:", err.Error())
 		return
@@ -74,48 +76,69 @@ func (fr *FileRepository) LoadAllFromFile(ctx context.Context) {
 	}
 }
 
-func (fr *FileRepository) toFile(ms []metric.Metric) error {
-	fp := fr.c.FileStoragePath
+func (fr *FileRepository) toFile(ctx context.Context, ms []metric.Metric) error {
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
-	jms := make([]metric.JSONMetric, 0)
-	for _, m := range ms {
-		j, err := m.JSON()
-		fr.processError(err)
-		jms = append(jms, j)
-	}
-
-	jml := &JSONMetricList{Array: jms}
-	body, err := json.MarshalIndent(jml, "", "   ")
-	fr.processError(err)
-
-	fr.Lock()
-	err = os.WriteFile(fp, body, 0777)
-	fr.Unlock()
+	job := fr.toFileJob(ms)
+	_, err := retry.NewRetryJob(ctxWithTimeout, "wait file access", job, []error{}, []int{1, 2, 5}, fr.l)
 	return err
 }
 
-func (fr *FileRepository) fromFile() ([]*metric.Metric, error) {
-	fp := fr.c.FileStoragePath
+func (fr *FileRepository) toFileJob(ms []metric.Metric) func(ctx context.Context) (bool, error) {
+	return func(ctx context.Context) (bool, error) {
+		fp := fr.c.FileStoragePath
 
-	data, err := os.ReadFile(fp)
-	if err != nil {
-		return nil, err
-	}
+		jms := make([]metric.JSONMetric, 0)
+		for _, m := range ms {
+			j, err := m.JSON()
+			fr.processError(err)
+			jms = append(jms, j)
+		}
 
-	jml := &JSONMetricList{}
-	err = json.Unmarshal(data, jml)
-	if err != nil {
-		return nil, err
-	}
-
-	res := make([]*metric.Metric, 0)
-	for _, jm := range jml.Array {
-		m, err := metric.NewMetricFromJSON(&jm)
+		jml := &JSONMetricList{Array: jms}
+		body, err := json.MarshalIndent(jml, "", "   ")
 		fr.processError(err)
-		res = append(res, m)
-	}
 
-	return res, nil
+		fr.Lock()
+		err = os.WriteFile(fp, body, 0777)
+		fr.Unlock()
+		return true, err
+	}
+}
+
+func (fr *FileRepository) fromFile(ctx context.Context) ([]*metric.Metric, error) {
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	job := fr.fromFileJob()
+	return retry.NewRetryJob(ctxWithTimeout, "wait file access", job, []error{}, []int{1, 2, 5}, fr.l)
+}
+
+func (fr *FileRepository) fromFileJob() func(ctx context.Context) ([]*metric.Metric, error) {
+	return func(ctx context.Context) ([]*metric.Metric, error) {
+		fp := fr.c.FileStoragePath
+
+		data, err := os.ReadFile(fp)
+		if err != nil {
+			return nil, err
+		}
+
+		jml := &JSONMetricList{}
+		err = json.Unmarshal(data, jml)
+		if err != nil {
+			return nil, err
+		}
+
+		res := make([]*metric.Metric, 0)
+		for _, jm := range jml.Array {
+			m, err := metric.NewMetricFromJSON(&jm)
+			fr.processError(err)
+			res = append(res, m)
+		}
+
+		return res, nil
+	}
 }
 
 func (fr *FileRepository) processError(err error) {

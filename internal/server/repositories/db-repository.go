@@ -3,11 +3,13 @@ package repositories
 import (
 	"context"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
 	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 	"math"
 	"screamer/internal/common"
 	"screamer/internal/common/metric"
+	"screamer/internal/common/retry"
 	"screamer/internal/server/db"
 )
 
@@ -62,10 +64,9 @@ func (db *DBRepository) Add(ctx context.Context, m metric.Metric) (metric.Metric
 		"name":  m.Ident.Name,
 		"value": m.Value,
 	}
-	_, err := db.pool.Exec(ctx, query, args)
-	if err != nil {
-		db.log.Warn("DB repo error: ", err)
-	}
+
+	job := db.execJob(query, args)
+	_, err := retry.NewRetryJob(ctx, "db exec", job, []error{}, []int{1, 2, 5}, db.log)
 	return m, err
 }
 
@@ -76,9 +77,9 @@ func (db *DBRepository) Get(ctx context.Context, i metric.Ident) (m metric.Metri
 		"name": i.Name,
 	}
 
-	rows, err := db.pool.Query(ctx, query, args)
+	job := db.queryJob(query, args)
+	rows, err := retry.NewRetryJob(ctx, "db query", job, []error{}, []int{1, 2, 5}, db.log)
 	if err != nil {
-		db.log.Warn("DB repo error: ", err)
 		return
 	}
 	defer rows.Close()
@@ -119,10 +120,11 @@ func (db *DBRepository) Increase(ctx context.Context, m metric.Metric) (metric.M
 
 func (db *DBRepository) getUniqIdents(ctx context.Context) (is []metric.Ident, err error) {
 	query := `SELECT DISTINCT type, name FROM metrics`
+	args := pgx.NamedArgs{}
 
-	rows, err := db.pool.Query(ctx, query)
+	job := db.queryJob(query, args)
+	rows, err := retry.NewRetryJob(ctx, "db query", job, []error{}, []int{1, 2, 5}, db.log)
 	if err != nil {
-		db.log.Warn("DB repo error: ", err)
 		return
 	}
 	defer rows.Close()
@@ -138,6 +140,18 @@ func (db *DBRepository) getUniqIdents(ctx context.Context) (is []metric.Ident, e
 	}
 
 	return
+}
+
+func (db *DBRepository) queryJob(query string, args pgx.NamedArgs) func(ctx context.Context) (pgx.Rows, error) {
+	return func(ctx context.Context) (pgx.Rows, error) {
+		return db.pool.Query(ctx, query, args)
+	}
+}
+
+func (db *DBRepository) execJob(query string, args pgx.NamedArgs) func(ctx context.Context) (pgconn.CommandTag, error) {
+	return func(ctx context.Context) (pgconn.CommandTag, error) {
+		return db.pool.Exec(ctx, query, args)
+	}
 }
 
 func NewDBRepository(db *db.DB, log *zap.SugaredLogger) *DBRepository {

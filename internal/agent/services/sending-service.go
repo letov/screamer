@@ -10,7 +10,10 @@ import (
 	"net/http"
 	"screamer/internal/agent/config"
 	"screamer/internal/agent/repositories"
+	"screamer/internal/common"
 	"screamer/internal/common/metric"
+	"screamer/internal/common/retry"
+	"time"
 )
 
 type SendingService struct {
@@ -23,35 +26,27 @@ func (ss *SendingService) SendMetrics(ctx context.Context) {
 	ms := ss.repo.GetAll(ctx)
 
 	for _, m := range ms {
-		ss.requestOne(m)
+		ss.requestOne(ctx, m)
 	}
 }
 
-func (ss *SendingService) requestOne(m metric.Metric) {
+func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
 	url := fmt.Sprintf("http://%v/update", ss.config.NetAddress.String())
 	body, _ := m.Bytes()
 
-	r, err := http.Post(url, "application/json", bytes.NewBuffer(body))
-	if err == nil {
-		defer func(Body io.ReadCloser) {
-			_, _ = io.Copy(io.Discard, r.Body)
-			_ = Body.Close()
-		}(r.Body)
-	}
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
-	if err != nil {
-		ss.log.Warn("Request error", err.Error())
-	} else if r.StatusCode != http.StatusOK {
-		ss.log.Warn("Bad status", r.StatusCode)
-	} else {
-		data, _ := io.ReadAll(r.Body)
-		ss.log.Info("Answer: ", string(data))
-	}
+	job := ss.requestJob(&body, url)
+	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
 }
 
-func (ss *SendingService) requestAll(ms []metric.Metric) {
+func (ss *SendingService) requestAll(ctx context.Context, ms []metric.Metric) {
 	url := fmt.Sprintf("http://%v/updates", ss.config.NetAddress.String())
 	var jms []metric.JSONMetric
+
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
 
 	for _, m := range ms {
 		jm, err := m.JSON()
@@ -68,21 +63,34 @@ func (ss *SendingService) requestAll(ms []metric.Metric) {
 		return
 	}
 
-	r, err := http.Post(url, "application/json", bytes.NewBuffer(body))
-	if err == nil {
-		defer func(Body io.ReadCloser) {
-			_, _ = io.Copy(io.Discard, r.Body)
-			_ = Body.Close()
-		}(r.Body)
-	}
+	job := ss.requestJob(&body, url)
+	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
+}
 
-	if err != nil {
-		ss.log.Warn("Request error", err.Error())
-	} else if r.StatusCode != http.StatusOK {
-		ss.log.Warn("Bad status", r.StatusCode)
-	} else {
-		data, _ := io.ReadAll(r.Body)
-		ss.log.Info("Answer: ", string(data))
+func (ss *SendingService) requestJob(body *[]byte, url string) func(ctx context.Context) ([]byte, error) {
+	return func(ctx context.Context) ([]byte, error) {
+		client := http.Client{}
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(*body))
+		if err != nil {
+			return nil, err
+		}
+		req.Header.Set("Content-Type", "application/json")
+		res, err := client.Do(req)
+		if err == nil {
+			defer func(Body io.ReadCloser) {
+				_, _ = io.Copy(io.Discard, res.Body)
+				_ = Body.Close()
+			}(res.Body)
+		}
+
+		if err != nil {
+			return nil, err
+		}
+		resBody, err := io.ReadAll(res.Body)
+		if res.StatusCode != http.StatusOK {
+			err = common.ErrNoOKResponse
+		}
+		return resBody, err
 	}
 }
 

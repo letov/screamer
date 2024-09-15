@@ -13,7 +13,6 @@ type Event struct {
 	Name     string
 	Duration time.Duration
 	Event    FuncWithCtx
-	Ctx      context.Context
 	Cancel   func()
 }
 
@@ -41,14 +40,13 @@ func (e *Event) CallCancel() {
 	}
 }
 
-func NewEvent(ctx context.Context, n string, s int, e FuncWithCtx, log *zap.SugaredLogger) *Event {
+func NewEvent(n string, s int, e FuncWithCtx, log *zap.SugaredLogger) *Event {
 	log.Info("Registered new event: ", n, " on every ", s, " sec")
 
 	return &Event{
 		Name:     n,
 		Duration: intToSecond(s),
 		Event:    e,
-		Ctx:      ctx,
 		Cancel:   nil,
 	}
 }
@@ -61,7 +59,8 @@ func (el *EventLoop) Run() {
 			for {
 				if _, ok := <-ticker.C; ok {
 					el.log.Info("Run event: ", event.Name)
-					ctxTimeout, cancel := context.WithTimeout(event.Ctx, event.Duration)
+					event.CallCancel()
+					ctxTimeout, cancel := context.WithTimeout(context.Background(), event.Duration)
 					event.SetCancel(cancel)
 					event.Event(ctxTimeout)
 				}

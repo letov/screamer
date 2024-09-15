@@ -29,7 +29,7 @@ func NewEvents(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config, fr *re
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			if c.Restore && c.StoreInterval > 0 {
-				es.PushEvent(event_loop.NewEvent(ctx, "Store backup", c.StoreInterval, fr.SaveAllToFile, log))
+				es.PushEvent(event_loop.NewEvent("Store backup", c.StoreInterval, fr.SaveAllToFile, log))
 			}
 			return nil
 		},

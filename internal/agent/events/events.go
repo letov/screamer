@@ -28,8 +28,8 @@ func NewEvents(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config, ps *se
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
-			es.PushEvent(event_loop.NewEvent(ctx, "UpdateMetrics", c.PollInterval, ps.UpdateMetrics, log))
-			es.PushEvent(event_loop.NewEvent(ctx, "SendMetrics", c.ReportInterval, ss.SendMetrics, log))
+			es.PushEvent(event_loop.NewEvent("UpdateMetrics", c.PollInterval, ps.UpdateMetrics, log))
+			es.PushEvent(event_loop.NewEvent("SendMetrics", c.ReportInterval, ss.SendMetrics, log))
 			return nil
 		},
 	})
