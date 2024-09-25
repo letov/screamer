@@ -12,7 +12,7 @@ type NetAddress struct {
 }
 
 func (a NetAddress) String() string {
-	return "http://" + a.Host + ":" + strconv.Itoa(a.Port)
+	return a.Host + ":" + strconv.Itoa(a.Port)
 }
 
 func (a *NetAddress) Set(s string) error {

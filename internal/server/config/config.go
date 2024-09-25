@@ -20,7 +20,7 @@ func NewConfig() *Config {
 
 	return &Config{
 		NetAddress:      getPriorConfigValue(cs, "NetAddress").(net_address.NetAddress),
-		ServerLogEnable: getPriorConfigValue(cs, "ServerLogEnable").(bool),
+		DBAddress:       getPriorConfigValue(cs, "DBAddress").(string),
 		StoreInterval:   getPriorConfigValue(cs, "StoreInterval").(int),
 		FileStoragePath: getPriorConfigValue(cs, "FileStoragePath").(string),
 		Restore:         getPriorConfigValue(cs, "Restore").(bool),

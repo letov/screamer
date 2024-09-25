@@ -2,27 +2,25 @@ package handlers
 
 import (
 	"context"
-	"io"
+	"github.com/go-chi/chi/v5"
 	"net/http"
 	"screamer/internal/server/services"
 	"time"
 )
 
-type UpdateMetricHandler struct {
+type UpdateMetricOldHandler struct {
 	ms *services.MetricService
 }
 
-func (h *UpdateMetricHandler) Handler(res http.ResponseWriter, req *http.Request) {
+func (h *UpdateMetricOldHandler) Handler(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
-	data, err := io.ReadAll(req.Body)
-	if err != nil {
-		http.Error(res, err.Error(), http.StatusBadRequest)
-		return
-	}
+	n := chi.URLParam(req, "name")
+	v := chi.URLParam(req, "value")
+	t := chi.URLParam(req, "type")
 
-	body, err := h.ms.UpdateMetricJSON(ctx, &data)
+	body, err := h.ms.UpdateMetricParams(ctx, n, v, t)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
@@ -35,8 +33,8 @@ func (h *UpdateMetricHandler) Handler(res http.ResponseWriter, req *http.Request
 	}
 }
 
-func NewUpdateMetricHandler(ms *services.MetricService) *UpdateMetricHandler {
-	return &UpdateMetricHandler{
+func NewUpdateMetricOldHandler(ms *services.MetricService) *UpdateMetricOldHandler {
+	return &UpdateMetricOldHandler{
 		ms: ms,
 	}
 }

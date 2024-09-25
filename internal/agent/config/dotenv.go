@@ -2,27 +2,24 @@ package config
 
 import (
 	"github.com/joho/godotenv"
-	"log"
 	"os"
 	"screamer/internal/common/netaddress"
 	"strconv"
 )
 
 func newDotenv() preConfig {
-	if err := godotenv.Load(".env.agent"); err != nil {
-		log.Fatal("Error loading .env file")
+	err := godotenv.Load(".env.agent.local")
+	if err != nil {
+		_ = godotenv.Load(".env.agent")
 	}
 
 	netAddress := new(netaddress.NetAddress)
-	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))
-
-	ale := *getEnvInt("AGENT_LOG_ENABLE", 1) == 1
+	_ = netAddress.Set(*getEnv("ADDRESS", ""))
 
 	return preConfig{
 		NetAddress:     netAddress,
-		PollInterval:   getEnvInt("POLL_INTERVAL", 2),
-		ReportInterval: getEnvInt("REPORT_INTERVAL", 10),
-		AgentLogEnable: &ale,
+		PollInterval:   getEnvInt("POLL_INTERVAL", 0),
+		ReportInterval: getEnvInt("REPORT_INTERVAL", 0),
 	}
 }
 

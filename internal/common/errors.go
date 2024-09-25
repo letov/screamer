@@ -7,3 +7,6 @@ var ErrMetricNotExists = errors.New("metric not exists")
 var ErrTypeNotExists = errors.New("unknown metric type")
 var ErrInvalidValue = errors.New("invalid value")
 var ErrEmptyValue = errors.New("empty value")
+
+var ErrNoOKResponse = errors.New("no ok response")
+var ErrNoDBConnection = errors.New("no db connection")

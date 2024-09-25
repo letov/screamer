@@ -18,6 +18,11 @@ func newEnv() preConfig {
 		}
 	}
 
+	d, exists := os.LookupEnv("DATABASE_DSN")
+	if exists {
+		pre.DBAddress = &d
+	}
+
 	si, exists := os.LookupEnv("STORE_INTERVAL")
 	if exists {
 		i, err := strconv.Atoi(si)
@@ -33,18 +38,8 @@ func newEnv() preConfig {
 
 	r, exists := os.LookupEnv("RESTORE")
 	if exists {
-		i, err := strconv.Atoi(r)
+		b, err := strconv.ParseBool(r)
 		if err == nil {
-			b := i == 1
-			pre.Restore = &b
-		}
-	}
-
-	sle, exists := os.LookupEnv("SERVER_LOG_ENABLE")
-	if exists {
-		i, err := strconv.Atoi(sle)
-		if err == nil {
-			b := i == 1
 			pre.Restore = &b
 		}
 	}

@@ -2,29 +2,32 @@ package config
 
 import (
 	"github.com/joho/godotenv"
-	"log"
 	"os"
 	net_address "screamer/internal/common/netaddress"
 	"strconv"
 )
 
 func newDotenv() preConfig {
-	if err := godotenv.Load(".env.server"); err != nil {
-		log.Println("Error loading .env file")
+	err := godotenv.Load(".env.server.local")
+	if err != nil {
+		_ = godotenv.Load(".env.server")
 	}
 
 	netAddress := new(net_address.NetAddress)
-	_ = netAddress.Set(*getEnv("ADDRESS", "localhost:8080"))
+	_ = netAddress.Set(*getEnv("ADDRESS", ""))
 
-	sle := *getEnvInt("SERVER_LOG_ENABLE", 1) == 1
-	r := *getEnvInt("RESTORE", 1) == 1
+	r := *getEnv("RESTORE", "false")
+	br, err := strconv.ParseBool(r)
+	if err != nil {
+		br = false
+	}
 
 	return preConfig{
 		NetAddress:      netAddress,
-		StoreInterval:   getEnvInt("STORE_INTERVAL", 300),
-		FileStoragePath: getEnv("FILE_STORAGE_PATH", "/tmp/backup_file"),
-		Restore:         &r,
-		ServerLogEnable: &sle,
+		DBAddress:       getEnv("DATABASE_DSN", ""),
+		StoreInterval:   getEnvInt("STORE_INTERVAL", 0),
+		FileStoragePath: getEnv("FILE_STORAGE_PATH", ""),
+		Restore:         &br,
 	}
 }
 

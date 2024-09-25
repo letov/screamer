@@ -13,7 +13,6 @@ func newArgs() preConfig {
 		NetAddress:     netAddress,
 		PollInterval:   flag.Int("p", 0, "PollInterval desc"),
 		ReportInterval: flag.Int("r", 0, "ReportInterval desc"),
-		AgentLogEnable: flag.Bool("l", true, "AgentLogEnable desc"),
 	}
 
 	set := newSetConfig()
@@ -28,8 +27,6 @@ func newArgs() preConfig {
 			set.PollInterval = true
 		case "r":
 			set.ReportInterval = true
-		case "l":
-			set.AgentLogEnable = true
 		}
 	})
 
@@ -41,9 +38,6 @@ func newArgs() preConfig {
 	}
 	if !set.ReportInterval {
 		pre.ReportInterval = nil
-	}
-	if !set.AgentLogEnable {
-		pre.AgentLogEnable = nil
 	}
 
 	return pre

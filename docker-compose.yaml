@@ -1,0 +1,16 @@
+version: "3"
+services:
+  postgres:
+    image: postgres:15-alpine
+    restart: always
+    ports:
+      - "25432:5432"
+    environment:
+      POSTGRES_USER: my_user
+      POSTGRES_PASSWORD: my_pass
+      POSTGRES_DB: my_db
+    volumes:
+      - postgres_data_vol:/tmp/postgresql/data
+
+volumes:
+  postgres_data_vol:

@@ -1,10 +1,14 @@
 package repositories
 
-import "screamer/internal/common/metric"
+import (
+	"context"
+	"screamer/internal/common/metric"
+)
 
 type Repository interface {
-	Get(i metric.Ident) (metric.Metric, error)
-	GetAll() []metric.Metric
-	Add(m metric.Metric) (metric.Metric, error)
-	Increase(m metric.Metric) (metric.Metric, error)
+	Get(ctx context.Context, i metric.Ident) (metric.Metric, error)
+	GetAll(ctx context.Context) []metric.Metric
+	Add(ctx context.Context, m metric.Metric) (metric.Metric, error)
+	Increase(ctx context.Context, m metric.Metric) (metric.Metric, error)
+	BatchUpdate(ctx context.Context, m []metric.Metric) error
 }

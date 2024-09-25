@@ -11,10 +11,10 @@ func newArgs() preConfig {
 
 	pre := preConfig{
 		NetAddress:      netAddress,
-		StoreInterval:   flag.Int("i", 300, "StoreInterval desc"),
-		FileStoragePath: flag.String("f", "/tmp/backup_file", "FileStoragePath desc"),
-		Restore:         flag.Bool("r", true, "Restore desc"),
-		ServerLogEnable: flag.Bool("l", true, "ServerLogEnable desc"),
+		DBAddress:       flag.String("d", "", "DBAddress desc"),
+		StoreInterval:   flag.Int("i", 0, "StoreInterval desc"),
+		FileStoragePath: flag.String("f", "", "FileStoragePath desc"),
+		Restore:         flag.Bool("r", false, "Restore desc"),
 	}
 
 	set := newSetConfig()
@@ -25,19 +25,22 @@ func newArgs() preConfig {
 		switch f.Name {
 		case "a":
 			set.NetAddress = true
+		case "d":
+			set.DBAddress = true
 		case "i":
 			set.StoreInterval = true
 		case "f":
 			set.FileStoragePath = true
 		case "r":
 			set.Restore = true
-		case "l":
-			set.ServerLogEnable = true
 		}
 	})
 
 	if !set.NetAddress {
 		pre.NetAddress = nil
+	}
+	if !set.DBAddress {
+		pre.DBAddress = nil
 	}
 	if !set.StoreInterval {
 		pre.StoreInterval = nil
@@ -47,9 +50,6 @@ func newArgs() preConfig {
 	}
 	if !set.Restore {
 		pre.Restore = nil
-	}
-	if !set.ServerLogEnable {
-		pre.ServerLogEnable = nil
 	}
 
 	return pre

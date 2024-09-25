@@ -2,55 +2,102 @@ package services
 
 import (
 	"bytes"
+	"context"
+	"encoding/json"
 	"fmt"
+	"go.uber.org/zap"
 	"io"
-	"log"
 	"net/http"
 	"screamer/internal/agent/config"
 	"screamer/internal/agent/repositories"
+	"screamer/internal/common"
 	"screamer/internal/common/metric"
+	"screamer/internal/common/retry"
+	"time"
 )
 
 type SendingService struct {
 	config *config.Config
 	repo   repositories.Repository
+	log    *zap.SugaredLogger
 }
 
-func (ss *SendingService) SendMetrics() {
-	url := fmt.Sprintf("%v/update", ss.config.NetAddress.String())
-	ms := ss.repo.GetAll()
+func (ss *SendingService) SendMetrics(ctx context.Context) {
+	ms := ss.repo.GetAll(ctx)
 
 	for _, m := range ms {
-		ss.request(url, m)
+		ss.requestOne(ctx, m)
 	}
 }
 
-func (ss *SendingService) request(url string, m metric.Metric) {
+func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
+	url := fmt.Sprintf("http://%v/update", ss.config.NetAddress.String())
 	body, _ := m.Bytes()
 
-	r, err := http.Post(url, "application/json", bytes.NewBuffer(body))
-	if err == nil {
-		defer func(Body io.ReadCloser) {
-			_, _ = io.Copy(io.Discard, r.Body)
-			_ = Body.Close()
-		}(r.Body)
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	job := ss.requestJob(&body, url)
+	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
+}
+
+func (ss *SendingService) requestAll(ctx context.Context, ms []metric.Metric) {
+	url := fmt.Sprintf("http://%v/updates", ss.config.NetAddress.String())
+	var jms []metric.JSONMetric
+
+	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	for _, m := range ms {
+		jm, err := m.JSON()
+		if err != nil {
+			ss.log.Warn("Request error", err.Error())
+			return
+		}
+		jms = append(jms, jm)
 	}
 
-	if ss.config.AgentLogEnable {
+	body, err := json.Marshal(jms)
+	if err != nil {
+		ss.log.Warn("Request error", err.Error())
+		return
+	}
+
+	job := ss.requestJob(&body, url)
+	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
+}
+
+func (ss *SendingService) requestJob(body *[]byte, url string) func(ctx context.Context) ([]byte, error) {
+	return func(ctx context.Context) ([]byte, error) {
+		client := http.Client{}
+		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(*body))
 		if err != nil {
-			log.Println("Request error", err.Error())
-		} else if r.StatusCode != http.StatusOK {
-			log.Println("Bad status", r.StatusCode)
-		} else {
-			data, _ := io.ReadAll(r.Body)
-			log.Println("Answer", string(data))
+			return nil, err
 		}
+		req.Header.Set("Content-Type", "application/json")
+		res, err := client.Do(req)
+		if err == nil {
+			defer func(Body io.ReadCloser) {
+				_, _ = io.Copy(io.Discard, res.Body)
+				_ = Body.Close()
+			}(res.Body)
+		}
+
+		if err != nil {
+			return nil, err
+		}
+		resBody, err := io.ReadAll(res.Body)
+		if res.StatusCode != http.StatusOK {
+			err = common.ErrNoOKResponse
+		}
+		return resBody, err
 	}
 }
 
-func NewSendingService(config *config.Config, repo repositories.Repository) *SendingService {
+func NewSendingService(log *zap.SugaredLogger, config *config.Config, repo repositories.Repository) *SendingService {
 	return &SendingService{
 		config: config,
 		repo:   repo,
+		log:    log,
 	}
 }
