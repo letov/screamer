@@ -20,6 +20,7 @@ func newDotenv() preConfig {
 		NetAddress:     netAddress,
 		PollInterval:   getEnvInt("POLL_INTERVAL", 0),
 		ReportInterval: getEnvInt("REPORT_INTERVAL", 0),
+		Key:            getEnv("KEY", ""),
 	}
 }
 

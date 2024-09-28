@@ -5,12 +5,14 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"github.com/aoliveti/curling"
 	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"screamer/internal/agent/config"
 	"screamer/internal/agent/repositories"
 	"screamer/internal/common"
+	"screamer/internal/common/hash"
 	"screamer/internal/common/metric"
 	"screamer/internal/common/retry"
 	"time"
@@ -75,6 +77,9 @@ func (ss *SendingService) requestJob(body *[]byte, url string) func(ctx context.
 			return nil, err
 		}
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("HashSHA256", hash.Encode(body, ss.config.Key))
+		cmd, _ := curling.NewFromRequest(req)
+		ss.log.Info(cmd)
 		res, err := client.Do(req)
 		if err == nil {
 			defer func(Body io.ReadCloser) {
@@ -87,6 +92,7 @@ func (ss *SendingService) requestJob(body *[]byte, url string) func(ctx context.
 			return nil, err
 		}
 		resBody, err := io.ReadAll(res.Body)
+		_ = res.Body.Close()
 		if res.StatusCode != http.StatusOK {
 			err = common.ErrNoOKResponse
 		}

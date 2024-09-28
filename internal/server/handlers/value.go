@@ -18,6 +18,7 @@ func (h *ValueMetricHandler) Handler(res http.ResponseWriter, req *http.Request)
 	defer cancel()
 
 	data, err := io.ReadAll(req.Body)
+	_ = req.Body.Close()
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

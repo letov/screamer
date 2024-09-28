@@ -3,12 +3,14 @@ package mux
 import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"screamer/internal/server/config"
 	"screamer/internal/server/handlers"
 	"screamer/internal/server/middlewares"
 	"time"
 )
 
 func NewMux(
+	c *config.Config,
 	hh *handlers.HomeHandler,
 	uh *handlers.UpdateMetricHandler,
 	ush *handlers.UpdatesMetricHandler,
@@ -26,6 +28,7 @@ func NewMux(
 	r.Use(middleware.Timeout(10 * time.Second))
 
 	r.Use(middlewares.Logger)
+	r.Use(middlewares.CheckHash(c))
 
 	r.Get("/", hh.Handler)
 	r.Get("/ping", ph.Handler)

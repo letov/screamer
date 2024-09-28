@@ -31,5 +31,10 @@ func newEnv() preConfig {
 		}
 	}
 
+	k, exists := os.LookupEnv("KEY")
+	if exists {
+		pre.Key = &k
+	}
+
 	return pre
 }

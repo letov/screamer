@@ -28,6 +28,7 @@ func newDotenv() preConfig {
 		StoreInterval:   getEnvInt("STORE_INTERVAL", 0),
 		FileStoragePath: getEnv("FILE_STORAGE_PATH", ""),
 		Restore:         &br,
+		Key:             getEnv("KEY", ""),
 	}
 }
 

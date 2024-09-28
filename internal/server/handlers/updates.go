@@ -17,6 +17,7 @@ func (h *UpdatesMetricHandler) Handler(res http.ResponseWriter, req *http.Reques
 	defer cancel()
 
 	data, err := io.ReadAll(req.Body)
+	_ = req.Body.Close()
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

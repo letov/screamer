@@ -8,6 +8,7 @@ type Config struct {
 	StoreInterval   int
 	FileStoragePath string
 	Restore         bool
+	Key             string
 }
 
 type preConfig struct {
@@ -16,6 +17,7 @@ type preConfig struct {
 	StoreInterval   *int
 	FileStoragePath *string
 	Restore         *bool
+	Key             *string
 }
 
 type setConfig struct {
@@ -24,6 +26,7 @@ type setConfig struct {
 	StoreInterval   bool
 	FileStoragePath bool
 	Restore         bool
+	Key             bool
 }
 
 func newPreConfig() preConfig {
@@ -33,6 +36,7 @@ func newPreConfig() preConfig {
 		StoreInterval:   nil,
 		FileStoragePath: nil,
 		Restore:         nil,
+		Key:             nil,
 	}
 }
 
@@ -43,5 +47,6 @@ func newSetConfig() setConfig {
 		StoreInterval:   false,
 		FileStoragePath: false,
 		Restore:         false,
+		Key:             false,
 	}
 }
