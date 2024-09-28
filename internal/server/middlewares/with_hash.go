@@ -22,8 +22,8 @@ func (w hashWriter) Write(b []byte) (int, error) {
 func CheckHash(c *config.Config) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			if c.Key != "" {
-				h := r.Header.Get("HashSHA256")
+			h := r.Header.Get("HashSHA256")
+			if c.Key != "" && h != "" {
 				reader := io.NopCloser(r.Body)
 				body, _ := io.ReadAll(reader)
 				_ = r.Body.Close()
