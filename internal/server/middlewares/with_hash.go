@@ -9,6 +9,16 @@ import (
 	"screamer/internal/server/config"
 )
 
+type hashWriter struct {
+	http.ResponseWriter
+	c *config.Config
+}
+
+func (w hashWriter) Write(b []byte) (int, error) {
+	w.Header().Set("HashSHA256", hash.Encode(&b, w.c.Key))
+	return w.ResponseWriter.Write(b)
+}
+
 func CheckHash(c *config.Config) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -22,9 +32,10 @@ func CheckHash(c *config.Config) func(next http.Handler) http.Handler {
 					return
 				}
 				r.Body = io.NopCloser(bytes.NewReader(body))
+				next.ServeHTTP(hashWriter{ResponseWriter: w, c: c}, r)
+			} else {
+				next.ServeHTTP(w, r)
 			}
-
-			next.ServeHTTP(w, r)
 		})
 	}
 }
