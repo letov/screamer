@@ -29,6 +29,7 @@ func NewMux(
 	r.Use(middleware.Timeout(10 * time.Second))
 
 	r.Use(middlewares.Logger)
+	r.Use(middlewares.Curl)
 	r.Use(middlewares.CheckHash(c))
 
 	r.Get("/", hh.Handler)
