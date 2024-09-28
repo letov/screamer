@@ -24,6 +24,7 @@ func NewMux(
 	r.Use(middleware.RequestID)
 	r.Use(middleware.RealIP)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.RedirectSlashes)
 	r.Use(middleware.Compress(5, "application/json", "text/html"))
 	r.Use(middleware.Timeout(10 * time.Second))
 
@@ -38,10 +39,8 @@ func NewMux(
 		r.Post("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}/{value}", uoh.Handler)
 	})
 
-	r.Post("/updates/", ush.Handler)
 	r.Post("/updates", ush.Handler)
 
-	r.Post("/value/", vh.Handler)
 	r.Route("/value", func(r chi.Router) {
 		r.Post("/", vh.Handler)
 		r.Get("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}", voh.Handler)
