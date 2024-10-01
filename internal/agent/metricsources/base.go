@@ -8,6 +8,7 @@ func NewMetricSources() []MetricSource {
 	return []MetricSource{
 		getRuntimeMetrics,
 		getPollCountMetric,
-		gewRandMetric,
+		getRandMetric,
+		getGopsutilMetric,
 	}
 }

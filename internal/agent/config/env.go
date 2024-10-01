@@ -36,5 +36,12 @@ func newEnv() preConfig {
 		pre.Key = &k
 	}
 
+	rl, exists := os.LookupEnv("RATE_LIMIT")
+	if exists {
+		if i, err := strconv.Atoi(rl); err == nil {
+			pre.RateLimit = &i
+		}
+	}
+
 	return pre
 }

@@ -27,8 +27,22 @@ type SendingService struct {
 func (ss *SendingService) SendMetrics(ctx context.Context) {
 	ms := ss.repo.GetAll(ctx)
 
+	jobs := make(chan metric.Metric, len(ms))
+
+	for w := 0; w < max(ss.config.RateLimit, 1); w++ {
+		go ss.worker(ctx, jobs)
+	}
+
 	for _, m := range ms {
-		ss.requestOne(ctx, m)
+		jobs <- m
+	}
+
+	close(jobs)
+}
+
+func (ss *SendingService) worker(ctx context.Context, jobs <-chan metric.Metric) {
+	for j := range jobs {
+		ss.requestOne(ctx, j)
 	}
 }
 

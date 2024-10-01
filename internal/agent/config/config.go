@@ -23,6 +23,7 @@ func NewConfig() *Config {
 		PollInterval:   getPriorConfigValue(cs, "PollInterval").(int),
 		ReportInterval: getPriorConfigValue(cs, "ReportInterval").(int),
 		Key:            getPriorConfigValue(cs, "Key").(string),
+		RateLimit:      getPriorConfigValue(cs, "RateLimit").(int),
 	}
 }
 

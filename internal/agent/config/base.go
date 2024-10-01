@@ -7,6 +7,7 @@ type Config struct {
 	PollInterval   int
 	ReportInterval int
 	Key            string
+	RateLimit      int
 }
 
 type preConfig struct {
@@ -14,6 +15,7 @@ type preConfig struct {
 	PollInterval   *int
 	ReportInterval *int
 	Key            *string
+	RateLimit      *int
 }
 
 type setConfig struct {
@@ -21,6 +23,7 @@ type setConfig struct {
 	PollInterval   bool
 	ReportInterval bool
 	Key            bool
+	RateLimit      bool
 }
 
 func newPreConfig() preConfig {
@@ -29,6 +32,7 @@ func newPreConfig() preConfig {
 		PollInterval:   nil,
 		ReportInterval: nil,
 		Key:            nil,
+		RateLimit:      nil,
 	}
 }
 
@@ -38,5 +42,6 @@ func newSetConfig() setConfig {
 		PollInterval:   false,
 		ReportInterval: false,
 		Key:            false,
+		RateLimit:      false,
 	}
 }

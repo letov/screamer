@@ -21,6 +21,7 @@ func newDotenv() preConfig {
 		PollInterval:   getEnvInt("POLL_INTERVAL", 0),
 		ReportInterval: getEnvInt("REPORT_INTERVAL", 0),
 		Key:            getEnv("KEY", ""),
+		RateLimit:      getEnvInt("RATE_LIMIT", 0),
 	}
 }
 
