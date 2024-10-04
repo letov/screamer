@@ -15,6 +15,7 @@ func newArgs() preConfig {
 		StoreInterval:   flag.Int("i", 0, "StoreInterval desc"),
 		FileStoragePath: flag.String("f", "", "FileStoragePath desc"),
 		Restore:         flag.Bool("r", false, "Restore desc"),
+		Key:             flag.String("k", "", "Key desc"),
 	}
 
 	set := newSetConfig()
@@ -33,6 +34,9 @@ func newArgs() preConfig {
 			set.FileStoragePath = true
 		case "r":
 			set.Restore = true
+		case "k":
+			set.Key = true
+
 		}
 	})
 
@@ -50,6 +54,9 @@ func newArgs() preConfig {
 	}
 	if !set.Restore {
 		pre.Restore = nil
+	}
+	if !set.Key {
+		pre.Key = nil
 	}
 
 	return pre

@@ -7,7 +7,7 @@ import (
 
 const randomMetric = "RandomValue"
 
-func gewRandMetric() []*metric.Metric {
+func getRandMetric() []*metric.Metric {
 	rm := metric.NewGauge(randomMetric, rand.Float64())
 	return []*metric.Metric{rm}
 }

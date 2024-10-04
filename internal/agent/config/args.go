@@ -13,6 +13,8 @@ func newArgs() preConfig {
 		NetAddress:     netAddress,
 		PollInterval:   flag.Int("p", 0, "PollInterval desc"),
 		ReportInterval: flag.Int("r", 0, "ReportInterval desc"),
+		Key:            flag.String("k", "", "Key desc"),
+		RateLimit:      flag.Int("l", 0, "RateLimit desc"),
 	}
 
 	set := newSetConfig()
@@ -27,6 +29,10 @@ func newArgs() preConfig {
 			set.PollInterval = true
 		case "r":
 			set.ReportInterval = true
+		case "k":
+			set.Key = true
+		case "l":
+			set.RateLimit = true
 		}
 	})
 
@@ -38,6 +44,12 @@ func newArgs() preConfig {
 	}
 	if !set.ReportInterval {
 		pre.ReportInterval = nil
+	}
+	if !set.Key {
+		pre.Key = nil
+	}
+	if !set.RateLimit {
+		pre.RateLimit = nil
 	}
 
 	return pre

@@ -51,18 +51,22 @@ func NewEvent(n string, s int, e FuncWithCtx, log *zap.SugaredLogger) *Event {
 	}
 }
 
-func (el *EventLoop) Run() {
+func (el *EventLoop) Run(doneCh chan struct{}) {
 	for _, event := range el.events.GetEvents() {
 		ticker := time.NewTicker(event.Duration)
 		event := event
 		go func() {
 			for {
-				if _, ok := <-ticker.C; ok {
+				select {
+				case <-ticker.C:
 					el.log.Info("Run event: ", event.Name)
 					event.CallCancel()
 					ctxTimeout, cancel := context.WithTimeout(context.Background(), event.Duration)
 					event.SetCancel(cancel)
 					event.Event(ctxTimeout)
+				case <-doneCh:
+					el.log.Info("Stop event loop")
+					return
 				}
 			}
 		}()
@@ -74,18 +78,21 @@ func NewEventLoop(lc fx.Lifecycle, log *zap.SugaredLogger, es Events) *EventLoop
 		events: es,
 		log:    log,
 	}
+	doneCh := make(chan struct{})
 
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			log.Info("Starting event loop")
-			el.Run()
+			el.Run(doneCh)
 			return nil
 		},
 		OnStop: func(ctx context.Context) error {
 			log.Info("Stopping event loop")
 			for _, event := range el.events.GetEvents() {
+				log.Info("Stopping event: ", event.Name)
 				event.CallCancel()
 			}
+			close(doneCh)
 			return nil
 		},
 	})

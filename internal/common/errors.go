@@ -10,3 +10,5 @@ var ErrEmptyValue = errors.New("empty value")
 
 var ErrNoOKResponse = errors.New("no ok response")
 var ErrNoDBConnection = errors.New("no db connection")
+
+var ErrInvalidHash = errors.New("invalid hash")

@@ -14,6 +14,7 @@ require (
 )
 
 require (
+	github.com/aoliveti/curling v1.1.0 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
@@ -24,6 +25,9 @@ require (
 	github.com/pmezard/go-difflib v1.0.0 // indirect
 	github.com/pressly/goose/v3 v3.22.0 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
+	github.com/shirou/gopsutil v3.21.11+incompatible // indirect
+	github.com/tklauser/go-sysconf v0.3.14 // indirect
+	github.com/tklauser/numcpus v0.8.0 // indirect
 	go.uber.org/dig v1.18.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
 	golang.org/x/crypto v0.27.0 // indirect
