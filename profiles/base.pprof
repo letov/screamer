@@ -1,0 +1,55 @@
+heap profile: 6: 26816 [6: 26817] @ heap/1048576
+0: 0 [0: 0] @ 0x1007b8d80 0x1007b9510 0x1007b94d9 0x100acc1ec 0x100789804
+#	0x1007b8d7f	context.WithDeadlineCause+0x19f					/opt/homebrew/Cellar/go/1.23.0/libexec/src/context/context.go:638
+#	0x1007b950f	context.WithDeadline+0x4f					/opt/homebrew/Cellar/go/1.23.0/libexec/src/context/context.go:612
+#	0x1007b94d8	context.WithTimeout+0x18					/opt/homebrew/Cellar/go/1.23.0/libexec/src/context/context.go:690
+#	0x100acc1eb	screamer/internal/common/eventloop.(*EventLoop).Run.func1+0x13b	/Users/ruslan-leto/GolandProjects/screamer/internal/common/eventloop/eventloop.go:64
+
+1: 448 [1: 448] @ 0x1007536c8 0x1007538f4 0x100753840 0x10078732c
+#	0x1007536c7	runtime.malg+0x27		/opt/homebrew/Cellar/go/1.23.0/libexec/src/runtime/proc.go:4944
+#	0x1007538f3	runtime.newproc1+0x73		/opt/homebrew/Cellar/go/1.23.0/libexec/src/runtime/proc.go:4989
+#	0x10075383f	runtime.newproc.func1+0x2f	/opt/homebrew/Cellar/go/1.23.0/libexec/src/runtime/proc.go:4966
+#	0x10078732b	runtime.systemstack+0x6b	/opt/homebrew/Cellar/go/1.23.0/libexec/src/runtime/asm_arm64.s:244
+
+1: 1792 [1: 1792] @ 0x100796010 0x100795e1c 0x100795b70 0x100acdee8 0x100a87c0c 0x100a6915c 0x100789804
+#	0x10079600f	sync.(*Pool).pinSlow+0x1af			/opt/homebrew/Cellar/go/1.23.0/libexec/src/sync/pool.go:241
+#	0x100795e1b	sync.(*Pool).pin+0x5b				/opt/homebrew/Cellar/go/1.23.0/libexec/src/sync/pool.go:220
+#	0x100795b6f	sync.(*Pool).Get+0x1f				/opt/homebrew/Cellar/go/1.23.0/libexec/src/sync/pool.go:135
+#	0x100acdee7	github.com/go-chi/chi/v5.(*Mux).ServeHTTP+0x97	/Users/ruslan-leto/go/pkg/mod/github.com/go-chi/chi/v5@v5.1.0/mux.go:81
+#	0x100a87c0b	net/http.serverHandler.ServeHTTP+0xbb		/opt/homebrew/Cellar/go/1.23.0/libexec/src/net/http/server.go:3210
+#	0x100a6915b	net/http.(*conn).serve+0x4fb			/opt/homebrew/Cellar/go/1.23.0/libexec/src/net/http/server.go:2092
+
+4: 24576 [4: 24576] @ 0x100ac899c 0x100acaa34 0x100acc100 0x100789804
+#	0x100ac899b	screamer/internal/agent/metricsources.getRuntimeMetrics+0x10b			/Users/ruslan-leto/GolandProjects/screamer/internal/agent/metricsources/runtime.go:15
+#	0x100acaa33	screamer/internal/agent/services.(*ProcessingService).UpdateMetrics+0xe3	/Users/ruslan-leto/GolandProjects/screamer/internal/agent/services/processing_service.go:23
+#	0x100acc0ff	screamer/internal/common/eventloop.(*EventLoop).Run.func1+0x4f			/Users/ruslan-leto/GolandProjects/screamer/internal/common/eventloop/eventloop.go:66
+
+
+# runtime.MemStats
+# Alloc = 3364376
+# TotalAlloc = 3364376
+# Sys = 13124872
+# Lookups = 0
+# Mallocs = 12138
+# Frees = 606
+# HeapAlloc = 3364376
+# HeapSys = 7700480
+# HeapIdle = 3407872
+# HeapInuse = 4292608
+# HeapReleased = 3407872
+# HeapObjects = 11532
+# Stack = 688128 / 688128
+# MSpan = 75200 / 81600
+# MCache = 14400 / 15600
+# BuckHashSys = 1445076
+# GCSys = 2144224
+# OtherSys = 1049764
+# NextGC = 4194304
+# LastGC = 0
+# PauseNs = [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+# PauseEnd = [0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0]
+# NumGC = 0
+# NumForcedGC = 0
+# GCCPUFraction = 0
+# DebugGC = false
+# MaxRSS = 18120704

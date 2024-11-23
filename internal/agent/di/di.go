@@ -9,6 +9,7 @@ import (
 	"screamer/internal/agent/services"
 	event_loop "screamer/internal/common/eventloop"
 	"screamer/internal/common/logger"
+	"screamer/internal/common/prof"
 	"screamer/internal/server/handlers"
 )
 
@@ -31,5 +32,7 @@ func InjectApp() fx.Option {
 
 		events.NewEvents,
 		event_loop.NewEventLoop,
+
+		prof.NewProfServer,
 	)
 }
