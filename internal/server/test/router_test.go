@@ -1,14 +1,15 @@
 package test
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/stretchr/testify/assert"
-	"go.uber.org/fx"
-	"go.uber.org/fx/fxtest"
 	"net/http"
 	"net/http/httptest"
 	"screamer/internal/server/di"
 	"testing"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/stretchr/testify/assert"
+	"go.uber.org/fx"
+	"go.uber.org/fx/fxtest"
 )
 
 func inttest(t *testing.T, r interface{}) {

@@ -1,10 +1,11 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"os"
 	net_address "screamer/internal/common/netaddress"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 func newDotenv() preConfig {

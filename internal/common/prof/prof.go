@@ -2,12 +2,13 @@ package prof
 
 import (
 	"context"
-	"github.com/go-chi/chi/v5"
-	"go.uber.org/fx"
-	"go.uber.org/zap"
 	"net"
 	"net/http"
 	_ "net/http/pprof"
+
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 type Server struct {

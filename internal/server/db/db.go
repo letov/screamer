@@ -3,14 +3,15 @@ package db
 import (
 	"context"
 	"embed"
+	"screamer/internal/common"
+	"screamer/internal/server/config"
+	"time"
+
 	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/jackc/pgx/v5/stdlib"
 	"github.com/pressly/goose/v3"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"screamer/internal/common"
-	"screamer/internal/server/config"
-	"time"
 )
 
 type DB struct {

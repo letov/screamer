@@ -2,12 +2,13 @@ package httpserver
 
 import (
 	"context"
-	"github.com/go-chi/chi/v5"
-	"go.uber.org/fx"
-	"go.uber.org/zap"
 	"net"
 	"net/http"
 	"screamer/internal/server/config"
+
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 func NewHTTPServer(lc fx.Lifecycle, mux *chi.Mux, log *zap.SugaredLogger, c *config.Config) *http.Server {

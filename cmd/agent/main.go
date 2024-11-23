@@ -1,10 +1,11 @@
 package main
 
 import (
-	"go.uber.org/fx"
 	"screamer/internal/agent/di"
 	event_loop "screamer/internal/common/eventloop"
 	"screamer/internal/common/prof"
+
+	"go.uber.org/fx"
 )
 
 func main() {
