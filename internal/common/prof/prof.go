@@ -15,6 +15,7 @@ type Server struct {
 	srv *http.Server
 }
 
+// NewProfServer инстанс pprof сервера
 func NewProfServer(
 	lc fx.Lifecycle,
 	log *zap.SugaredLogger,
