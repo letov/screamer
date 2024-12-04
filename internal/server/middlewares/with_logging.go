@@ -1,10 +1,11 @@
 package middlewares
 
 import (
-	"github.com/go-chi/chi/v5/middleware"
 	"net/http"
 	"screamer/internal/common/logger"
 	"time"
+
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func Logger(next http.Handler) http.Handler {

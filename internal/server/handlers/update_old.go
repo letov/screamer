@@ -2,10 +2,11 @@ package handlers
 
 import (
 	"context"
-	"github.com/go-chi/chi/v5"
 	"net/http"
 	"screamer/internal/server/services"
 	"time"
+
+	"github.com/go-chi/chi/v5"
 )
 
 type UpdateMetricOldHandler struct {

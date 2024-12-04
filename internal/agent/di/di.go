@@ -1,7 +1,6 @@
 package di
 
 import (
-	"go.uber.org/fx"
 	"screamer/internal/agent/config"
 	"screamer/internal/agent/events"
 	metric_sources "screamer/internal/agent/metricsources"
@@ -9,7 +8,10 @@ import (
 	"screamer/internal/agent/services"
 	event_loop "screamer/internal/common/eventloop"
 	"screamer/internal/common/logger"
+	"screamer/internal/common/prof"
 	"screamer/internal/server/handlers"
+
+	"go.uber.org/fx"
 )
 
 func InjectApp() fx.Option {
@@ -31,5 +33,7 @@ func InjectApp() fx.Option {
 
 		events.NewEvents,
 		event_loop.NewEventLoop,
+
+		prof.NewProfServer,
 	)
 }

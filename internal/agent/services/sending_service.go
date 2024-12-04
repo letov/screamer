@@ -5,8 +5,6 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"github.com/aoliveti/curling"
-	"go.uber.org/zap"
 	"io"
 	"net/http"
 	"screamer/internal/agent/config"
@@ -16,6 +14,9 @@ import (
 	"screamer/internal/common/metric"
 	"screamer/internal/common/retry"
 	"time"
+
+	"github.com/aoliveti/curling"
+	"go.uber.org/zap"
 )
 
 type SendingService struct {

@@ -1,12 +1,13 @@
 package mux
 
 import (
-	"github.com/go-chi/chi/v5"
-	"github.com/go-chi/chi/v5/middleware"
 	"screamer/internal/server/config"
 	"screamer/internal/server/handlers"
 	"screamer/internal/server/middlewares"
 	"time"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
 )
 
 func NewMux(

@@ -2,13 +2,15 @@ package eventloop
 
 import (
 	"context"
+	"time"
+
 	"go.uber.org/fx"
 	"go.uber.org/zap"
-	"time"
 )
 
 type FuncWithCtx = func(ctx context.Context)
 
+// Event событие, выполняет FuncWithCtx с переожичностью Duration
 type Event struct {
 	Name     string
 	Duration time.Duration

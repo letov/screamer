@@ -3,14 +3,15 @@ package repositories
 import (
 	"context"
 	"encoding/json"
-	"go.uber.org/fx"
-	"go.uber.org/zap"
 	"os"
 	"screamer/internal/common/metric"
 	"screamer/internal/common/retry"
 	"screamer/internal/server/config"
 	"sync"
 	"time"
+
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 type FileRepository struct {

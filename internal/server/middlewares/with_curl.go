@@ -1,9 +1,10 @@
 package middlewares
 
 import (
-	"github.com/aoliveti/curling"
 	"net/http"
 	"screamer/internal/common/logger"
+
+	"github.com/aoliveti/curling"
 )
 
 func Curl(next http.Handler) http.Handler {

@@ -2,10 +2,15 @@ package config
 
 import (
 	"flag"
+	"os"
 	net_address "screamer/internal/common/netaddress"
 )
 
 func newArgs() preConfig {
+	if os.Getenv("IS_TEST_ENV") == "true" {
+		return preConfig{}
+	}
+
 	netAddress := new(net_address.NetAddress)
 	flag.Var(netAddress, "a", "Server address host:port")
 
@@ -36,7 +41,6 @@ func newArgs() preConfig {
 			set.Restore = true
 		case "k":
 			set.Key = true
-
 		}
 	})
 

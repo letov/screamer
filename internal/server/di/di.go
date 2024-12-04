@@ -1,8 +1,6 @@
 package di
 
 import (
-	"go.uber.org/fx"
-	"go.uber.org/zap"
 	event_loop "screamer/internal/common/eventloop"
 	"screamer/internal/common/logger"
 	"screamer/internal/server/config"
@@ -13,6 +11,9 @@ import (
 	"screamer/internal/server/mux"
 	"screamer/internal/server/repositories"
 	"screamer/internal/server/services"
+
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 func InjectApp() fx.Option {

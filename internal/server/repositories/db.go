@@ -2,15 +2,16 @@ package repositories
 
 import (
 	"context"
-	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgconn"
-	"github.com/jackc/pgx/v5/pgxpool"
-	"go.uber.org/zap"
 	"math"
 	"screamer/internal/common"
 	"screamer/internal/common/metric"
 	"screamer/internal/common/retry"
 	"screamer/internal/server/db"
+
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgconn"
+	"github.com/jackc/pgx/v5/pgxpool"
+	"go.uber.org/zap"
 )
 
 type DBRepository struct {

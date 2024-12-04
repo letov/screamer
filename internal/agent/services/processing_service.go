@@ -2,12 +2,13 @@ package services
 
 import (
 	"context"
-	"go.uber.org/zap"
 	"screamer/internal/agent/config"
 	metric_sources "screamer/internal/agent/metricsources"
 	"screamer/internal/agent/repositories"
 	"screamer/internal/common"
 	"screamer/internal/common/metric"
+
+	"go.uber.org/zap"
 )
 
 type ProcessingService struct {
