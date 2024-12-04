@@ -9,9 +9,14 @@ import (
 )
 
 func newDotenv() preConfig {
-	err := godotenv.Load(".env.server.local")
-	if err != nil {
-		_ = godotenv.Load(".env.server")
+	var err error
+	if os.Getenv("IS_TEST_ENV") == "true" {
+		err = godotenv.Load("../../../.env.server.test")
+	} else {
+		err = godotenv.Load(".env.server.local")
+		if err != nil {
+			err = godotenv.Load(".env.server")
+		}
 	}
 
 	netAddress := new(net_address.NetAddress)
