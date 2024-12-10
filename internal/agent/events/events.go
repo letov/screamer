@@ -2,11 +2,12 @@ package events
 
 import (
 	"context"
-	"go.uber.org/fx"
-	"go.uber.org/zap"
 	"screamer/internal/agent/config"
 	"screamer/internal/agent/services"
 	event_loop "screamer/internal/common/eventloop"
+
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 type AgentEvents struct {

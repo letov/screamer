@@ -24,6 +24,7 @@ type JSONMetric struct {
 	Value *float64 `json:"value,omitempty"`
 }
 
+// Metric метрика, состоит из идентификатора и значения
 type Metric struct {
 	Ident Ident
 	Value float64

@@ -1,9 +1,10 @@
 package metricsources
 
 import (
+	"screamer/internal/common/metric"
+
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
-	"screamer/internal/common/metric"
 )
 
 const totalMemory = "TotalMemory"

@@ -1,25 +1,35 @@
-package httpserver
+package prof
 
 import (
 	"context"
 	"net"
 	"net/http"
-	"screamer/internal/server/config"
+	_ "net/http/pprof"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
 
-func NewHTTPServer(lc fx.Lifecycle, mux *chi.Mux, log *zap.SugaredLogger, c *config.Config) *http.Server {
-	srv := &http.Server{Addr: c.NetAddress.String(), Handler: mux}
+type Server struct {
+	srv *http.Server
+}
+
+// NewProfServer инстанс pprof сервера
+func NewProfServer(
+	lc fx.Lifecycle,
+	log *zap.SugaredLogger,
+) *Server {
+	router := chi.NewRouter()
+	router.Handle("/debug/pprof/*", http.DefaultServeMux)
+	srv := &http.Server{Addr: "localhost:8084", Handler: router}
 	lc.Append(fx.Hook{
 		OnStart: func(ctx context.Context) error {
 			ln, err := net.Listen("tcp", srv.Addr)
 			if err != nil {
 				return err
 			}
-			log.Info("Starting HTTP server: ", srv.Addr)
+			log.Info("Starting pprof server: ", srv.Addr)
 			go func() {
 				err := srv.Serve(ln)
 				if err != nil {
@@ -32,5 +42,5 @@ func NewHTTPServer(lc fx.Lifecycle, mux *chi.Mux, log *zap.SugaredLogger, c *con
 			return srv.Shutdown(ctx)
 		},
 	})
-	return srv
+	return &Server{srv}
 }

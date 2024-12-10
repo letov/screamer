@@ -61,6 +61,7 @@ func toFloat64(field reflect.Value) (float64, error) {
 		return float64(field.Uint()), nil
 	case reflect.Uint64:
 		return float64(field.Uint()), nil
+	default:
+		return 0, common.ErrTypeNotExists
 	}
-	return 0, common.ErrTypeNotExists
 }

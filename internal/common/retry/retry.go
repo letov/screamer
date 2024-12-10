@@ -3,10 +3,12 @@ package retry
 import (
 	"context"
 	"errors"
-	"go.uber.org/zap"
 	"time"
+
+	"go.uber.org/zap"
 )
 
+// NewRetryJob ретрайбл джоб, tryIntervals - интервалы повторов
 func NewRetryJob[T any](
 	ctx context.Context,
 	name string,

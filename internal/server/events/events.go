@@ -2,11 +2,12 @@ package events
 
 import (
 	"context"
-	"go.uber.org/fx"
-	"go.uber.org/zap"
 	event_loop "screamer/internal/common/eventloop"
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
+
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 type ServerEvents struct {

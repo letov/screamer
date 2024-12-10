@@ -1,16 +1,21 @@
 package config
 
 import (
-	"github.com/joho/godotenv"
 	"os"
 	net_address "screamer/internal/common/netaddress"
 	"strconv"
+
+	"github.com/joho/godotenv"
 )
 
 func newDotenv() preConfig {
-	err := godotenv.Load(".env.server.local")
-	if err != nil {
-		_ = godotenv.Load(".env.server")
+	if os.Getenv("IS_TEST_ENV") == "true" {
+		_ = godotenv.Load("../../../.env.server.test")
+	} else {
+		err := godotenv.Load(".env.server.local")
+		if err != nil {
+			_ = godotenv.Load(".env.server")
+		}
 	}
 
 	netAddress := new(net_address.NetAddress)
