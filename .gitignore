@@ -27,3 +27,4 @@ vendor/
 /data/
 .env.agent.local
 .env.server.local
+/cmd/staticlint/main
