@@ -1,7 +1,7 @@
 package main
 
 import (
-	"screamer/internal/common/checks/os_exit_check"
+	"screamer/internal/common/checks/osexit"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/multichecker"
@@ -13,7 +13,7 @@ import (
 
 func main() {
 	mychecks := []*analysis.Analyzer{
-		os_exit_check.Analyzer,
+		osexit.Analyzer,
 		shadow.Analyzer,
 		shift.Analyzer,
 		structtag.Analyzer,

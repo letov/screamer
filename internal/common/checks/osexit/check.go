@@ -1,4 +1,4 @@
-package os_exit_check
+package osexit
 
 import (
 	"go/ast"
