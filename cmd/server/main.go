@@ -1,9 +1,8 @@
 package main
 
 import (
-	"net/http"
 	"screamer/internal/common/build"
-	event_loop "screamer/internal/common/eventloop"
+	"screamer/internal/server/app"
 	"screamer/internal/server/di"
 
 	"go.uber.org/fx"
@@ -19,6 +18,6 @@ func main() {
 	build.ShowBuildParams(buildVersion, buildDate, buildCommit)
 	fx.New(
 		di.InjectApp(),
-		fx.Invoke(func(*event_loop.EventLoop, *http.Server) {}),
+		fx.Invoke(app.Start),
 	).Run()
 }
