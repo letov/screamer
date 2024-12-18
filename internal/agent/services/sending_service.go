@@ -20,9 +20,10 @@ import (
 )
 
 type SendingService struct {
-	config *config.Config
-	repo   repositories.Repository
-	log    *zap.SugaredLogger
+	config  *config.Config
+	repo    repositories.Repository
+	log     *zap.SugaredLogger
+	encrypt *hash.RSAEncrypt
 }
 
 func (ss *SendingService) SendMetrics(ctx context.Context) {
@@ -50,6 +51,9 @@ func (ss *SendingService) worker(ctx context.Context, jobs <-chan metric.Metric)
 func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
 	url := fmt.Sprintf("http://%v/update", ss.config.NetAddress.String())
 	body, _ := m.Bytes()
+	if ss.encrypt != nil {
+		body, _ = ss.encrypt.Encrypt(body)
+	}
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
@@ -116,9 +120,15 @@ func (ss *SendingService) requestJob(body *[]byte, url string) func(ctx context.
 }
 
 func NewSendingService(log *zap.SugaredLogger, config *config.Config, repo repositories.Repository) *SendingService {
+	var encrypt *hash.RSAEncrypt
+	if len(config.CryptoKey) != 0 {
+		encrypt = hash.NewRSAEncrypt(config.CryptoKey, log)
+	}
+
 	return &SendingService{
-		config: config,
-		repo:   repo,
-		log:    log,
+		config:  config,
+		repo:    repo,
+		log:     log,
+		encrypt: encrypt,
 	}
 }

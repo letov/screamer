@@ -34,6 +34,7 @@ func newDotenv() preConfig {
 		FileStoragePath: getEnv("FILE_STORAGE_PATH", ""),
 		Restore:         &br,
 		Key:             getEnv("KEY", ""),
+		CryptoKey:       getEnv("CRYPTO_KEY", ""),
 	}
 }
 
