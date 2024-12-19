@@ -13,4 +13,6 @@ var (
 	ErrNoDBConnection = errors.New("no db connection")
 
 	ErrInvalidHash = errors.New("invalid hash")
+
+	ErrServiceStop = errors.New("service is stop")
 )

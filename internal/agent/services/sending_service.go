@@ -159,6 +159,10 @@ func NewSendingService(
 		OnStop: func(ctx context.Context) error {
 			ss.stop = true
 			log.Info("Agent active jobs count: ", ss.activeJobs)
+			if ss.activeJobs == 0 {
+				log.Info("Sending closed")
+				return nil
+			}
 			for i := 0; i < 5; i++ {
 				if ss.activeJobs > 0 {
 					log.Info("Agent active jobs count: ", ss.activeJobs)
