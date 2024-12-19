@@ -27,6 +27,7 @@ func newDotenv() preConfig {
 		ReportInterval: getEnvInt("REPORT_INTERVAL", 0),
 		Key:            getEnv("KEY", ""),
 		RateLimit:      getEnvInt("RATE_LIMIT", 0),
+		CryptoKey:      getEnv("CRYPTO_KEY", ""),
 	}
 }
 

@@ -8,6 +8,7 @@ type Config struct {
 	ReportInterval int
 	Key            string
 	RateLimit      int
+	CryptoKey      string
 }
 
 type preConfig struct {
@@ -16,6 +17,7 @@ type preConfig struct {
 	ReportInterval *int
 	Key            *string
 	RateLimit      *int
+	CryptoKey      *string
 }
 
 type setConfig struct {
@@ -24,6 +26,7 @@ type setConfig struct {
 	ReportInterval bool
 	Key            bool
 	RateLimit      bool
+	CryptoKey      bool
 }
 
 func newPreConfig() preConfig {
@@ -33,6 +36,7 @@ func newPreConfig() preConfig {
 		ReportInterval: nil,
 		Key:            nil,
 		RateLimit:      nil,
+		CryptoKey:      nil,
 	}
 }
 
@@ -43,5 +47,6 @@ func newSetConfig() setConfig {
 		ReportInterval: false,
 		Key:            false,
 		RateLimit:      false,
+		CryptoKey:      false,
 	}
 }

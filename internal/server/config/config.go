@@ -25,6 +25,7 @@ func NewConfig() *Config {
 		FileStoragePath: getPriorConfigValue(cs, "FileStoragePath").(string),
 		Restore:         getPriorConfigValue(cs, "Restore").(bool),
 		Key:             getPriorConfigValue(cs, "Key").(string),
+		CryptoKey:       getPriorConfigValue(cs, "CryptoKey").(string),
 	}
 }
 

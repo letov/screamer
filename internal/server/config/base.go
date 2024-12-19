@@ -9,6 +9,7 @@ type Config struct {
 	FileStoragePath string
 	Restore         bool
 	Key             string
+	CryptoKey       string
 }
 
 type preConfig struct {
@@ -18,6 +19,7 @@ type preConfig struct {
 	FileStoragePath *string
 	Restore         *bool
 	Key             *string
+	CryptoKey       *string
 }
 
 type setConfig struct {
@@ -27,6 +29,7 @@ type setConfig struct {
 	FileStoragePath bool
 	Restore         bool
 	Key             bool
+	CryptoKey       bool
 }
 
 func newPreConfig() preConfig {
@@ -37,6 +40,7 @@ func newPreConfig() preConfig {
 		FileStoragePath: nil,
 		Restore:         nil,
 		Key:             nil,
+		CryptoKey:       nil,
 	}
 }
 
@@ -48,5 +52,6 @@ func newSetConfig() setConfig {
 		FileStoragePath: false,
 		Restore:         false,
 		Key:             false,
+		CryptoKey:       false,
 	}
 }
