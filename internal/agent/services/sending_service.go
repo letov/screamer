@@ -13,9 +13,11 @@ import (
 	"screamer/internal/common/hash"
 	"screamer/internal/common/metric"
 	"screamer/internal/common/retry"
+	"sync"
 	"time"
 
 	"github.com/aoliveti/curling"
+	"go.uber.org/fx"
 	"go.uber.org/zap"
 )
 
@@ -24,9 +26,15 @@ type SendingService struct {
 	repo    repositories.Repository
 	log     *zap.SugaredLogger
 	encrypt *hash.RSAEncrypt
+	stop    bool
+	sync.Mutex
+	activeJobs int
 }
 
 func (ss *SendingService) SendMetrics(ctx context.Context) {
+	if ss.stop {
+		return
+	}
 	ms := ss.repo.GetAll(ctx)
 
 	jobs := make(chan metric.Metric, len(ms))
@@ -49,6 +57,9 @@ func (ss *SendingService) worker(ctx context.Context, jobs <-chan metric.Metric)
 }
 
 func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
+	ss.Lock()
+	ss.activeJobs++
+	ss.Unlock()
 	url := fmt.Sprintf("http://%v/update", ss.config.NetAddress.String())
 	body, _ := m.Bytes()
 	if ss.encrypt != nil {
@@ -56,7 +67,12 @@ func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
 	}
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
-	defer cancel()
+	defer func() {
+		ss.Lock()
+		ss.activeJobs--
+		ss.Unlock()
+		cancel()
+	}()
 
 	job := ss.requestJob(&body, url)
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
@@ -119,16 +135,43 @@ func (ss *SendingService) requestJob(body *[]byte, url string) func(ctx context.
 	}
 }
 
-func NewSendingService(log *zap.SugaredLogger, config *config.Config, repo repositories.Repository) *SendingService {
+func NewSendingService(
+	lc fx.Lifecycle,
+	log *zap.SugaredLogger,
+	config *config.Config,
+	repo repositories.Repository,
+) *SendingService {
 	var encrypt *hash.RSAEncrypt
 	if len(config.CryptoKey) != 0 {
 		encrypt = hash.NewRSAEncrypt(config.CryptoKey, log)
 	}
 
-	return &SendingService{
-		config:  config,
-		repo:    repo,
-		log:     log,
-		encrypt: encrypt,
+	ss := &SendingService{
+		config:     config,
+		repo:       repo,
+		log:        log,
+		encrypt:    encrypt,
+		activeJobs: 0,
+		stop:       false,
 	}
+
+	lc.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			ss.stop = true
+			log.Info("Agent active jobs count: ", ss.activeJobs)
+			for i := 0; i < 5; i++ {
+				if ss.activeJobs > 0 {
+					log.Info("Agent active jobs count: ", ss.activeJobs)
+					log.Info("Try to wait sending")
+					time.Sleep(time.Second)
+				} else {
+					log.Info("Try to wait")
+					break
+				}
+			}
+			return nil
+		},
+	})
+
+	return ss
 }
