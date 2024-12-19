@@ -1,0 +1,8 @@
+{
+  "address": "localhost:8080",
+  "store_interval": "300",
+  "store_file": "/tmp/backup_file",
+  "restore": false,
+  "database_dsn": "",
+  "crypto_key": ""
+}
