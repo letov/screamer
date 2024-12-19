@@ -13,7 +13,7 @@ import (
 	"screamer/internal/common/hash"
 	"screamer/internal/common/metric"
 	"screamer/internal/common/retry"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"github.com/aoliveti/curling"
@@ -22,19 +22,14 @@ import (
 )
 
 type SendingService struct {
-	config  *config.Config
-	repo    repositories.Repository
-	log     *zap.SugaredLogger
-	encrypt *hash.RSAEncrypt
-	stop    bool
-	sync.Mutex
-	activeJobs int
+	config     *config.Config
+	repo       repositories.Repository
+	log        *zap.SugaredLogger
+	encrypt    *hash.RSAEncrypt
+	activeJobs atomic.Int32
 }
 
 func (ss *SendingService) SendMetrics(ctx context.Context) {
-	if ss.stop {
-		return
-	}
 	ms := ss.repo.GetAll(ctx)
 
 	jobs := make(chan metric.Metric, len(ms))
@@ -57,9 +52,6 @@ func (ss *SendingService) worker(ctx context.Context, jobs <-chan metric.Metric)
 }
 
 func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
-	ss.Lock()
-	ss.activeJobs++
-	ss.Unlock()
 	url := fmt.Sprintf("http://%v/update", ss.config.NetAddress.String())
 	body, _ := m.Bytes()
 	if ss.encrypt != nil {
@@ -68,13 +60,10 @@ func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer func() {
-		ss.Lock()
-		ss.activeJobs--
-		ss.Unlock()
 		cancel()
 	}()
 
-	job := ss.requestJob(&body, url)
+	job := ss.requestJob(&body, url, &ss.activeJobs)
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
 }
 
@@ -100,12 +89,17 @@ func (ss *SendingService) requestAll(ctx context.Context, ms []metric.Metric) {
 		return
 	}
 
-	job := ss.requestJob(&body, url)
+	job := ss.requestJob(&body, url, &ss.activeJobs)
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
 }
 
-func (ss *SendingService) requestJob(body *[]byte, url string) func(ctx context.Context) ([]byte, error) {
+func (ss *SendingService) requestJob(body *[]byte, url string, aj *atomic.Int32) func(ctx context.Context) ([]byte, error) {
 	return func(ctx context.Context) ([]byte, error) {
+		aj.Add(1)
+		defer func() {
+			aj.Add(-1)
+		}()
+
 		client := http.Client{}
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(*body))
 		if err != nil {
@@ -147,32 +141,29 @@ func NewSendingService(
 	}
 
 	ss := &SendingService{
-		config:     config,
-		repo:       repo,
-		log:        log,
-		encrypt:    encrypt,
-		activeJobs: 0,
-		stop:       false,
+		config:  config,
+		repo:    repo,
+		log:     log,
+		encrypt: encrypt,
 	}
 
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
-			ss.stop = true
-			log.Info("Agent active jobs count: ", ss.activeJobs)
-			if ss.activeJobs == 0 {
-				log.Info("Sending closed")
-				return nil
-			}
-			for i := 0; i < 5; i++ {
-				if ss.activeJobs > 0 {
-					log.Info("Agent active jobs count: ", ss.activeJobs)
-					log.Info("Try to wait sending")
-					time.Sleep(time.Second)
-				} else {
-					log.Info("Try to wait")
-					break
+			aj := ss.activeJobs.Load()
+			log.Info("Agent active jobs count: ", aj)
+			if aj != 0 {
+				for i := 0; i < 5; i++ {
+					aj = ss.activeJobs.Load()
+					if aj > 0 {
+						log.Info("Agent active jobs count: ", aj)
+						log.Info("Try to wait")
+						time.Sleep(time.Second)
+					} else {
+						break
+					}
 				}
 			}
+			log.Info("Sending service closed")
 			return nil
 		},
 	})

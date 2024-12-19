@@ -4,12 +4,11 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"screamer/internal/common"
 	"screamer/internal/common/metric"
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
 	"strconv"
-	"sync"
+	"sync/atomic"
 	"time"
 
 	"go.uber.org/fx"
@@ -17,31 +16,17 @@ import (
 )
 
 type MetricService struct {
-	config *config.Config
-	repo   repositories.Repository
-	stop   bool
-	sync.Mutex
-	activeWrites int
-}
-
-func (ms *MetricService) increaseActiveWrites() {
-	ms.Lock()
-	ms.activeWrites++
-	ms.Unlock()
-}
-
-func (ms *MetricService) decreaseActiveWrites() {
-	ms.Lock()
-	ms.activeWrites--
-	ms.Unlock()
+	config     *config.Config
+	repo       repositories.Repository
+	stop       bool
+	activeJobs atomic.Int32
 }
 
 func (ms *MetricService) UpdatesMetricJSON(ctx context.Context, body *[]byte) (err error) {
-	if ms.stop {
-		return common.ErrServiceStop
-	}
-	ms.increaseActiveWrites()
-	defer ms.decreaseActiveWrites()
+	ms.activeJobs.Add(1)
+	defer func() {
+		ms.activeJobs.Add(-1)
+	}()
 
 	var jms []metric.JSONMetric
 	err = json.Unmarshal(*body, &jms)
@@ -92,11 +77,10 @@ func (ms *MetricService) UpdateMetricParams(ctx context.Context, n string, vs st
 }
 
 func (ms *MetricService) processUpdateMetric(ctx context.Context, m *metric.Metric) (res *[]byte, err error) {
-	if ms.stop {
-		return nil, common.ErrServiceStop
-	}
-	ms.increaseActiveWrites()
-	defer ms.decreaseActiveWrites()
+	ms.activeJobs.Add(1)
+	defer func() {
+		ms.activeJobs.Add(-1)
+	}()
 
 	var newM metric.Metric
 
@@ -171,30 +155,28 @@ func NewMetricService(
 	r repositories.Repository,
 ) *MetricService {
 	ms := &MetricService{
-		config:       c,
-		repo:         r,
-		stop:         false,
-		activeWrites: 0,
+		config: c,
+		repo:   r,
+		stop:   false,
 	}
 
 	lc.Append(fx.Hook{
 		OnStop: func(ctx context.Context) error {
-			ms.stop = true
-			log.Info("Service active writes count: ", ms.activeWrites)
-			if ms.activeWrites == 0 {
-				log.Info("Service closed")
-				return nil
-			}
-			for i := 0; i < 5; i++ {
-				if ms.activeWrites > 0 {
-					log.Info("Service active writes count: ", ms.activeWrites)
-					log.Info("Try to wait writing")
-					time.Sleep(time.Second)
-				} else {
-					log.Info("Try to wait")
-					break
+			aj := ms.activeJobs.Load()
+			log.Info("Server active jobs count: ", aj)
+			if aj != 0 {
+				for i := 0; i < 5; i++ {
+					aj = ms.activeJobs.Load()
+					if aj > 0 {
+						log.Info("Server active jobs count: ", aj)
+						log.Info("Try to wait")
+						time.Sleep(time.Second)
+					} else {
+						break
+					}
 				}
 			}
+			log.Info("Sending service closed")
 			return nil
 		},
 	})
