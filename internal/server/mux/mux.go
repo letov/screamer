@@ -8,6 +8,7 @@ import (
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
+	"go.uber.org/zap"
 )
 
 func NewMux(
@@ -19,6 +20,7 @@ func NewMux(
 	vh *handlers.ValueMetricHandler,
 	voh *handlers.ValueMetricOldHandler,
 	ph *handlers.PingHandler,
+	log *zap.SugaredLogger,
 ) *chi.Mux {
 	r := chi.NewRouter()
 
@@ -30,8 +32,9 @@ func NewMux(
 	r.Use(middleware.Timeout(10 * time.Second))
 
 	r.Use(middlewares.Logger)
-	r.Use(middlewares.Curl)
 	r.Use(middlewares.CheckHash(c))
+	r.Use(middlewares.Decrypt(c, log))
+	r.Use(middlewares.Curl)
 
 	r.Get("/", hh.Handler)
 	r.Get("/ping", ph.Handler)
