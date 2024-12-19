@@ -49,5 +49,10 @@ func newEnv() preConfig {
 		pre.Key = &k
 	}
 
+	ck, exists := os.LookupEnv("CRYPTO_KEY")
+	if exists {
+		pre.CryptoKey = &ck
+	}
+
 	return pre
 }

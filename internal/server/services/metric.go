@@ -4,18 +4,45 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"screamer/internal/common"
 	"screamer/internal/common/metric"
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
 	"strconv"
+	"sync"
+	"time"
+
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 type MetricService struct {
 	config *config.Config
 	repo   repositories.Repository
+	stop   bool
+	sync.Mutex
+	activeWrites int
+}
+
+func (ms *MetricService) increaseActiveWrites() {
+	ms.Lock()
+	ms.activeWrites++
+	ms.Unlock()
+}
+
+func (ms *MetricService) decreaseActiveWrites() {
+	ms.Lock()
+	ms.activeWrites--
+	ms.Unlock()
 }
 
 func (ms *MetricService) UpdatesMetricJSON(ctx context.Context, body *[]byte) (err error) {
+	if ms.stop {
+		return common.ErrServiceStop
+	}
+	ms.increaseActiveWrites()
+	defer ms.decreaseActiveWrites()
+
 	var jms []metric.JSONMetric
 	err = json.Unmarshal(*body, &jms)
 	if err != nil {
@@ -65,6 +92,12 @@ func (ms *MetricService) UpdateMetricParams(ctx context.Context, n string, vs st
 }
 
 func (ms *MetricService) processUpdateMetric(ctx context.Context, m *metric.Metric) (res *[]byte, err error) {
+	if ms.stop {
+		return nil, common.ErrServiceStop
+	}
+	ms.increaseActiveWrites()
+	defer ms.decreaseActiveWrites()
+
 	var newM metric.Metric
 
 	if m.Ident.Type == metric.Counter {
@@ -131,9 +164,40 @@ func (ms *MetricService) Home(ctx context.Context) (res *[]byte) {
 	return &bs
 }
 
-func NewMetricService(c *config.Config, r repositories.Repository) *MetricService {
-	return &MetricService{
-		config: c,
-		repo:   r,
+func NewMetricService(
+	lc fx.Lifecycle,
+	log *zap.SugaredLogger,
+	c *config.Config,
+	r repositories.Repository,
+) *MetricService {
+	ms := &MetricService{
+		config:       c,
+		repo:         r,
+		stop:         false,
+		activeWrites: 0,
 	}
+
+	lc.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			ms.stop = true
+			log.Info("Service active writes count: ", ms.activeWrites)
+			if ms.activeWrites == 0 {
+				log.Info("Service closed")
+				return nil
+			}
+			for i := 0; i < 5; i++ {
+				if ms.activeWrites > 0 {
+					log.Info("Service active writes count: ", ms.activeWrites)
+					log.Info("Try to wait writing")
+					time.Sleep(time.Second)
+				} else {
+					log.Info("Try to wait")
+					break
+				}
+			}
+			return nil
+		},
+	})
+
+	return ms
 }
