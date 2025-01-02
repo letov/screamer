@@ -8,14 +8,26 @@ import (
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
 	"strconv"
+	"sync/atomic"
+	"time"
+
+	"go.uber.org/fx"
+	"go.uber.org/zap"
 )
 
 type MetricService struct {
-	config *config.Config
-	repo   repositories.Repository
+	config     *config.Config
+	repo       repositories.Repository
+	stop       bool
+	activeJobs atomic.Int32
 }
 
 func (ms *MetricService) UpdatesMetricJSON(ctx context.Context, body *[]byte) (err error) {
+	ms.activeJobs.Add(1)
+	defer func() {
+		ms.activeJobs.Add(-1)
+	}()
+
 	var jms []metric.JSONMetric
 	err = json.Unmarshal(*body, &jms)
 	if err != nil {
@@ -65,6 +77,11 @@ func (ms *MetricService) UpdateMetricParams(ctx context.Context, n string, vs st
 }
 
 func (ms *MetricService) processUpdateMetric(ctx context.Context, m *metric.Metric) (res *[]byte, err error) {
+	ms.activeJobs.Add(1)
+	defer func() {
+		ms.activeJobs.Add(-1)
+	}()
+
 	var newM metric.Metric
 
 	if m.Ident.Type == metric.Counter {
@@ -131,9 +148,38 @@ func (ms *MetricService) Home(ctx context.Context) (res *[]byte) {
 	return &bs
 }
 
-func NewMetricService(c *config.Config, r repositories.Repository) *MetricService {
-	return &MetricService{
+func NewMetricService(
+	lc fx.Lifecycle,
+	log *zap.SugaredLogger,
+	c *config.Config,
+	r repositories.Repository,
+) *MetricService {
+	ms := &MetricService{
 		config: c,
 		repo:   r,
+		stop:   false,
 	}
+
+	lc.Append(fx.Hook{
+		OnStop: func(ctx context.Context) error {
+			aj := ms.activeJobs.Load()
+			log.Info("Server active jobs count: ", aj)
+			if aj != 0 {
+				for i := 0; i < 5; i++ {
+					aj = ms.activeJobs.Load()
+					if aj > 0 {
+						log.Info("Server active jobs count: ", aj)
+						log.Info("Try to wait")
+						time.Sleep(time.Second)
+					} else {
+						break
+					}
+				}
+			}
+			log.Info("Sending service closed")
+			return nil
+		},
+	})
+
+	return ms
 }

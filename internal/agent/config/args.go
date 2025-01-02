@@ -15,6 +15,7 @@ func newArgs() preConfig {
 		ReportInterval: flag.Int("r", 0, "ReportInterval desc"),
 		Key:            flag.String("k", "", "Key desc"),
 		RateLimit:      flag.Int("l", 0, "RateLimit desc"),
+		CryptoKey:      flag.String("crypto-key", "", "CryptoKey desc"),
 	}
 
 	set := newSetConfig()
@@ -33,6 +34,8 @@ func newArgs() preConfig {
 			set.Key = true
 		case "l":
 			set.RateLimit = true
+		case "crypto-key":
+			set.CryptoKey = true
 		}
 	})
 
@@ -50,6 +53,9 @@ func newArgs() preConfig {
 	}
 	if !set.RateLimit {
 		pre.RateLimit = nil
+	}
+	if !set.CryptoKey {
+		pre.CryptoKey = nil
 	}
 
 	return pre

@@ -21,6 +21,7 @@ func newArgs() preConfig {
 		FileStoragePath: flag.String("f", "", "FileStoragePath desc"),
 		Restore:         flag.Bool("r", false, "Restore desc"),
 		Key:             flag.String("k", "", "Key desc"),
+		CryptoKey:       flag.String("crypto-key", "", "CryptoKey desc"),
 	}
 
 	set := newSetConfig()
@@ -41,6 +42,8 @@ func newArgs() preConfig {
 			set.Restore = true
 		case "k":
 			set.Key = true
+		case "crypto-key":
+			set.CryptoKey = true
 		}
 	})
 
@@ -61,6 +64,9 @@ func newArgs() preConfig {
 	}
 	if !set.Key {
 		pre.Key = nil
+	}
+	if !set.CryptoKey {
+		pre.CryptoKey = nil
 	}
 
 	return pre
