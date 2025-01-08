@@ -22,6 +22,7 @@ func newArgs() preConfig {
 		Restore:         flag.Bool("r", false, "Restore desc"),
 		Key:             flag.String("k", "", "Key desc"),
 		CryptoKey:       flag.String("crypto-key", "", "CryptoKey desc"),
+		TrustedSubnet:   flag.String("t", "", "TrustedSubnet desc"),
 	}
 
 	set := newSetConfig()
@@ -43,6 +44,8 @@ func newArgs() preConfig {
 		case "k":
 			set.Key = true
 		case "crypto-key":
+			set.CryptoKey = true
+		case "t":
 			set.CryptoKey = true
 		}
 	})
@@ -67,6 +70,9 @@ func newArgs() preConfig {
 	}
 	if !set.CryptoKey {
 		pre.CryptoKey = nil
+	}
+	if !set.TrustedSubnet {
+		pre.TrustedSubnet = nil
 	}
 
 	return pre

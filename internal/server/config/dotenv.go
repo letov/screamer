@@ -35,6 +35,7 @@ func newDotenv() preConfig {
 		Restore:         &br,
 		Key:             getEnv("KEY", ""),
 		CryptoKey:       getEnv("CRYPTO_KEY", ""),
+		TrustedSubnet:   getEnv("TRUSTED_SUBNET", ""),
 	}
 }
 

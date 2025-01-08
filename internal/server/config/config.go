@@ -26,6 +26,7 @@ func NewConfig() *Config {
 		Restore:         getPriorConfigValue(cs, "Restore").(bool),
 		Key:             getPriorConfigValue(cs, "Key").(string),
 		CryptoKey:       getPriorConfigValue(cs, "CryptoKey").(string),
+		TrustedSubnet:   getPriorConfigValue(cs, "TrustedSubnet").(string),
 	}
 }
 

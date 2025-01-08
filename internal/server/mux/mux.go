@@ -34,6 +34,7 @@ func NewMux(
 	r.Use(middlewares.Logger)
 	r.Use(middlewares.CheckHash(c))
 	r.Use(middlewares.Decrypt(c, log))
+	r.Use(middlewares.TrustedSubnet(c, log))
 	r.Use(middlewares.Curl)
 
 	r.Get("/", hh.Handler)

@@ -10,6 +10,7 @@ type Config struct {
 	Restore         bool
 	Key             string
 	CryptoKey       string
+	TrustedSubnet   string
 }
 
 type preConfig struct {
@@ -20,6 +21,7 @@ type preConfig struct {
 	Restore         *bool
 	Key             *string
 	CryptoKey       *string
+	TrustedSubnet   *string
 }
 
 type setConfig struct {
@@ -30,6 +32,7 @@ type setConfig struct {
 	Restore         bool
 	Key             bool
 	CryptoKey       bool
+	TrustedSubnet   bool
 }
 
 func newPreConfig() preConfig {
@@ -41,6 +44,7 @@ func newPreConfig() preConfig {
 		Restore:         nil,
 		Key:             nil,
 		CryptoKey:       nil,
+		TrustedSubnet:   nil,
 	}
 }
 
@@ -53,5 +57,6 @@ func newSetConfig() setConfig {
 		Restore:         false,
 		Key:             false,
 		CryptoKey:       false,
+		TrustedSubnet:   false,
 	}
 }

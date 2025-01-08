@@ -54,5 +54,10 @@ func newEnv() preConfig {
 		pre.CryptoKey = &ck
 	}
 
+	t, exists := os.LookupEnv("TRUSTED_SUBNET")
+	if exists {
+		pre.CryptoKey = &t
+	}
+
 	return pre
 }
