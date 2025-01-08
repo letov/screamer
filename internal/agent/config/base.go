@@ -9,6 +9,7 @@ type Config struct {
 	Key            string
 	RateLimit      int
 	CryptoKey      string
+	Host           string
 }
 
 type preConfig struct {
@@ -18,6 +19,7 @@ type preConfig struct {
 	Key            *string
 	RateLimit      *int
 	CryptoKey      *string
+	Host           *string
 }
 
 type setConfig struct {
@@ -27,6 +29,7 @@ type setConfig struct {
 	Key            bool
 	RateLimit      bool
 	CryptoKey      bool
+	Host           bool
 }
 
 func newPreConfig() preConfig {
@@ -37,6 +40,7 @@ func newPreConfig() preConfig {
 		Key:            nil,
 		RateLimit:      nil,
 		CryptoKey:      nil,
+		Host:           nil,
 	}
 }
 
@@ -48,5 +52,6 @@ func newSetConfig() setConfig {
 		Key:            false,
 		RateLimit:      false,
 		CryptoKey:      false,
+		Host:           false,
 	}
 }

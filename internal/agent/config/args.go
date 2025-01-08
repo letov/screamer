@@ -16,6 +16,7 @@ func newArgs() preConfig {
 		Key:            flag.String("k", "", "Key desc"),
 		RateLimit:      flag.Int("l", 0, "RateLimit desc"),
 		CryptoKey:      flag.String("crypto-key", "", "CryptoKey desc"),
+		Host:           flag.String("h", "", "Host desc"),
 	}
 
 	set := newSetConfig()
@@ -36,6 +37,8 @@ func newArgs() preConfig {
 			set.RateLimit = true
 		case "crypto-key":
 			set.CryptoKey = true
+		case "h":
+			set.Host = true
 		}
 	})
 
@@ -56,6 +59,9 @@ func newArgs() preConfig {
 	}
 	if !set.CryptoKey {
 		pre.CryptoKey = nil
+	}
+	if !set.Host {
+		pre.Host = nil
 	}
 
 	return pre

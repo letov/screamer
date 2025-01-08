@@ -48,5 +48,10 @@ func newEnv() preConfig {
 		pre.CryptoKey = &ck
 	}
 
+	h, exists := os.LookupEnv("HOST")
+	if exists {
+		pre.Host = &h
+	}
+
 	return pre
 }

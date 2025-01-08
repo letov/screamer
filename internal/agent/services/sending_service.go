@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"screamer/internal/agent/config"
 	"screamer/internal/agent/repositories"
@@ -67,6 +68,14 @@ func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
 }
 
+func (ss *SendingService) getIp() string {
+	ips, _ := net.LookupIP(ss.config.Host)
+	if len(ips) == 0 {
+		ss.log.Fatal("host lookup fail")
+	}
+	return ips[0].String()
+}
+
 func (ss *SendingService) requestAll(ctx context.Context, ms []metric.Metric) {
 	url := fmt.Sprintf("http://%v/updates", ss.config.NetAddress.String())
 	var jms []metric.JSONMetric
@@ -101,11 +110,13 @@ func (ss *SendingService) requestJob(body *[]byte, url string, aj *atomic.Int32)
 		}()
 
 		client := http.Client{}
+		ip := ss.getIp()
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(*body))
 		if err != nil {
 			return nil, err
 		}
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Real-IP", ip)
 		req.Header.Set("HashSHA256", hash.Encode(body, ss.config.Key))
 		cmd, _ := curling.NewFromRequest(req)
 		ss.log.Info(cmd)
