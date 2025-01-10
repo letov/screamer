@@ -3,6 +3,7 @@ package metric
 import (
 	"encoding/json"
 	"screamer/internal/common"
+	pb "screamer/proto"
 	"strconv"
 )
 
@@ -30,7 +31,7 @@ type Metric struct {
 	Value float64
 }
 
-func (m *Metric) JSON() (JSONMetric, error) {
+func (m Metric) JSON() (JSONMetric, error) {
 	switch m.Ident.Type {
 	case Counter:
 		v := int64(m.Value)
@@ -52,7 +53,7 @@ func (m *Metric) JSON() (JSONMetric, error) {
 	}
 }
 
-func (m *Metric) Bytes() ([]byte, error) {
+func (m Metric) Bytes() ([]byte, error) {
 	jm, err := m.JSON()
 	if err != nil {
 		return []byte{}, err
@@ -61,7 +62,7 @@ func (m *Metric) Bytes() ([]byte, error) {
 	return json.Marshal(jm)
 }
 
-func (m *Metric) String() string {
+func (m Metric) String() string {
 	switch m.Ident.Type {
 	case Counter:
 		return strconv.FormatFloat(m.Value, 'f', -1, 64)
@@ -70,6 +71,30 @@ func (m *Metric) String() string {
 	default:
 		return ""
 	}
+}
+
+func (m Metric) GrpcRequest() (*pb.Request, error) {
+	var mType pb.MType
+	var val float32 = 0
+	var delta int64 = 0
+
+	switch m.Ident.Type {
+	case Counter:
+		mType = pb.MType_COUNTER
+		delta = int64(m.Value)
+	case Gauge:
+		mType = pb.MType_GAUGE
+		val = float32(m.Value)
+	default:
+		return nil, common.ErrTypeNotExists
+	}
+
+	return &pb.Request{
+		Id:    m.Ident.Name,
+		Mtype: mType,
+		Value: val,
+		Delta: delta,
+	}, nil
 }
 
 const (

@@ -6,10 +6,12 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"net"
 	"net/http"
 	"screamer/internal/agent/config"
 	"screamer/internal/agent/repositories"
 	"screamer/internal/common"
+	"screamer/internal/common/grpcclient"
 	"screamer/internal/common/hash"
 	"screamer/internal/common/metric"
 	"screamer/internal/common/retry"
@@ -27,6 +29,7 @@ type SendingService struct {
 	log        *zap.SugaredLogger
 	encrypt    *hash.RSAEncrypt
 	activeJobs atomic.Int32
+	gc         *grpcclient.GRPCClient
 }
 
 func (ss *SendingService) SendMetrics(ctx context.Context) {
@@ -63,8 +66,22 @@ func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
 		cancel()
 	}()
 
-	job := ss.requestJob(&body, url, &ss.activeJobs)
+	var job func(ctx context.Context) ([]byte, error)
+	if len(ss.config.NetAddressGrpc.String()) > 0 {
+		job = ss.requestJobGrpc(m, ss.gc, &ss.activeJobs)
+	} else {
+		job = ss.requestJobHttp(&body, url, &ss.activeJobs)
+	}
+
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
+}
+
+func (ss *SendingService) getIp() string {
+	ips, _ := net.LookupIP(ss.config.Host)
+	if len(ips) == 0 {
+		ss.log.Fatal("host lookup fail")
+	}
+	return ips[0].String()
 }
 
 func (ss *SendingService) requestAll(ctx context.Context, ms []metric.Metric) {
@@ -89,11 +106,15 @@ func (ss *SendingService) requestAll(ctx context.Context, ms []metric.Metric) {
 		return
 	}
 
-	job := ss.requestJob(&body, url, &ss.activeJobs)
+	job := ss.requestJobHttp(&body, url, &ss.activeJobs)
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
 }
 
-func (ss *SendingService) requestJob(body *[]byte, url string, aj *atomic.Int32) func(ctx context.Context) ([]byte, error) {
+func (ss *SendingService) requestJobHttp(
+	body *[]byte,
+	url string,
+	aj *atomic.Int32,
+) func(ctx context.Context) ([]byte, error) {
 	return func(ctx context.Context) ([]byte, error) {
 		aj.Add(1)
 		defer func() {
@@ -101,11 +122,13 @@ func (ss *SendingService) requestJob(body *[]byte, url string, aj *atomic.Int32)
 		}()
 
 		client := http.Client{}
+		ip := ss.getIp()
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(*body))
 		if err != nil {
 			return nil, err
 		}
 		req.Header.Set("Content-Type", "application/json")
+		req.Header.Set("X-Real-IP", ip)
 		req.Header.Set("HashSHA256", hash.Encode(body, ss.config.Key))
 		cmd, _ := curling.NewFromRequest(req)
 		ss.log.Info(cmd)
@@ -129,11 +152,34 @@ func (ss *SendingService) requestJob(body *[]byte, url string, aj *atomic.Int32)
 	}
 }
 
+func (ss *SendingService) requestJobGrpc(
+	m metric.Metric,
+	gc *grpcclient.GRPCClient,
+	aj *atomic.Int32,
+) func(ctx context.Context) ([]byte, error) {
+	return func(ctx context.Context) ([]byte, error) {
+		aj.Add(1)
+		defer func() {
+			aj.Add(-1)
+		}()
+
+		in, err := m.GrpcRequest()
+		if err != nil {
+			return nil, err
+		}
+
+		_, err = gc.Client.UpdateValue(ctx, in)
+
+		return nil, err
+	}
+}
+
 func NewSendingService(
 	lc fx.Lifecycle,
 	log *zap.SugaredLogger,
 	config *config.Config,
 	repo repositories.Repository,
+	gc *grpcclient.GRPCClient,
 ) *SendingService {
 	var encrypt *hash.RSAEncrypt
 	if len(config.CryptoKey) != 0 {
@@ -145,6 +191,7 @@ func NewSendingService(
 		repo:    repo,
 		log:     log,
 		encrypt: encrypt,
+		gc:      gc,
 	}
 
 	lc.Append(fx.Hook{

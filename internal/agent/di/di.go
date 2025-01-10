@@ -7,6 +7,7 @@ import (
 	"screamer/internal/agent/repositories"
 	"screamer/internal/agent/services"
 	event_loop "screamer/internal/common/eventloop"
+	"screamer/internal/common/grpcclient"
 	"screamer/internal/common/logger"
 	"screamer/internal/common/prof"
 	"screamer/internal/server/handlers"
@@ -35,5 +36,6 @@ func InjectApp() fx.Option {
 		event_loop.NewEventLoop,
 
 		prof.NewProfServer,
+		grpcclient.NewGRPCClient,
 	)
 }

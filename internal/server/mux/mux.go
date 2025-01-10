@@ -15,7 +15,7 @@ func NewMux(
 	c *config.Config,
 	hh *handlers.HomeHandler,
 	uh *handlers.UpdateMetricHandler,
-	ush *handlers.UpdatesMetricHandler,
+	ush *handlers.UpdateBatchMetricHandler,
 	uoh *handlers.UpdateMetricOldHandler,
 	vh *handlers.ValueMetricHandler,
 	voh *handlers.ValueMetricOldHandler,
@@ -34,6 +34,7 @@ func NewMux(
 	r.Use(middlewares.Logger)
 	r.Use(middlewares.CheckHash(c))
 	r.Use(middlewares.Decrypt(c, log))
+	r.Use(middlewares.TrustedSubnet(c, log))
 	r.Use(middlewares.Curl)
 
 	r.Get("/", hh.Handler)
@@ -44,7 +45,7 @@ func NewMux(
 		r.Post("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}/{value}", uoh.Handler)
 	})
 
-	r.Post("/updates", ush.Handler)
+	r.Post("/update-batch", ush.Handler)
 
 	r.Route("/value", func(r chi.Router) {
 		r.Post("/", vh.Handler)

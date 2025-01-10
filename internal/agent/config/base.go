@@ -9,6 +9,8 @@ type Config struct {
 	Key            string
 	RateLimit      int
 	CryptoKey      string
+	Host           string
+	NetAddressGrpc netaddress.NetAddress
 }
 
 type preConfig struct {
@@ -18,6 +20,8 @@ type preConfig struct {
 	Key            *string
 	RateLimit      *int
 	CryptoKey      *string
+	Host           *string
+	NetAddressGrpc *netaddress.NetAddress
 }
 
 type setConfig struct {
@@ -27,6 +31,8 @@ type setConfig struct {
 	Key            bool
 	RateLimit      bool
 	CryptoKey      bool
+	Host           bool
+	NetAddressGrpc bool
 }
 
 func newPreConfig() preConfig {
@@ -37,6 +43,8 @@ func newPreConfig() preConfig {
 		Key:            nil,
 		RateLimit:      nil,
 		CryptoKey:      nil,
+		Host:           nil,
+		NetAddressGrpc: nil,
 	}
 }
 
@@ -48,5 +56,7 @@ func newSetConfig() setConfig {
 		Key:            false,
 		RateLimit:      false,
 		CryptoKey:      false,
+		Host:           false,
+		NetAddressGrpc: false,
 	}
 }

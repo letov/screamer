@@ -22,7 +22,7 @@ type MetricService struct {
 	activeJobs atomic.Int32
 }
 
-func (ms *MetricService) UpdatesMetricJSON(ctx context.Context, body *[]byte) (err error) {
+func (ms *MetricService) UpdateBatchMetricJSON(ctx context.Context, body *[]byte) (err error) {
 	ms.activeJobs.Add(1)
 	defer func() {
 		ms.activeJobs.Add(-1)
@@ -47,91 +47,58 @@ func (ms *MetricService) UpdatesMetricJSON(ctx context.Context, body *[]byte) (e
 	return ms.repo.BatchUpdate(ctx, mList)
 }
 
-func (ms *MetricService) UpdateMetricJSON(ctx context.Context, body *[]byte) (res *[]byte, err error) {
-	var jm metric.JSONMetric
-	err = json.Unmarshal(*body, &jm)
-	if err != nil {
-		return nil, err
-	}
-
+func (ms *MetricService) UpdateMetricJSON(ctx context.Context, jm metric.JSONMetric) (metric.Metric, error) {
 	m, err := metric.NewMetricFromJSON(&jm)
 	if err != nil {
-		return nil, err
+		return metric.Metric{}, err
 	}
 
 	return ms.processUpdateMetric(ctx, m)
 }
 
-func (ms *MetricService) UpdateMetricParams(ctx context.Context, n string, vs string, t string) (res *[]byte, err error) {
+func (ms *MetricService) UpdateMetricParams(ctx context.Context, n string, vs string, t string) (metric.Metric, error) {
 	v, err := strconv.ParseFloat(vs, 64)
 	if err != nil {
-		return nil, err
+		return metric.Metric{}, err
 	}
 
 	m, err := metric.NewMetric(n, v, t)
 	if err != nil {
-		return nil, err
+		return metric.Metric{}, err
 	}
 
 	return ms.processUpdateMetric(ctx, m)
 }
 
-func (ms *MetricService) processUpdateMetric(ctx context.Context, m *metric.Metric) (res *[]byte, err error) {
+func (ms *MetricService) processUpdateMetric(ctx context.Context, m *metric.Metric) (metric.Metric, error) {
 	ms.activeJobs.Add(1)
 	defer func() {
 		ms.activeJobs.Add(-1)
 	}()
 
-	var newM metric.Metric
-
 	if m.Ident.Type == metric.Counter {
-		newM, err = ms.repo.Increase(ctx, *m)
+		return ms.repo.Increase(ctx, *m)
 	} else {
-		newM, err = ms.repo.Add(ctx, *m)
+		return ms.repo.Add(ctx, *m)
 	}
-	if err != nil {
-		return nil, err
-	}
-
-	body, err := newM.Bytes()
-	return &body, err
 }
 
-func (ms *MetricService) ValueMetricJSON(ctx context.Context, body *[]byte) (res *[]byte, err error) {
-	var jm metric.JSONMetric
-	err = json.Unmarshal(*body, &jm)
-	if err != nil {
-		return nil, err
-	}
-
+func (ms *MetricService) ValueMetricJSON(ctx context.Context, jm metric.JSONMetric) (metric.Metric, error) {
 	i, err := metric.NewMetricIdentFromJSON(&jm)
 	if err != nil {
-		return nil, err
+		return metric.Metric{}, err
 	}
 
-	m, err := ms.repo.Get(ctx, i)
-	if err != nil {
-		return nil, err
-	}
-
-	bs, err := m.Bytes()
-	if err != nil {
-		return nil, err
-	}
-
-	return &bs, err
+	return ms.repo.Get(ctx, i)
 }
 
-func (ms *MetricService) ValueMetricParams(ctx context.Context, n string, t string) (res *[]byte, err error) {
+func (ms *MetricService) ValueMetricParams(ctx context.Context, n string, t string) (metric.Metric, error) {
 	i, err := metric.NewMetricIdent(n, t)
 	if err != nil {
-		return nil, err
+		return metric.Metric{}, err
 	}
 
-	m, err := ms.repo.Get(ctx, i)
-	bs := []byte(m.String())
-
-	return &bs, err
+	return ms.repo.Get(ctx, i)
 }
 
 func (ms *MetricService) Home(ctx context.Context) (res *[]byte) {

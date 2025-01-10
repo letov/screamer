@@ -21,6 +21,9 @@ func newDotenv() preConfig {
 	netAddress := new(netaddress.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", ""))
 
+	netAddressGrpc := new(netaddress.NetAddress)
+	_ = netAddressGrpc.Set(*getEnv("ADDRESS_GRPC", ""))
+
 	return preConfig{
 		NetAddress:     netAddress,
 		PollInterval:   getEnvInt("POLL_INTERVAL", 0),
@@ -28,6 +31,8 @@ func newDotenv() preConfig {
 		Key:            getEnv("KEY", ""),
 		RateLimit:      getEnvInt("RATE_LIMIT", 0),
 		CryptoKey:      getEnv("CRYPTO_KEY", ""),
+		Host:           getEnv("HOST", ""),
+		NetAddressGrpc: netAddressGrpc,
 	}
 }
 

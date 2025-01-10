@@ -14,5 +14,7 @@ var (
 
 	ErrInvalidHash = errors.New("invalid hash")
 
-	ErrServiceStop = errors.New("service is stop")
+	ErrXRealIpEmpty         = errors.New("header X-Real-IP is empty")
+	ErrTrustedSubnetInvalid = errors.New("invalid trusted subnet")
+	ErrTrustedSubnetUnTrust = errors.New("untrusted subnet")
 )
