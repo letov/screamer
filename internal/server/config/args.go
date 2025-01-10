@@ -14,6 +14,9 @@ func newArgs() preConfig {
 	netAddress := new(net_address.NetAddress)
 	flag.Var(netAddress, "a", "Server address host:port")
 
+	netAddressGrpc := new(net_address.NetAddress)
+	flag.Var(netAddressGrpc, "ag", "Grpc server address host:port")
+
 	pre := preConfig{
 		NetAddress:      netAddress,
 		DBAddress:       flag.String("d", "", "DBAddress desc"),
@@ -23,6 +26,7 @@ func newArgs() preConfig {
 		Key:             flag.String("k", "", "Key desc"),
 		CryptoKey:       flag.String("crypto-key", "", "CryptoKey desc"),
 		TrustedSubnet:   flag.String("t", "", "TrustedSubnet desc"),
+		NetAddressGrpc:  netAddressGrpc,
 	}
 
 	set := newSetConfig()
@@ -47,6 +51,8 @@ func newArgs() preConfig {
 			set.CryptoKey = true
 		case "t":
 			set.CryptoKey = true
+		case "ag":
+			set.NetAddressGrpc = true
 		}
 	})
 
@@ -73,6 +79,9 @@ func newArgs() preConfig {
 	}
 	if !set.TrustedSubnet {
 		pre.TrustedSubnet = nil
+	}
+	if !set.NetAddressGrpc {
+		pre.NetAddressGrpc = nil
 	}
 
 	return pre

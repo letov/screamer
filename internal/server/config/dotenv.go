@@ -21,6 +21,9 @@ func newDotenv() preConfig {
 	netAddress := new(net_address.NetAddress)
 	_ = netAddress.Set(*getEnv("ADDRESS", ""))
 
+	netAddressGrpc := new(net_address.NetAddress)
+	_ = netAddressGrpc.Set(*getEnv("ADDRESS_GRPC", ""))
+
 	r := *getEnv("RESTORE", "false")
 	br, err := strconv.ParseBool(r)
 	if err != nil {
@@ -36,6 +39,7 @@ func newDotenv() preConfig {
 		Key:             getEnv("KEY", ""),
 		CryptoKey:       getEnv("CRYPTO_KEY", ""),
 		TrustedSubnet:   getEnv("TRUSTED_SUBNET", ""),
+		NetAddressGrpc:  netAddressGrpc,
 	}
 }
 

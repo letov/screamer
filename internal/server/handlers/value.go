@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
+	"errors"
 	"io"
 	"net/http"
 	"screamer/internal/common"
+	"screamer/internal/common/metric"
 	"screamer/internal/server/services"
 	"time"
 )
@@ -24,9 +27,16 @@ func (h *ValueMetricHandler) Handler(res http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	body, err := h.ms.ValueMetricJSON(ctx, &data)
+	var jm metric.JSONMetric
+	err = json.Unmarshal(data, &jm)
 	if err != nil {
-		if err == common.ErrMetricNotExists {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	m, err := h.ms.ValueMetricJSON(ctx, jm)
+	if err != nil {
+		if errors.Is(err, common.ErrMetricNotExists) {
 			http.Error(res, err.Error(), http.StatusNotFound)
 			return
 		}
@@ -34,8 +44,13 @@ func (h *ValueMetricHandler) Handler(res http.ResponseWriter, req *http.Request)
 		return
 	}
 
+	body, err := m.Bytes()
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+	}
+
 	res.Header().Set("Content-Type", "application/json")
-	if _, err = res.Write(*body); err != nil {
+	if _, err = res.Write(body); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}

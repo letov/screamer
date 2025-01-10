@@ -8,11 +8,11 @@ import (
 	"time"
 )
 
-type UpdatesMetricHandler struct {
+type UpdateBatchMetricHandler struct {
 	ms *services.MetricService
 }
 
-func (h *UpdatesMetricHandler) Handler(res http.ResponseWriter, req *http.Request) {
+func (h *UpdateBatchMetricHandler) Handler(res http.ResponseWriter, req *http.Request) {
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 
@@ -23,7 +23,7 @@ func (h *UpdatesMetricHandler) Handler(res http.ResponseWriter, req *http.Reques
 		return
 	}
 
-	err = h.ms.UpdatesMetricJSON(ctx, &data)
+	err = h.ms.UpdateBatchMetricJSON(ctx, &data)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
@@ -37,8 +37,8 @@ func (h *UpdatesMetricHandler) Handler(res http.ResponseWriter, req *http.Reques
 	}
 }
 
-func NewUpdatesMetricHandler(ms *services.MetricService) *UpdatesMetricHandler {
-	return &UpdatesMetricHandler{
+func NewUpdateBatchMetricHandler(ms *services.MetricService) *UpdateBatchMetricHandler {
+	return &UpdateBatchMetricHandler{
 		ms: ms,
 	}
 }

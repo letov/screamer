@@ -2,6 +2,7 @@ package handlers
 
 import (
 	"context"
+	"errors"
 	"net/http"
 	"screamer/internal/common"
 	"screamer/internal/server/services"
@@ -21,9 +22,9 @@ func (h *ValueMetricOldHandler) Handler(res http.ResponseWriter, req *http.Reque
 	t := chi.URLParam(req, "type")
 	n := chi.URLParam(req, "name")
 
-	body, err := h.ms.ValueMetricParams(ctx, n, t)
+	m, err := h.ms.ValueMetricParams(ctx, n, t)
 	if err != nil {
-		if err == common.ErrMetricNotExists {
+		if errors.Is(err, common.ErrMetricNotExists) {
 			http.Error(res, err.Error(), http.StatusNotFound)
 			return
 		}
@@ -31,8 +32,13 @@ func (h *ValueMetricOldHandler) Handler(res http.ResponseWriter, req *http.Reque
 		return
 	}
 
+	body, err := m.Bytes()
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+	}
+
 	res.Header().Set("Content-Type", "text/html")
-	if _, err = res.Write(*body); err != nil {
+	if _, err = res.Write(body); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}

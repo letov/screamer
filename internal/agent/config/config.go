@@ -26,6 +26,7 @@ func NewConfig() *Config {
 		RateLimit:      getPriorConfigValue(cs, "RateLimit").(int),
 		CryptoKey:      getPriorConfigValue(cs, "CryptoKey").(string),
 		Host:           getPriorConfigValue(cs, "Host").(string),
+		NetAddressGrpc: getPriorConfigValue(cs, "NetAddressGrpc").(net_address.NetAddress),
 	}
 }
 

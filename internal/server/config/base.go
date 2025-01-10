@@ -11,6 +11,7 @@ type Config struct {
 	Key             string
 	CryptoKey       string
 	TrustedSubnet   string
+	NetAddressGrpc  net_address.NetAddress
 }
 
 type preConfig struct {
@@ -22,6 +23,7 @@ type preConfig struct {
 	Key             *string
 	CryptoKey       *string
 	TrustedSubnet   *string
+	NetAddressGrpc  *net_address.NetAddress
 }
 
 type setConfig struct {
@@ -33,6 +35,7 @@ type setConfig struct {
 	Key             bool
 	CryptoKey       bool
 	TrustedSubnet   bool
+	NetAddressGrpc  bool
 }
 
 func newPreConfig() preConfig {
@@ -45,6 +48,7 @@ func newPreConfig() preConfig {
 		Key:             nil,
 		CryptoKey:       nil,
 		TrustedSubnet:   nil,
+		NetAddressGrpc:  nil,
 	}
 }
 
@@ -58,5 +62,6 @@ func newSetConfig() setConfig {
 		Key:             false,
 		CryptoKey:       false,
 		TrustedSubnet:   false,
+		NetAddressGrpc:  false,
 	}
 }

@@ -9,6 +9,9 @@ func newArgs() preConfig {
 	netAddress := new(net_address.NetAddress)
 	flag.Var(netAddress, "a", "Server address host:port")
 
+	netAddressGrpc := new(net_address.NetAddress)
+	flag.Var(netAddressGrpc, "ag", "Grpc server address host:port")
+
 	pre := preConfig{
 		NetAddress:     netAddress,
 		PollInterval:   flag.Int("p", 0, "PollInterval desc"),
@@ -17,6 +20,7 @@ func newArgs() preConfig {
 		RateLimit:      flag.Int("l", 0, "RateLimit desc"),
 		CryptoKey:      flag.String("crypto-key", "", "CryptoKey desc"),
 		Host:           flag.String("h", "", "Host desc"),
+		NetAddressGrpc: netAddressGrpc,
 	}
 
 	set := newSetConfig()
@@ -39,6 +43,8 @@ func newArgs() preConfig {
 			set.CryptoKey = true
 		case "h":
 			set.Host = true
+		case "ag":
+			set.NetAddressGrpc = true
 		}
 	})
 
@@ -62,6 +68,9 @@ func newArgs() preConfig {
 	}
 	if !set.Host {
 		pre.Host = nil
+	}
+	if !set.NetAddressGrpc {
+		pre.NetAddressGrpc = nil
 	}
 
 	return pre

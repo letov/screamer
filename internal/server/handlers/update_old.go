@@ -21,14 +21,19 @@ func (h *UpdateMetricOldHandler) Handler(res http.ResponseWriter, req *http.Requ
 	v := chi.URLParam(req, "value")
 	t := chi.URLParam(req, "type")
 
-	body, err := h.ms.UpdateMetricParams(ctx, n, v, t)
+	m, err := h.ms.UpdateMetricParams(ctx, n, v, t)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	body, err := m.Bytes()
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+	}
+
 	res.Header().Set("Content-Type", "application/json")
-	if _, err = res.Write(*body); err != nil {
+	if _, err = res.Write(body); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}

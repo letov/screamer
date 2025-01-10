@@ -15,7 +15,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_updatesGaugeHandler(t *testing.T) {
+func Test_updateBatchGaugeHandler(t *testing.T) {
 	type args struct {
 		t     metric.Type
 		name  string
@@ -75,7 +75,7 @@ func Test_updatesGaugeHandler(t *testing.T) {
 					},
 				})
 
-				req, err := http.NewRequest("POST", "/updates", bytes.NewBuffer(data))
+				req, err := http.NewRequest("POST", "/update-batch", bytes.NewBuffer(data))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -95,7 +95,7 @@ func Test_updatesGaugeHandler(t *testing.T) {
 	}
 }
 
-func Test_updatesCounterHandler(t *testing.T) {
+func Test_updateBatchCounterHandler(t *testing.T) {
 	type args struct {
 		t     metric.Type
 		name  string
@@ -155,7 +155,7 @@ func Test_updatesCounterHandler(t *testing.T) {
 					},
 				})
 
-				req, err := http.NewRequest("POST", "/updates", bytes.NewBuffer(data))
+				req, err := http.NewRequest("POST", "/updateBatch", bytes.NewBuffer(data))
 				if err != nil {
 					t.Fatal(err)
 				}
@@ -175,7 +175,7 @@ func Test_updatesCounterHandler(t *testing.T) {
 	}
 }
 
-func Test_updatesNegativeTypeHandler(t *testing.T) {
+func Test_updateBatchNegativeTypeHandler(t *testing.T) {
 	type args struct {
 		t     metric.Type
 		name  string
@@ -235,7 +235,7 @@ func Test_updatesNegativeTypeHandler(t *testing.T) {
 					},
 				})
 
-				req, err := http.NewRequest("POST", "/updates", bytes.NewBuffer(data))
+				req, err := http.NewRequest("POST", "/updateBatch", bytes.NewBuffer(data))
 				if err != nil {
 					t.Fatal(err)
 				}

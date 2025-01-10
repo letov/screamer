@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
+	"screamer/internal/common/metric"
 	"screamer/internal/server/services"
 	"time"
 )
@@ -23,14 +25,26 @@ func (h *UpdateMetricHandler) Handler(res http.ResponseWriter, req *http.Request
 		return
 	}
 
-	body, err := h.ms.UpdateMetricJSON(ctx, &data)
+	var jm metric.JSONMetric
+	err = json.Unmarshal(data, &jm)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	m, err := h.ms.UpdateMetricJSON(ctx, jm)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	body, err := m.Bytes()
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+	}
+
 	res.Header().Set("Content-Type", "application/json")
-	if _, err = res.Write(*body); err != nil {
+	if _, err = res.Write(body); err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}

@@ -2,10 +2,12 @@ package di
 
 import (
 	event_loop "screamer/internal/common/eventloop"
+	"screamer/internal/common/grpcclient"
 	"screamer/internal/common/logger"
 	"screamer/internal/server/config"
 	"screamer/internal/server/db"
 	"screamer/internal/server/events"
+	"screamer/internal/server/grpcserver"
 	"screamer/internal/server/handlers"
 	"screamer/internal/server/httpserver"
 	"screamer/internal/server/mux"
@@ -50,7 +52,7 @@ func InjectApp() fx.Option {
 
 		handlers.NewHomeHandler,
 		handlers.NewUpdateMetricHandler,
-		handlers.NewUpdatesMetricHandler,
+		handlers.NewUpdateBatchMetricHandler,
 		handlers.NewUpdateMetricOldHandler,
 		handlers.NewValueMetricHandler,
 		handlers.NewValueMetricOldHandler,
@@ -61,5 +63,7 @@ func InjectApp() fx.Option {
 
 		mux.NewMux,
 		httpserver.NewHTTPServer,
+		grpcserver.NewGRPCServer,
+		grpcclient.NewGRPCClient,
 	)
 }

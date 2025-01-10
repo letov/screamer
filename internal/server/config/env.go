@@ -59,5 +59,14 @@ func newEnv() preConfig {
 		pre.CryptoKey = &t
 	}
 
+	ag, exists := os.LookupEnv("ADDRESS_GRPC")
+	if exists {
+		netAddressGrpc := new(net_address.NetAddress)
+		err := netAddressGrpc.Set(ag)
+		if err == nil {
+			pre.NetAddress = netAddressGrpc
+		}
+	}
+
 	return pre
 }
