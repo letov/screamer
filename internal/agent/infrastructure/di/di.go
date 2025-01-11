@@ -1,7 +1,7 @@
 package di
 
 import (
-	"screamer/internal/agent/application/agent_services"
+	"screamer/internal/agent/application/agentservices"
 	"screamer/internal/agent/infrastructure/config"
 	"screamer/internal/agent/infrastructure/events"
 	metric_sources "screamer/internal/agent/infrastructure/metricsources"
@@ -23,8 +23,8 @@ func InjectApp() fx.Option {
 		store.NewMemoryRepository,
 		metric_sources.NewMetricSources,
 
-		agent_services.NewProcessing,
-		agent_services.NewSending,
+		agentservices.NewProcessing,
+		agentservices.NewSending,
 
 		handlers.NewHomeHandler,
 		handlers.NewUpdateMetricHandler,

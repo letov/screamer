@@ -1,4 +1,4 @@
-package agent_services
+package agentservices
 
 import (
 	"context"

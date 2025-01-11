@@ -26,6 +26,10 @@ func (h *ValueMetricOldHandler) Handler(res http.ResponseWriter, req *http.Reque
 	n := chi.URLParam(req, "name")
 
 	m, err := domain.NewMetric(n, 0, domain.Type(t))
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
 
 	jm, err := dto.NewJSONMetric(m)
 	if err != nil {

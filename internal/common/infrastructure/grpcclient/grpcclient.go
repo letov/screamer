@@ -20,7 +20,7 @@ func NewGRPCClient(
 	lc fx.Lifecycle,
 	log *zap.SugaredLogger,
 ) *GRPCClient {
-	conn, err := grpc.Dial(":8081", grpc.WithTransportCredentials(insecure.NewCredentials()))
+	conn, err := grpc.NewClient(":8081", grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		log.Fatal(err)
 	}
