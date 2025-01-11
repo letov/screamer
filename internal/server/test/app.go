@@ -3,8 +3,8 @@ package test
 import (
 	"context"
 	"fmt"
-	"screamer/internal/server/db"
-	"screamer/internal/server/di"
+	"screamer/internal/server/infrastructure/db"
+	"screamer/internal/server/infrastructure/di"
 	"testing"
 
 	"go.uber.org/fx"

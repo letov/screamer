@@ -6,9 +6,9 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"screamer/internal/common"
-	"screamer/internal/common/metric"
-	"screamer/internal/server/db"
-	"screamer/internal/server/repositories"
+	"screamer/internal/common/domain"
+	"screamer/internal/server/application/repo"
+	"screamer/internal/server/infrastructure/db"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -17,7 +17,7 @@ import (
 
 func Test_updateOldHandler(t *testing.T) {
 	type args struct {
-		t     metric.Type
+		t     domain.Type
 		name  string
 		value float64
 	}
@@ -28,7 +28,7 @@ func Test_updateOldHandler(t *testing.T) {
 		{
 			name: "positive test #1",
 			args: args{
-				t:     metric.Counter,
+				t:     domain.Counter,
 				name:  "test",
 				value: 100,
 			},
@@ -36,7 +36,7 @@ func Test_updateOldHandler(t *testing.T) {
 		{
 			name: "positive test #2",
 			args: args{
-				t:     metric.Gauge,
+				t:     domain.Gauge,
 				name:  "test2",
 				value: 1232.22,
 			},
@@ -44,7 +44,7 @@ func Test_updateOldHandler(t *testing.T) {
 		{
 			name: "positive test #3",
 			args: args{
-				t:     metric.Gauge,
+				t:     domain.Gauge,
 				name:  "test3",
 				value: 0,
 			},
@@ -52,7 +52,7 @@ func Test_updateOldHandler(t *testing.T) {
 		{
 			name: "positive test #4",
 			args: args{
-				t:     metric.Gauge,
+				t:     domain.Gauge,
 				name:  "test4",
 				value: 123122,
 			},
@@ -60,7 +60,7 @@ func Test_updateOldHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 				url := fmt.Sprintf("/update/%v/%v/%v", tt.args.t.String(), tt.args.name, tt.args.value)
@@ -71,7 +71,7 @@ func Test_updateOldHandler(t *testing.T) {
 				rr := httptest.NewRecorder()
 				mux.ServeHTTP(rr, req)
 				assert.Equal(t, rr.Code, http.StatusOK)
-				m, err := repo.Get(ctx, metric.Ident{
+				m, err := repo.Get(ctx, domain.Ident{
 					Type: tt.args.t,
 					Name: tt.args.name,
 				})
@@ -86,7 +86,7 @@ func Test_updateOldHandler(t *testing.T) {
 
 func Test_updateOldNegativeHandler(t *testing.T) {
 	type args struct {
-		t     metric.Type
+		t     domain.Type
 		name  string
 		value float64
 	}
@@ -97,7 +97,7 @@ func Test_updateOldNegativeHandler(t *testing.T) {
 		{
 			name: "negative test #1",
 			args: args{
-				t:     metric.Counter,
+				t:     domain.Counter,
 				name:  "test1",
 				value: 100,
 			},
@@ -105,7 +105,7 @@ func Test_updateOldNegativeHandler(t *testing.T) {
 		{
 			name: "negative test #1",
 			args: args{
-				t:     metric.Gauge,
+				t:     domain.Gauge,
 				name:  "test2",
 				value: 123123,
 			},
@@ -113,10 +113,10 @@ func Test_updateOldNegativeHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
-				_, err := repo.Get(ctx, metric.Ident{
+				_, err := repo.Get(ctx, domain.Ident{
 					Type: tt.args.t,
 					Name: tt.args.name,
 				})
@@ -155,7 +155,7 @@ func Test_updateOldNegativeTypeHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 				url := fmt.Sprintf("/update/%v/%v/%v", tt.args.t, tt.args.name, tt.args.value)

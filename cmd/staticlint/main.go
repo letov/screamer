@@ -1,7 +1,7 @@
 package main
 
 import (
-	"screamer/internal/common/checks/osexit"
+	"screamer/internal/common/helpers/checks/osexit"
 
 	"golang.org/x/tools/go/analysis"
 	"golang.org/x/tools/go/analysis/multichecker"

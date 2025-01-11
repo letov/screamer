@@ -1,0 +1,32 @@
+syntax = "proto3";
+
+package demo;
+
+option go_package = "screamer/proto/compiled";
+
+enum MType {
+    COUNTER = 0;
+    GAUGE = 1;
+}
+
+message Request {
+  string id = 1;
+  MType mtype = 2;
+  int64 delta = 3;
+  float value = 4;
+}
+
+message Ident {
+  string type = 1;
+  string name = 2;
+}
+
+message Response {
+  Ident ident = 1;
+  float value = 2;
+}
+
+service ScreamerService {
+  rpc UpdateValue(Request) returns (Response);
+  rpc GetValue(Request) returns (Response);
+}
