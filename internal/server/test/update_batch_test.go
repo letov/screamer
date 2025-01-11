@@ -63,7 +63,7 @@ func Test_updateBatchGaugeHandler(t *testing.T) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal([]dto.JsonMetric{
+				data, _ := json.Marshal([]dto.JSONMetric{
 					{
 						ID:    tt.args[0].name,
 						MType: tt.args[0].t.String(),
@@ -143,7 +143,7 @@ func Test_updateBatchCounterHandler(t *testing.T) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal([]dto.JsonMetric{
+				data, _ := json.Marshal([]dto.JSONMetric{
 					{
 						ID:    tt.args[0].name,
 						MType: tt.args[0].t.String(),
@@ -223,7 +223,7 @@ func Test_updateBatchNegativeTypeHandler(t *testing.T) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal([]dto.JsonMetric{
+				data, _ := json.Marshal([]dto.JSONMetric{
 					{
 						ID:    tt.args[0].name,
 						MType: tt.args[0].t.String(),

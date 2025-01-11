@@ -25,7 +25,7 @@ func (h *UpdateBatchMetricHandler) Handler(res http.ResponseWriter, req *http.Re
 		return
 	}
 
-	var jms []dto.JsonMetric
+	var jms []dto.JSONMetric
 	err = json.Unmarshal(data, &jms)
 	if err != nil {
 		return

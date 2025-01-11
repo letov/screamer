@@ -14,7 +14,7 @@ var (
 
 	ErrInvalidHash = errors.New("invalid hash")
 
-	ErrXRealIpEmpty         = errors.New("header X-Real-IP is empty")
+	ErrXRealIPEmpty         = errors.New("header X-Real-IP is empty")
 	ErrTrustedSubnetInvalid = errors.New("invalid trusted subnet")
 	ErrTrustedSubnetUnTrust = errors.New("untrusted subnet")
 )

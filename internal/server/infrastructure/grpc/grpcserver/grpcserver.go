@@ -20,7 +20,7 @@ type GRPCServer struct {
 }
 
 func (m *GRPCServer) UpdateValue(ctx context.Context, in *pb.Request) (*pb.Response, error) {
-	jm := dto.NewJsonMetricFromPb(in)
+	jm := dto.NewJSONMetricFromPb(in)
 	r, err := m.Ms.UpdateMetricJSON(ctx, jm)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func (m *GRPCServer) UpdateValue(ctx context.Context, in *pb.Request) (*pb.Respo
 }
 
 func (m *GRPCServer) GetValue(ctx context.Context, in *pb.Request) (*pb.Response, error) {
-	jm := dto.NewJsonMetricFromPb(in)
+	jm := dto.NewJSONMetricFromPb(in)
 	mtr, err := m.Ms.ValueMetricJSON(ctx, jm)
 	if err != nil {
 		return nil, err

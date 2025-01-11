@@ -37,7 +37,7 @@ func (h *UpdateMetricOldHandler) Handler(res http.ResponseWriter, req *http.Requ
 		return
 	}
 
-	jm, err := dto.NewJsonMetric(m)
+	jm, err := dto.NewJSONMetric(m)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

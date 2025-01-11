@@ -27,7 +27,7 @@ func (h *ValueMetricOldHandler) Handler(res http.ResponseWriter, req *http.Reque
 
 	m, err := domain.NewMetric(n, 0, domain.Type(t))
 
-	jm, err := dto.NewJsonMetric(m)
+	jm, err := dto.NewJSONMetric(m)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

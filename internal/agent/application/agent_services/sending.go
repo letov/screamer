@@ -71,13 +71,13 @@ func (ss *Sending) requestOne(ctx context.Context, m domain.Metric) {
 	if len(ss.config.NetAddressGrpc.String()) > 0 {
 		job = ss.requestJobGrpc(m, ss.gc, &ss.activeJobs)
 	} else {
-		job = ss.requestJobHttp(&body, url, &ss.activeJobs)
+		job = ss.requestJobHTTP(&body, url, &ss.activeJobs)
 	}
 
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
 }
 
-func (ss *Sending) getIp() string {
+func (ss *Sending) getIP() string {
 	ips, _ := net.LookupIP(ss.config.Host)
 	if len(ips) == 0 {
 		ss.log.Fatal("host lookup fail")
@@ -87,13 +87,13 @@ func (ss *Sending) getIp() string {
 
 func (ss *Sending) requestAll(ctx context.Context, ms []domain.Metric) {
 	url := fmt.Sprintf("http://%v/updates", ss.config.NetAddress.String())
-	var jms []dto.JsonMetric
+	var jms []dto.JSONMetric
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	for _, m := range ms {
-		jm, err := dto.NewJsonMetric(m)
+		jm, err := dto.NewJSONMetric(m)
 		if err != nil {
 			ss.log.Warn("Request error", err.Error())
 			return
@@ -107,11 +107,11 @@ func (ss *Sending) requestAll(ctx context.Context, ms []domain.Metric) {
 		return
 	}
 
-	job := ss.requestJobHttp(&body, url, &ss.activeJobs)
+	job := ss.requestJobHTTP(&body, url, &ss.activeJobs)
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
 }
 
-func (ss *Sending) requestJobHttp(
+func (ss *Sending) requestJobHTTP(
 	body *[]byte,
 	url string,
 	aj *atomic.Int32,
@@ -123,7 +123,7 @@ func (ss *Sending) requestJobHttp(
 		}()
 
 		client := http.Client{}
-		ip := ss.getIp()
+		ip := ss.getIP()
 		req, err := http.NewRequestWithContext(ctx, http.MethodPost, url, bytes.NewBuffer(*body))
 		if err != nil {
 			return nil, err

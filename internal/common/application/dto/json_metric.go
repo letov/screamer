@@ -7,15 +7,15 @@ import (
 	"strings"
 )
 
-// JsonMetric метрика в json (формат структуры из задания)
-type JsonMetric struct {
+// JSONMetric метрика в json (формат структуры из задания)
+type JSONMetric struct {
 	ID    string   `json:"id"`
 	MType string   `json:"type"`
 	Delta *int64   `json:"delta,omitempty"`
 	Value *float64 `json:"value,omitempty"`
 }
 
-func (jm JsonMetric) GetDomainMetric() (domain.Metric, error) {
+func (jm JSONMetric) GetDomainMetric() (domain.Metric, error) {
 	switch domain.Type(jm.MType) {
 	case domain.Counter:
 		if jm.Delta == nil {
@@ -32,7 +32,7 @@ func (jm JsonMetric) GetDomainMetric() (domain.Metric, error) {
 	}
 }
 
-func (jm JsonMetric) GetIdent() (domain.Ident, error) {
+func (jm JSONMetric) GetIdent() (domain.Ident, error) {
 	m, err := jm.GetDomainMetric()
 	if err != nil {
 		return domain.Ident{}, err
@@ -40,11 +40,11 @@ func (jm JsonMetric) GetIdent() (domain.Ident, error) {
 	return m.Ident, nil
 }
 
-func NewJsonMetricFromPb(pb *pb.Request) JsonMetric {
+func NewJSONMetricFromPb(pb *pb.Request) JSONMetric {
 	delta := pb.GetDelta()
 	value := float64(pb.GetValue())
 
-	return JsonMetric{
+	return JSONMetric{
 		ID:    pb.GetId(),
 		MType: strings.ToLower(pb.GetMtype().String()),
 		Delta: &delta,
@@ -52,24 +52,24 @@ func NewJsonMetricFromPb(pb *pb.Request) JsonMetric {
 	}
 }
 
-func NewJsonMetric(m domain.Metric) (JsonMetric, error) {
+func NewJSONMetric(m domain.Metric) (JSONMetric, error) {
 	switch m.Ident.Type {
 	case domain.Counter:
 		v := int64(m.Value)
-		return JsonMetric{
+		return JSONMetric{
 			ID:    m.Ident.Name,
 			MType: m.Ident.Type.String(),
 			Delta: &v,
 			Value: nil,
 		}, nil
 	case domain.Gauge:
-		return JsonMetric{
+		return JSONMetric{
 			ID:    m.Ident.Name,
 			MType: m.Ident.Type.String(),
 			Delta: nil,
 			Value: &m.Value,
 		}, nil
 	default:
-		return JsonMetric{}, common.ErrTypeNotExists
+		return JSONMetric{}, common.ErrTypeNotExists
 	}
 }

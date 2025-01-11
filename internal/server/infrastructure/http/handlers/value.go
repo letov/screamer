@@ -27,7 +27,7 @@ func (h *ValueMetricHandler) Handler(res http.ResponseWriter, req *http.Request)
 		return
 	}
 
-	var jm dto.JsonMetric
+	var jm dto.JSONMetric
 	err = json.Unmarshal(data, &jm)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)

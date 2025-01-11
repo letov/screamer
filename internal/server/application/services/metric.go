@@ -21,7 +21,7 @@ type MetricService struct {
 	activeJobs atomic.Int32
 }
 
-func (ms *MetricService) UpdateBatchMetricJSON(ctx context.Context, jms []dto.JsonMetric) (err error) {
+func (ms *MetricService) UpdateBatchMetricJSON(ctx context.Context, jms []dto.JSONMetric) (err error) {
 	ms.activeJobs.Add(1)
 	defer func() {
 		ms.activeJobs.Add(-1)
@@ -40,16 +40,16 @@ func (ms *MetricService) UpdateBatchMetricJSON(ctx context.Context, jms []dto.Js
 	return ms.repo.BatchUpdate(ctx, mList)
 }
 
-func (ms *MetricService) UpdateMetricJSON(ctx context.Context, jm dto.JsonMetric) (dto.JsonMetric, error) {
+func (ms *MetricService) UpdateMetricJSON(ctx context.Context, jm dto.JSONMetric) (dto.JSONMetric, error) {
 	m, err := jm.GetDomainMetric()
 	if err != nil {
-		return dto.JsonMetric{}, err
+		return dto.JSONMetric{}, err
 	}
 
 	return ms.processUpdateMetric(ctx, m)
 }
 
-func (ms *MetricService) processUpdateMetric(ctx context.Context, m domain.Metric) (dto.JsonMetric, error) {
+func (ms *MetricService) processUpdateMetric(ctx context.Context, m domain.Metric) (dto.JSONMetric, error) {
 	ms.activeJobs.Add(1)
 	defer func() {
 		ms.activeJobs.Add(-1)
@@ -63,12 +63,12 @@ func (ms *MetricService) processUpdateMetric(ctx context.Context, m domain.Metri
 		res, e = ms.repo.Add(ctx, m)
 	}
 	if e != nil {
-		return dto.JsonMetric{}, e
+		return dto.JSONMetric{}, e
 	}
-	return dto.NewJsonMetric(res)
+	return dto.NewJSONMetric(res)
 }
 
-func (ms *MetricService) ValueMetricJSON(ctx context.Context, jm dto.JsonMetric) (domain.Metric, error) {
+func (ms *MetricService) ValueMetricJSON(ctx context.Context, jm dto.JSONMetric) (domain.Metric, error) {
 	i, err := jm.GetIdent()
 	if err != nil {
 		return domain.Metric{}, err

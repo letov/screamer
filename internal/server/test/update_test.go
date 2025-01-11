@@ -49,7 +49,7 @@ func Test_updateCounterHandler(t *testing.T) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal(dto.JsonMetric{
+				data, _ := json.Marshal(dto.JSONMetric{
 					ID:    tt.args.name,
 					MType: tt.args.t.String(),
 					Delta: &tt.args.value,
@@ -108,7 +108,7 @@ func Test_updateGaugeHandler(t *testing.T) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal(dto.JsonMetric{
+				data, _ := json.Marshal(dto.JSONMetric{
 					ID:    tt.args.name,
 					MType: tt.args.t.String(),
 					Value: &tt.args.value,
@@ -167,7 +167,7 @@ func Test_updateNegativeTypeHandler(t *testing.T) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal(dto.JsonMetric{
+				data, _ := json.Marshal(dto.JSONMetric{
 					ID:    tt.args.name,
 					MType: tt.args.t,
 					Value: &tt.args.value,
@@ -218,7 +218,7 @@ func Test_updateNegativeCounterHandler(t *testing.T) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal(dto.JsonMetric{
+				data, _ := json.Marshal(dto.JSONMetric{
 					ID:    tt.args.name,
 					MType: tt.args.t.String(),
 					Value: &tt.args.value,

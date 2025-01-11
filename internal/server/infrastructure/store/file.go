@@ -28,7 +28,7 @@ func (fr *File) BatchUpdate(_ context.Context, _ []domain.Metric) error {
 }
 
 type JSONMetricList struct {
-	Array []dto.JsonMetric
+	Array []dto.JSONMetric
 }
 
 func (fr *File) GetAll(ctx context.Context) []domain.Metric {
@@ -91,9 +91,9 @@ func (fr *File) toFileJob(ms []domain.Metric) func(ctx context.Context) (bool, e
 	return func(ctx context.Context) (bool, error) {
 		fp := fr.c.FileStoragePath
 
-		jms := make([]dto.JsonMetric, 0)
+		jms := make([]dto.JSONMetric, 0)
 		for _, m := range ms {
-			j, err := dto.NewJsonMetric(m)
+			j, err := dto.NewJSONMetric(m)
 			fr.processError(err)
 			jms = append(jms, j)
 		}
