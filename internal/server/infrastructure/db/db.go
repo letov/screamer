@@ -4,7 +4,7 @@ import (
 	"context"
 	"embed"
 	"screamer/internal/common"
-	"screamer/internal/server/config"
+	"screamer/internal/server/infrastructure/config"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgxpool"

@@ -1,9 +1,9 @@
 package mux
 
 import (
-	"screamer/internal/server/config"
-	"screamer/internal/server/handlers"
-	"screamer/internal/server/middlewares"
+	"screamer/internal/server/infrastructure/config"
+	handlers2 "screamer/internal/server/infrastructure/http/handlers"
+	"screamer/internal/server/infrastructure/http/middlewares"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -13,13 +13,13 @@ import (
 
 func NewMux(
 	c *config.Config,
-	hh *handlers.HomeHandler,
-	uh *handlers.UpdateMetricHandler,
-	ush *handlers.UpdateBatchMetricHandler,
-	uoh *handlers.UpdateMetricOldHandler,
-	vh *handlers.ValueMetricHandler,
-	voh *handlers.ValueMetricOldHandler,
-	ph *handlers.PingHandler,
+	hh *handlers2.HomeHandler,
+	uh *handlers2.UpdateMetricHandler,
+	ush *handlers2.UpdateBatchMetricHandler,
+	uoh *handlers2.UpdateMetricOldHandler,
+	vh *handlers2.ValueMetricHandler,
+	voh *handlers2.ValueMetricOldHandler,
+	ph *handlers2.PingHandler,
 	log *zap.SugaredLogger,
 ) *chi.Mux {
 	r := chi.NewRouter()
@@ -34,7 +34,7 @@ func NewMux(
 	r.Use(middlewares.Logger)
 	r.Use(middlewares.CheckHash(c))
 	r.Use(middlewares.Decrypt(c, log))
-	r.Use(middlewares.TrustedSubnet(c, log))
+	r.Use(middlewares.TrustedSubnet(c))
 	r.Use(middlewares.Curl)
 
 	r.Get("/", hh.Handler)

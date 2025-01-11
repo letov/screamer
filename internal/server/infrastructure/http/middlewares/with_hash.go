@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"screamer/internal/common"
 	"screamer/internal/common/helpers/hash"
-	"screamer/internal/server/config"
+	"screamer/internal/server/infrastructure/config"
 )
 
 type hashWriter struct {

@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 	"screamer/internal/common"
-	"screamer/internal/server/services"
+	"screamer/internal/server/application/services"
 	"time"
 
 	"github.com/go-chi/chi/v5"

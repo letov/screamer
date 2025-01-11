@@ -4,7 +4,7 @@ import (
 	"net"
 	"net/http"
 	"screamer/internal/common"
-	"screamer/internal/server/config"
+	"screamer/internal/server/infrastructure/config"
 )
 
 func TrustedSubnet(c *config.Config) func(next http.Handler) http.Handler {

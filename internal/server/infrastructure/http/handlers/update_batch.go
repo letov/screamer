@@ -4,7 +4,7 @@ import (
 	"context"
 	"io"
 	"net/http"
-	"screamer/internal/server/services"
+	"screamer/internal/server/application/services"
 	"time"
 )
 

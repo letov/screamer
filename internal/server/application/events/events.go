@@ -3,8 +3,8 @@ package events
 import (
 	"context"
 	event_loop "screamer/internal/common/infrastructure/eventloop"
-	"screamer/internal/server/config"
-	"screamer/internal/server/repositories"
+	"screamer/internal/server/infrastructure/config"
+	"screamer/internal/server/infrastructure/repositories"
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"

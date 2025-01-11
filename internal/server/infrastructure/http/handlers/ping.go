@@ -3,7 +3,7 @@ package handlers
 import (
 	"context"
 	"net/http"
-	"screamer/internal/server/db"
+	"screamer/internal/server/infrastructure/db"
 	"time"
 )
 

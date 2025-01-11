@@ -6,7 +6,7 @@ import (
 	"screamer/internal/common"
 	"screamer/internal/common/domain/metric"
 	"screamer/internal/common/helpers/retry"
-	"screamer/internal/server/db"
+	"screamer/internal/server/infrastructure/db"
 
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgconn"

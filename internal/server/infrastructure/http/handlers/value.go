@@ -8,7 +8,7 @@ import (
 	"net/http"
 	"screamer/internal/common"
 	"screamer/internal/common/domain/metric"
-	"screamer/internal/server/services"
+	"screamer/internal/server/application/services"
 	"time"
 )
 

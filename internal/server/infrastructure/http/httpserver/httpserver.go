@@ -4,7 +4,7 @@ import (
 	"context"
 	"net"
 	"net/http"
-	"screamer/internal/server/config"
+	"screamer/internal/server/infrastructure/config"
 
 	"github.com/go-chi/chi/v5"
 	"go.uber.org/fx"

@@ -10,7 +10,7 @@ import (
 	"screamer/internal/common/infrastructure/grpcclient"
 	"screamer/internal/common/infrastructure/logger"
 	"screamer/internal/common/infrastructure/prof"
-	"screamer/internal/server/handlers"
+	handlers2 "screamer/internal/server/infrastructure/http/handlers"
 
 	"go.uber.org/fx"
 )
@@ -26,11 +26,11 @@ func InjectApp() fx.Option {
 		services2.NewProcessing,
 		services2.NewSending,
 
-		handlers.NewHomeHandler,
-		handlers.NewUpdateMetricHandler,
-		handlers.NewUpdateMetricOldHandler,
-		handlers.NewValueMetricHandler,
-		handlers.NewValueMetricOldHandler,
+		handlers2.NewHomeHandler,
+		handlers2.NewUpdateMetricHandler,
+		handlers2.NewUpdateMetricOldHandler,
+		handlers2.NewValueMetricHandler,
+		handlers2.NewValueMetricOldHandler,
 
 		events.NewEvents,
 		event_loop.NewEventLoop,

@@ -6,7 +6,7 @@ import (
 	"os"
 	"screamer/internal/common/domain/metric"
 	"screamer/internal/common/helpers/retry"
-	"screamer/internal/server/config"
+	"screamer/internal/server/infrastructure/config"
 	"sync"
 	"time"
 

@@ -7,8 +7,8 @@ import (
 	"net/http"
 	"net/http/httptest"
 	"screamer/internal/common/domain/metric"
-	"screamer/internal/server/db"
-	"screamer/internal/server/repositories"
+	"screamer/internal/server/infrastructure/db"
+	"screamer/internal/server/infrastructure/repositories"
 	"testing"
 
 	"github.com/go-chi/chi/v5"

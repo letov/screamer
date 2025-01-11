@@ -4,8 +4,8 @@ import (
 	"context"
 	"net"
 	"screamer/internal/common/domain/metric"
-	"screamer/internal/server/config"
-	"screamer/internal/server/services"
+	"screamer/internal/server/application/services"
+	"screamer/internal/server/infrastructure/config"
 	"strings"
 
 	"go.uber.org/fx"

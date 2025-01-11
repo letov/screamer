@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 	"screamer/internal/common/helpers/hash"
-	"screamer/internal/server/config"
+	"screamer/internal/server/infrastructure/config"
 
 	"go.uber.org/zap"
 )
