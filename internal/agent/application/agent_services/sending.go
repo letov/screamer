@@ -1,4 +1,4 @@
-package services
+package agent_services
 
 import (
 	"bytes"
@@ -8,10 +8,11 @@ import (
 	"io"
 	"net"
 	"net/http"
+	"screamer/internal/agent/application/repo"
 	"screamer/internal/agent/infrastructure/config"
-	"screamer/internal/agent/infrastructure/repositories"
 	"screamer/internal/common"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/application/dto"
+	"screamer/internal/common/domain"
 	"screamer/internal/common/helpers/hash"
 	"screamer/internal/common/helpers/retry"
 	"screamer/internal/common/infrastructure/grpcclient"
@@ -25,7 +26,7 @@ import (
 
 type Sending struct {
 	config     *config.Config
-	repo       repositories.Repository
+	repo       repo.Repository
 	log        *zap.SugaredLogger
 	encrypt    *hash.RSAEncrypt
 	activeJobs atomic.Int32
@@ -35,7 +36,7 @@ type Sending struct {
 func (ss *Sending) SendMetrics(ctx context.Context) {
 	ms := ss.repo.GetAll(ctx)
 
-	jobs := make(chan metric.Metric, len(ms))
+	jobs := make(chan domain.Metric, len(ms))
 
 	for w := 0; w < max(ss.config.RateLimit, 1); w++ {
 		go ss.worker(ctx, jobs)
@@ -48,15 +49,15 @@ func (ss *Sending) SendMetrics(ctx context.Context) {
 	close(jobs)
 }
 
-func (ss *Sending) worker(ctx context.Context, jobs <-chan metric.Metric) {
+func (ss *Sending) worker(ctx context.Context, jobs <-chan domain.Metric) {
 	for j := range jobs {
 		ss.requestOne(ctx, j)
 	}
 }
 
-func (ss *Sending) requestOne(ctx context.Context, m metric.Metric) {
+func (ss *Sending) requestOne(ctx context.Context, m domain.Metric) {
 	url := fmt.Sprintf("http://%v/update", ss.config.NetAddress.String())
-	body, _ := m.Bytes()
+	body, _ := json.Marshal(m)
 	if ss.encrypt != nil {
 		body, _ = ss.encrypt.Encrypt(body)
 	}
@@ -84,15 +85,15 @@ func (ss *Sending) getIp() string {
 	return ips[0].String()
 }
 
-func (ss *Sending) requestAll(ctx context.Context, ms []metric.Metric) {
+func (ss *Sending) requestAll(ctx context.Context, ms []domain.Metric) {
 	url := fmt.Sprintf("http://%v/updates", ss.config.NetAddress.String())
-	var jms []metric.JSONMetric
+	var jms []dto.JsonMetric
 
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
 	for _, m := range ms {
-		jm, err := m.JSON()
+		jm, err := dto.NewJsonMetric(m)
 		if err != nil {
 			ss.log.Warn("Request error", err.Error())
 			return
@@ -153,7 +154,7 @@ func (ss *Sending) requestJobHttp(
 }
 
 func (ss *Sending) requestJobGrpc(
-	m metric.Metric,
+	m domain.Metric,
 	gc *grpcclient.GRPCClient,
 	aj *atomic.Int32,
 ) func(ctx context.Context) ([]byte, error) {
@@ -163,7 +164,7 @@ func (ss *Sending) requestJobGrpc(
 			aj.Add(-1)
 		}()
 
-		in, err := m.GrpcRequest()
+		in, err := dto.NewPbMetric(m)
 		if err != nil {
 			return nil, err
 		}
@@ -178,7 +179,7 @@ func NewSending(
 	lc fx.Lifecycle,
 	log *zap.SugaredLogger,
 	config *config.Config,
-	repo repositories.Repository,
+	repo repo.Repository,
 	gc *grpcclient.GRPCClient,
 ) *Sending {
 	var encrypt *hash.RSAEncrypt

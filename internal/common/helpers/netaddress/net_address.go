@@ -11,7 +11,7 @@ type NetAddress struct {
 	Port int
 }
 
-func (a NetAddress) String() string {
+func (a *NetAddress) String() string {
 	return a.Host + ":" + strconv.Itoa(a.Port)
 }
 

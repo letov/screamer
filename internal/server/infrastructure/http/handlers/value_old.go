@@ -2,9 +2,12 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"net/http"
 	"screamer/internal/common"
+	"screamer/internal/common/application/dto"
+	"screamer/internal/common/domain"
 	"screamer/internal/server/application/services"
 	"time"
 
@@ -22,7 +25,15 @@ func (h *ValueMetricOldHandler) Handler(res http.ResponseWriter, req *http.Reque
 	t := chi.URLParam(req, "type")
 	n := chi.URLParam(req, "name")
 
-	m, err := h.ms.ValueMetricParams(ctx, n, t)
+	m, err := domain.NewMetric(n, 0, domain.Type(t))
+
+	jm, err := dto.NewJsonMetric(m)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	r, err := h.ms.ValueMetricJSON(ctx, jm)
 	if err != nil {
 		if errors.Is(err, common.ErrMetricNotExists) {
 			http.Error(res, err.Error(), http.StatusNotFound)
@@ -32,7 +43,7 @@ func (h *ValueMetricOldHandler) Handler(res http.ResponseWriter, req *http.Reque
 		return
 	}
 
-	body, err := m.Bytes()
+	body, err := json.Marshal(r)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 	}

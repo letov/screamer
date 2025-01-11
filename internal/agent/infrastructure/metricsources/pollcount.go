@@ -1,12 +1,12 @@
 package metricsources
 
 import (
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/domain"
 )
 
 const pollCount = "PollCount"
 
-func getPollCountMetric() []*metric.Metric {
-	pc := metric.NewCounter(pollCount, 0)
-	return []*metric.Metric{pc}
+func getPollCountMetric() []domain.Metric {
+	pc, _ := domain.NewMetric(pollCount, 0, domain.Counter)
+	return []domain.Metric{pc}
 }

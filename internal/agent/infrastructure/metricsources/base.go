@@ -1,10 +1,10 @@
 package metricsources
 
 import (
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/domain"
 )
 
-type MetricSource = func() []*metric.Metric
+type MetricSource = func() []domain.Metric
 
 func NewMetricSources() []MetricSource {
 	return []MetricSource{

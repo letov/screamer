@@ -2,8 +2,10 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"io"
 	"net/http"
+	"screamer/internal/common/application/dto"
 	"screamer/internal/server/application/services"
 	"time"
 )
@@ -23,7 +25,13 @@ func (h *UpdateBatchMetricHandler) Handler(res http.ResponseWriter, req *http.Re
 		return
 	}
 
-	err = h.ms.UpdateBatchMetricJSON(ctx, &data)
+	var jms []dto.JsonMetric
+	err = json.Unmarshal(data, &jms)
+	if err != nil {
+		return
+	}
+
+	err = h.ms.UpdateBatchMetricJSON(ctx, jms)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return

@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/application/dto"
 	"screamer/internal/server/application/services"
 	"time"
 )
@@ -25,20 +25,20 @@ func (h *UpdateMetricHandler) Handler(res http.ResponseWriter, req *http.Request
 		return
 	}
 
-	var jm metric.JSONMetric
+	var jm dto.JsonMetric
 	err = json.Unmarshal(data, &jm)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	m, err := h.ms.UpdateMetricJSON(ctx, jm)
+	r, err := h.ms.UpdateMetricJSON(ctx, jm)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	body, err := m.Bytes()
+	body, err := json.Marshal(r)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 	}

@@ -6,9 +6,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/application/dto"
+	"screamer/internal/common/domain"
+	"screamer/internal/server/application/repo"
 	"screamer/internal/server/infrastructure/db"
-	"screamer/internal/server/infrastructure/repositories"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -17,7 +18,7 @@ import (
 
 func Test_updateCounterHandler(t *testing.T) {
 	type args struct {
-		t     metric.Type
+		t     domain.Type
 		name  string
 		value int64
 	}
@@ -28,7 +29,7 @@ func Test_updateCounterHandler(t *testing.T) {
 		{
 			name: "positive test #1",
 			args: args{
-				t:     metric.Counter,
+				t:     domain.Counter,
 				name:  "test",
 				value: 100,
 			},
@@ -36,7 +37,7 @@ func Test_updateCounterHandler(t *testing.T) {
 		{
 			name: "positive test #2",
 			args: args{
-				t:     metric.Counter,
+				t:     domain.Counter,
 				name:  "test2",
 				value: 1232,
 			},
@@ -44,11 +45,11 @@ func Test_updateCounterHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal(metric.JSONMetric{
+				data, _ := json.Marshal(dto.JsonMetric{
 					ID:    tt.args.name,
 					MType: tt.args.t.String(),
 					Delta: &tt.args.value,
@@ -61,7 +62,7 @@ func Test_updateCounterHandler(t *testing.T) {
 				rr := httptest.NewRecorder()
 				mux.ServeHTTP(rr, req)
 				assert.Equal(t, rr.Code, http.StatusOK)
-				m, err := repo.Get(ctx, metric.Ident{
+				m, err := repo.Get(ctx, domain.Ident{
 					Type: tt.args.t,
 					Name: tt.args.name,
 				})
@@ -76,7 +77,7 @@ func Test_updateCounterHandler(t *testing.T) {
 
 func Test_updateGaugeHandler(t *testing.T) {
 	type args struct {
-		t     metric.Type
+		t     domain.Type
 		name  string
 		value float64
 	}
@@ -87,7 +88,7 @@ func Test_updateGaugeHandler(t *testing.T) {
 		{
 			name: "positive test #1",
 			args: args{
-				t:     metric.Gauge,
+				t:     domain.Gauge,
 				name:  "test",
 				value: 100,
 			},
@@ -95,7 +96,7 @@ func Test_updateGaugeHandler(t *testing.T) {
 		{
 			name: "positive test #2",
 			args: args{
-				t:     metric.Gauge,
+				t:     domain.Gauge,
 				name:  "test2",
 				value: 1232.22,
 			},
@@ -103,11 +104,11 @@ func Test_updateGaugeHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal(metric.JSONMetric{
+				data, _ := json.Marshal(dto.JsonMetric{
 					ID:    tt.args.name,
 					MType: tt.args.t.String(),
 					Value: &tt.args.value,
@@ -120,7 +121,7 @@ func Test_updateGaugeHandler(t *testing.T) {
 				rr := httptest.NewRecorder()
 				mux.ServeHTTP(rr, req)
 				assert.Equal(t, rr.Code, http.StatusOK)
-				m, err := repo.Get(ctx, metric.Ident{
+				m, err := repo.Get(ctx, domain.Ident{
 					Type: tt.args.t,
 					Name: tt.args.name,
 				})
@@ -162,11 +163,11 @@ func Test_updateNegativeTypeHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal(metric.JSONMetric{
+				data, _ := json.Marshal(dto.JsonMetric{
 					ID:    tt.args.name,
 					MType: tt.args.t,
 					Value: &tt.args.value,
@@ -186,7 +187,7 @@ func Test_updateNegativeTypeHandler(t *testing.T) {
 
 func Test_updateNegativeCounterHandler(t *testing.T) {
 	type args struct {
-		t     metric.Type
+		t     domain.Type
 		name  string
 		value float64
 	}
@@ -197,7 +198,7 @@ func Test_updateNegativeCounterHandler(t *testing.T) {
 		{
 			name: "negative test #1",
 			args: args{
-				t:     metric.Counter,
+				t:     domain.Counter,
 				name:  "test",
 				value: 100,
 			},
@@ -205,7 +206,7 @@ func Test_updateNegativeCounterHandler(t *testing.T) {
 		{
 			name: "negative test #2",
 			args: args{
-				t:     metric.Counter,
+				t:     domain.Counter,
 				name:  "test2",
 				value: 1232,
 			},
@@ -213,11 +214,11 @@ func Test_updateNegativeCounterHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal(metric.JSONMetric{
+				data, _ := json.Marshal(dto.JsonMetric{
 					ID:    tt.args.name,
 					MType: tt.args.t.String(),
 					Value: &tt.args.value,

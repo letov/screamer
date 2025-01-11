@@ -45,7 +45,7 @@ func NewMux(
 		r.Post("/{type:[a-zA-Z0-9]+}/{name:[a-zA-Z0-9]+}/{value}", uoh.Handler)
 	})
 
-	r.Post("/update-batch", ush.Handler)
+	r.Post("/updates", ush.Handler)
 
 	r.Route("/value", func(r chi.Router) {
 		r.Post("/", vh.Handler)

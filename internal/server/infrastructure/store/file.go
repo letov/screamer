@@ -1,10 +1,11 @@
-package repositories
+package store
 
 import (
 	"context"
 	"encoding/json"
 	"os"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/application/dto"
+	"screamer/internal/common/domain"
 	"screamer/internal/common/helpers/retry"
 	"screamer/internal/server/infrastructure/config"
 	"sync"
@@ -14,27 +15,27 @@ import (
 	"go.uber.org/zap"
 )
 
-type FileRepository struct {
+type File struct {
 	c  *config.Config
 	l  *zap.SugaredLogger
-	mr *MemoryRepository
+	mr *Memory
 	sync.Mutex
 }
 
-func (fr *FileRepository) BatchUpdate(_ context.Context, _ []metric.Metric) error {
+func (fr *File) BatchUpdate(_ context.Context, _ []domain.Metric) error {
 	//TODO implement me
 	panic("implement me")
 }
 
 type JSONMetricList struct {
-	Array []metric.JSONMetric
+	Array []dto.JsonMetric
 }
 
-func (fr *FileRepository) GetAll(ctx context.Context) []metric.Metric {
+func (fr *File) GetAll(ctx context.Context) []domain.Metric {
 	return fr.mr.GetAll(ctx)
 }
 
-func (fr *FileRepository) Add(ctx context.Context, m metric.Metric) (metric.Metric, error) {
+func (fr *File) Add(ctx context.Context, m domain.Metric) (domain.Metric, error) {
 	newM, err := fr.mr.Add(ctx, m)
 	if err != nil {
 		return newM, err
@@ -45,11 +46,11 @@ func (fr *FileRepository) Add(ctx context.Context, m metric.Metric) (metric.Metr
 	return newM, err
 }
 
-func (fr *FileRepository) Get(ctx context.Context, i metric.Ident) (metric.Metric, error) {
+func (fr *File) Get(ctx context.Context, i domain.Ident) (domain.Metric, error) {
 	return fr.mr.Get(ctx, i)
 }
 
-func (fr *FileRepository) Increase(ctx context.Context, m metric.Metric) (metric.Metric, error) {
+func (fr *File) Increase(ctx context.Context, m domain.Metric) (domain.Metric, error) {
 	newM, err := fr.mr.Increase(ctx, m)
 	if err != nil {
 		return newM, err
@@ -60,24 +61,24 @@ func (fr *FileRepository) Increase(ctx context.Context, m metric.Metric) (metric
 	return newM, err
 }
 
-func (fr *FileRepository) SaveAllToFile(ctx context.Context) {
+func (fr *File) SaveAllToFile(ctx context.Context) {
 	err := fr.toFile(ctx, fr.GetAll(ctx))
 	fr.processError(err)
 }
 
-func (fr *FileRepository) LoadAllFromFile(ctx context.Context) {
+func (fr *File) LoadAllFromFile(ctx context.Context) {
 	ms, err := fr.fromFile(ctx)
 	if err != nil {
 		fr.l.Warn("Load form file error:", err.Error())
 		return
 	}
 	for _, m := range ms {
-		_, err := fr.mr.Add(ctx, *m)
+		_, err := fr.mr.Add(ctx, m)
 		fr.processError(err)
 	}
 }
 
-func (fr *FileRepository) toFile(ctx context.Context, ms []metric.Metric) error {
+func (fr *File) toFile(ctx context.Context, ms []domain.Metric) error {
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -86,13 +87,13 @@ func (fr *FileRepository) toFile(ctx context.Context, ms []metric.Metric) error 
 	return err
 }
 
-func (fr *FileRepository) toFileJob(ms []metric.Metric) func(ctx context.Context) (bool, error) {
+func (fr *File) toFileJob(ms []domain.Metric) func(ctx context.Context) (bool, error) {
 	return func(ctx context.Context) (bool, error) {
 		fp := fr.c.FileStoragePath
 
-		jms := make([]metric.JSONMetric, 0)
+		jms := make([]dto.JsonMetric, 0)
 		for _, m := range ms {
-			j, err := m.JSON()
+			j, err := dto.NewJsonMetric(m)
 			fr.processError(err)
 			jms = append(jms, j)
 		}
@@ -108,7 +109,7 @@ func (fr *FileRepository) toFileJob(ms []metric.Metric) func(ctx context.Context
 	}
 }
 
-func (fr *FileRepository) fromFile(ctx context.Context) ([]*metric.Metric, error) {
+func (fr *File) fromFile(ctx context.Context) ([]domain.Metric, error) {
 	ctxWithTimeout, cancel := context.WithTimeout(ctx, 5*time.Second)
 	defer cancel()
 
@@ -116,8 +117,8 @@ func (fr *FileRepository) fromFile(ctx context.Context) ([]*metric.Metric, error
 	return retry.NewRetryJob(ctxWithTimeout, "wait file access", job, []error{}, []int{1, 2, 5}, fr.l)
 }
 
-func (fr *FileRepository) fromFileJob() func(ctx context.Context) ([]*metric.Metric, error) {
-	return func(ctx context.Context) ([]*metric.Metric, error) {
+func (fr *File) fromFileJob() func(ctx context.Context) ([]domain.Metric, error) {
+	return func(ctx context.Context) ([]domain.Metric, error) {
 		fp := fr.c.FileStoragePath
 
 		data, err := os.ReadFile(fp)
@@ -131,9 +132,9 @@ func (fr *FileRepository) fromFileJob() func(ctx context.Context) ([]*metric.Met
 			return nil, err
 		}
 
-		res := make([]*metric.Metric, 0)
+		res := make([]domain.Metric, 0)
 		for _, jm := range jml.Array {
-			m, err := metric.NewMetricFromJSON(&jm)
+			m, err := jm.GetDomainMetric()
 			fr.processError(err)
 			res = append(res, m)
 		}
@@ -142,14 +143,14 @@ func (fr *FileRepository) fromFileJob() func(ctx context.Context) ([]*metric.Met
 	}
 }
 
-func (fr *FileRepository) processError(err error) {
+func (fr *File) processError(err error) {
 	if err != nil {
 		fr.l.Warn("File process error:", err.Error())
 	}
 }
 
-func NewFileRepository(lc fx.Lifecycle, c *config.Config, log *zap.SugaredLogger, mr *MemoryRepository) *FileRepository {
-	fr := &FileRepository{
+func NewFile(lc fx.Lifecycle, c *config.Config, log *zap.SugaredLogger, mr *Memory) *File {
+	fr := &File{
 		c:  c,
 		l:  log,
 		mr: mr,

@@ -4,7 +4,7 @@ import (
 	"context"
 	event_loop "screamer/internal/common/infrastructure/eventloop"
 	"screamer/internal/server/infrastructure/config"
-	"screamer/internal/server/infrastructure/repositories"
+	"screamer/internal/server/infrastructure/store"
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -22,7 +22,7 @@ func (se *ServerEvents) GetEvents() []*event_loop.Event {
 	return se.events
 }
 
-func NewEvents(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config, fr *repositories.FileRepository) event_loop.Events {
+func NewEvents(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config, fr *store.File) event_loop.Events {
 	es := &ServerEvents{
 		events: make([]*event_loop.Event, 0),
 	}

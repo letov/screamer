@@ -2,12 +2,12 @@ package metricsources
 
 import (
 	"math/rand"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/domain"
 )
 
 const randomMetric = "RandomValue"
 
-func getRandMetric() []*metric.Metric {
-	rm := metric.NewGauge(randomMetric, rand.Float64())
-	return []*metric.Metric{rm}
+func getRandMetric() []domain.Metric {
+	rm, _ := domain.NewMetric(randomMetric, rand.Float64(), domain.Gauge)
+	return []domain.Metric{rm}
 }

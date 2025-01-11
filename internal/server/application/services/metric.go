@@ -2,12 +2,11 @@ package services
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/application/dto"
+	"screamer/internal/common/domain"
+	"screamer/internal/server/application/repo"
 	"screamer/internal/server/infrastructure/config"
-	"screamer/internal/server/infrastructure/repositories"
-	"strconv"
 	"sync/atomic"
 	"time"
 
@@ -17,85 +16,62 @@ import (
 
 type MetricService struct {
 	config     *config.Config
-	repo       repositories.Repository
+	repo       repo.Repository
 	stop       bool
 	activeJobs atomic.Int32
 }
 
-func (ms *MetricService) UpdateBatchMetricJSON(ctx context.Context, body *[]byte) (err error) {
+func (ms *MetricService) UpdateBatchMetricJSON(ctx context.Context, jms []dto.JsonMetric) (err error) {
 	ms.activeJobs.Add(1)
 	defer func() {
 		ms.activeJobs.Add(-1)
 	}()
 
-	var jms []metric.JSONMetric
-	err = json.Unmarshal(*body, &jms)
-	if err != nil {
-		return
-	}
-
-	mList := make([]metric.Metric, 0)
+	mList := make([]domain.Metric, 0)
 
 	for _, jm := range jms {
-		m, err := metric.NewMetricFromJSON(&jm)
+		m, err := jm.GetDomainMetric()
 		if err != nil {
 			return err
 		}
-		mList = append(mList, *m)
+		mList = append(mList, m)
 	}
 
 	return ms.repo.BatchUpdate(ctx, mList)
 }
 
-func (ms *MetricService) UpdateMetricJSON(ctx context.Context, jm metric.JSONMetric) (metric.Metric, error) {
-	m, err := metric.NewMetricFromJSON(&jm)
+func (ms *MetricService) UpdateMetricJSON(ctx context.Context, jm dto.JsonMetric) (dto.JsonMetric, error) {
+	m, err := jm.GetDomainMetric()
 	if err != nil {
-		return metric.Metric{}, err
+		return dto.JsonMetric{}, err
 	}
 
 	return ms.processUpdateMetric(ctx, m)
 }
 
-func (ms *MetricService) UpdateMetricParams(ctx context.Context, n string, vs string, t string) (metric.Metric, error) {
-	v, err := strconv.ParseFloat(vs, 64)
-	if err != nil {
-		return metric.Metric{}, err
-	}
-
-	m, err := metric.NewMetric(n, v, t)
-	if err != nil {
-		return metric.Metric{}, err
-	}
-
-	return ms.processUpdateMetric(ctx, m)
-}
-
-func (ms *MetricService) processUpdateMetric(ctx context.Context, m *metric.Metric) (metric.Metric, error) {
+func (ms *MetricService) processUpdateMetric(ctx context.Context, m domain.Metric) (dto.JsonMetric, error) {
 	ms.activeJobs.Add(1)
 	defer func() {
 		ms.activeJobs.Add(-1)
 	}()
 
-	if m.Ident.Type == metric.Counter {
-		return ms.repo.Increase(ctx, *m)
+	var res domain.Metric
+	var e error
+	if m.Ident.Type == domain.Counter {
+		res, e = ms.repo.Increase(ctx, m)
 	} else {
-		return ms.repo.Add(ctx, *m)
+		res, e = ms.repo.Add(ctx, m)
 	}
+	if e != nil {
+		return dto.JsonMetric{}, e
+	}
+	return dto.NewJsonMetric(res)
 }
 
-func (ms *MetricService) ValueMetricJSON(ctx context.Context, jm metric.JSONMetric) (metric.Metric, error) {
-	i, err := metric.NewMetricIdentFromJSON(&jm)
+func (ms *MetricService) ValueMetricJSON(ctx context.Context, jm dto.JsonMetric) (domain.Metric, error) {
+	i, err := jm.GetIdent()
 	if err != nil {
-		return metric.Metric{}, err
-	}
-
-	return ms.repo.Get(ctx, i)
-}
-
-func (ms *MetricService) ValueMetricParams(ctx context.Context, n string, t string) (metric.Metric, error) {
-	i, err := metric.NewMetricIdent(n, t)
-	if err != nil {
-		return metric.Metric{}, err
+		return domain.Metric{}, err
 	}
 
 	return ms.repo.Get(ctx, i)
@@ -119,7 +95,7 @@ func NewMetricService(
 	lc fx.Lifecycle,
 	log *zap.SugaredLogger,
 	c *config.Config,
-	r repositories.Repository,
+	r repo.Repository,
 ) *MetricService {
 	ms := &MetricService{
 		config: c,

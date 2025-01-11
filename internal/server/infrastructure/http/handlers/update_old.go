@@ -2,8 +2,12 @@ package handlers
 
 import (
 	"context"
+	"encoding/json"
 	"net/http"
+	"screamer/internal/common/application/dto"
+	"screamer/internal/common/domain"
 	"screamer/internal/server/application/services"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -21,13 +25,31 @@ func (h *UpdateMetricOldHandler) Handler(res http.ResponseWriter, req *http.Requ
 	v := chi.URLParam(req, "value")
 	t := chi.URLParam(req, "type")
 
-	m, err := h.ms.UpdateMetricParams(ctx, n, v, t)
+	vf, err := strconv.ParseFloat(v, 64)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	body, err := m.Bytes()
+	m, err := domain.NewMetric(n, vf, domain.Type(t))
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	jm, err := dto.NewJsonMetric(m)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	r, err := h.ms.UpdateMetricJSON(ctx, jm)
+	if err != nil {
+		http.Error(res, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	body, err := json.Marshal(r)
 	if err != nil {
 		http.Error(res, err.Error(), http.StatusBadRequest)
 	}

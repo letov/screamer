@@ -1,7 +1,7 @@
 package metricsources
 
 import (
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/domain"
 
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"
@@ -11,13 +11,13 @@ const totalMemory = "TotalMemory"
 const freeMemory = "FreeMemory"
 const cPUutilization1 = "CPUutilization1"
 
-func getGopsutilMetric() []*metric.Metric {
+func getGopsutilMetric() []domain.Metric {
 	v, _ := mem.VirtualMemory()
 	c, _ := cpu.Counts(false)
 
-	return []*metric.Metric{
-		metric.NewGauge(totalMemory, float64(v.Total)),
-		metric.NewGauge(freeMemory, float64(v.Available)),
-		metric.NewGauge(cPUutilization1, float64(c)),
-	}
+	m1, _ := domain.NewMetric(totalMemory, float64(v.Total), domain.Gauge)
+	m2, _ := domain.NewMetric(freeMemory, float64(v.Available), domain.Gauge)
+	m3, _ := domain.NewMetric(cPUutilization1, float64(c), domain.Gauge)
+
+	return []domain.Metric{m1, m2, m3}
 }

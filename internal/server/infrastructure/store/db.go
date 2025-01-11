@@ -1,10 +1,11 @@
-package repositories
+package store
 
 import (
 	"context"
+	"errors"
 	"math"
 	"screamer/internal/common"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/domain"
 	"screamer/internal/common/helpers/retry"
 	"screamer/internal/server/infrastructure/db"
 
@@ -14,18 +15,18 @@ import (
 	"go.uber.org/zap"
 )
 
-type DBRepository struct {
+type DB struct {
 	pool *pgxpool.Pool
 	log  *zap.SugaredLogger
 }
 
-func (db *DBRepository) BatchUpdate(ctx context.Context, ms []metric.Metric) error {
+func (db *DB) BatchUpdate(ctx context.Context, ms []domain.Metric) error {
 	tx, err := db.pool.Begin(ctx)
 	if err != nil {
 		return err
 	}
 	for _, m := range ms {
-		if m.Ident.Type == metric.Counter {
+		if m.Ident.Type == domain.Counter {
 			_, err = db.Increase(ctx, m)
 		} else {
 			_, err = db.Add(ctx, m)
@@ -39,8 +40,8 @@ func (db *DBRepository) BatchUpdate(ctx context.Context, ms []metric.Metric) err
 	return tx.Commit(ctx)
 }
 
-func (db *DBRepository) GetAll(ctx context.Context) (ms []metric.Metric) {
-	ms = make([]metric.Metric, 0)
+func (db *DB) GetAll(ctx context.Context) (ms []domain.Metric) {
+	ms = make([]domain.Metric, 0)
 
 	is, err := db.getUniqIdents(ctx)
 	if err != nil || len(is) == 0 {
@@ -58,7 +59,7 @@ func (db *DBRepository) GetAll(ctx context.Context) (ms []metric.Metric) {
 	return
 }
 
-func (db *DBRepository) Add(ctx context.Context, m metric.Metric) (metric.Metric, error) {
+func (db *DB) Add(ctx context.Context, m domain.Metric) (domain.Metric, error) {
 	query := `INSERT INTO metrics (type, name, value) VALUES (@type, @name, @value)`
 	args := pgx.NamedArgs{
 		"type":  m.Ident.Type.String(),
@@ -71,7 +72,7 @@ func (db *DBRepository) Add(ctx context.Context, m metric.Metric) (metric.Metric
 	return m, err
 }
 
-func (db *DBRepository) Get(ctx context.Context, i metric.Ident) (m metric.Metric, err error) {
+func (db *DB) Get(ctx context.Context, i domain.Ident) (m domain.Metric, err error) {
 	query := `SELECT type, name, value FROM metrics WHERE type=@type AND name=@name ORDER BY id DESC LIMIT 1`
 	args := pgx.NamedArgs{
 		"type": i.Type.String(),
@@ -85,7 +86,7 @@ func (db *DBRepository) Get(ctx context.Context, i metric.Ident) (m metric.Metri
 	}
 	defer rows.Close()
 
-	var ident metric.Ident
+	var ident domain.Ident
 	if rows.Next() {
 		err = rows.Scan(&ident.Type, &ident.Name, &m.Value)
 		if err != nil {
@@ -100,7 +101,7 @@ func (db *DBRepository) Get(ctx context.Context, i metric.Ident) (m metric.Metri
 	return
 }
 
-func (db *DBRepository) Increase(ctx context.Context, m metric.Metric) (metric.Metric, error) {
+func (db *DB) Increase(ctx context.Context, m domain.Metric) (domain.Metric, error) {
 	var _, frac float64
 	_, frac = math.Modf(m.Value)
 	if frac != 0 {
@@ -108,8 +109,11 @@ func (db *DBRepository) Increase(ctx context.Context, m metric.Metric) (metric.M
 	}
 
 	currentM, err := db.Get(ctx, m.Ident)
-	if err != nil && err == common.ErrMetricNotExists {
-		addM := *metric.NewCounter(m.Ident.Name, m.Value)
+	if err != nil && errors.Is(err, common.ErrMetricNotExists) {
+		addM, e := domain.NewMetric(m.Ident.Name, m.Value, domain.Counter)
+		if e != nil {
+			return domain.Metric{}, e
+		}
 		return db.Add(ctx, addM)
 	}
 	if err != nil {
@@ -119,7 +123,7 @@ func (db *DBRepository) Increase(ctx context.Context, m metric.Metric) (metric.M
 	return db.Add(ctx, m)
 }
 
-func (db *DBRepository) getUniqIdents(ctx context.Context) (is []metric.Ident, err error) {
+func (db *DB) getUniqIdents(ctx context.Context) (is []domain.Ident, err error) {
 	query := `SELECT DISTINCT type, name FROM metrics`
 	args := pgx.NamedArgs{}
 
@@ -131,7 +135,7 @@ func (db *DBRepository) getUniqIdents(ctx context.Context) (is []metric.Ident, e
 	defer rows.Close()
 
 	for rows.Next() {
-		var i metric.Ident
+		var i domain.Ident
 		err = rows.Scan(&i.Type, &i.Name)
 		if err != nil {
 			db.log.Warn("DB repo error: ", err)
@@ -143,20 +147,20 @@ func (db *DBRepository) getUniqIdents(ctx context.Context) (is []metric.Ident, e
 	return
 }
 
-func (db *DBRepository) queryJob(query string, args pgx.NamedArgs) func(ctx context.Context) (pgx.Rows, error) {
+func (db *DB) queryJob(query string, args pgx.NamedArgs) func(ctx context.Context) (pgx.Rows, error) {
 	return func(ctx context.Context) (pgx.Rows, error) {
 		return db.pool.Query(ctx, query, args)
 	}
 }
 
-func (db *DBRepository) execJob(query string, args pgx.NamedArgs) func(ctx context.Context) (pgconn.CommandTag, error) {
+func (db *DB) execJob(query string, args pgx.NamedArgs) func(ctx context.Context) (pgconn.CommandTag, error) {
 	return func(ctx context.Context) (pgconn.CommandTag, error) {
 		return db.pool.Exec(ctx, query, args)
 	}
 }
 
-func NewDBRepository(db *db.DB, log *zap.SugaredLogger) *DBRepository {
-	return &DBRepository{
+func NewDB(db *db.DB, log *zap.SugaredLogger) *DB {
+	return &DB{
 		pool: db.GetPool(),
 		log:  log,
 	}

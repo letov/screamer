@@ -4,18 +4,19 @@ import (
 	"reflect"
 	"runtime"
 	"screamer/internal/common"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/domain"
 )
 
-func getRuntimeMetrics() []*metric.Metric {
-	metrics := make([]*metric.Metric, 0)
+func getRuntimeMetrics() []domain.Metric {
+	metrics := make([]domain.Metric, 0)
 	var m runtime.MemStats
 	runtime.ReadMemStats(&m)
 	for _, n := range *getRuntimeMetricNames() {
 		value := reflect.ValueOf(m)
 		field := value.FieldByName(n)
 		if v, err := toFloat64(field); err == nil {
-			metrics = append(metrics, metric.NewGauge(n, v))
+			m, _ := domain.NewMetric(n, v, domain.Gauge)
+			metrics = append(metrics, m)
 		}
 	}
 	return metrics

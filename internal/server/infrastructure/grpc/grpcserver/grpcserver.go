@@ -3,10 +3,9 @@ package grpcserver
 import (
 	"context"
 	"net"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/application/dto"
 	"screamer/internal/server/application/services"
 	"screamer/internal/server/infrastructure/config"
-	"strings"
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -21,57 +20,38 @@ type GRPCServer struct {
 }
 
 func (m *GRPCServer) UpdateValue(ctx context.Context, in *pb.Request) (*pb.Response, error) {
-	delta := in.GetDelta()
-	value := float64(in.GetValue())
-
-	jm := metric.JSONMetric{
-		ID:    in.GetId(),
-		MType: strings.ToLower(in.GetMtype().String()),
-		Delta: &delta,
-		Value: &value,
-	}
-
-	mtr, err := m.Ms.UpdateMetricJSON(ctx, jm)
+	jm := dto.NewJsonMetricFromPb(in)
+	r, err := m.Ms.UpdateMetricJSON(ctx, jm)
 	if err != nil {
 		return nil, err
 	}
-
-	res := &pb.Response{
-		Value: float32(mtr.Value),
-		Ident: &pb.Ident{
-			Type: mtr.Ident.Type.String(),
-			Name: mtr.Ident.Name,
-		},
+	dm, err := r.GetDomainMetric()
+	if err != nil {
+		return nil, err
 	}
-
-	return res, nil
+	return &pb.Response{
+		Value: float32(dm.Value),
+		Ident: &pb.Ident{
+			Type: dm.Ident.Type.String(),
+			Name: dm.Ident.Name,
+		},
+	}, nil
 }
 
 func (m *GRPCServer) GetValue(ctx context.Context, in *pb.Request) (*pb.Response, error) {
-	delta := in.GetDelta()
-	value := float64(in.GetValue())
-
-	jm := metric.JSONMetric{
-		ID:    in.GetId(),
-		MType: strings.ToLower(in.GetMtype().String()),
-		Delta: &delta,
-		Value: &value,
-	}
-
+	jm := dto.NewJsonMetricFromPb(in)
 	mtr, err := m.Ms.ValueMetricJSON(ctx, jm)
 	if err != nil {
 		return nil, err
 	}
 
-	res := &pb.Response{
+	return &pb.Response{
 		Value: float32(mtr.Value),
 		Ident: &pb.Ident{
 			Type: mtr.Ident.Type.String(),
 			Name: mtr.Ident.Name,
 		},
-	}
-
-	return res, nil
+	}, nil
 }
 
 func NewGRPCServer(lc fx.Lifecycle, log *zap.SugaredLogger, c *config.Config, ms *services.MetricService) *grpc.Server {

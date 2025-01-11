@@ -1,35 +1,35 @@
-package services
+package agent_services
 
 import (
 	"context"
+	"screamer/internal/agent/application/repo"
 	"screamer/internal/agent/infrastructure/config"
 	metric_sources "screamer/internal/agent/infrastructure/metricsources"
-	"screamer/internal/agent/infrastructure/repositories"
 	"screamer/internal/common"
-	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/domain"
 
 	"go.uber.org/zap"
 )
 
 type Processing struct {
 	config        *config.Config
-	repo          repositories.Repository
+	repo          repo.Repository
 	metricSources []metric_sources.MetricSource
 	log           *zap.SugaredLogger
 }
 
 func (ps *Processing) UpdateMetrics(ctx context.Context) {
-	ms := make([]*metric.Metric, 0)
+	ms := make([]domain.Metric, 0)
 	for _, fn := range ps.metricSources {
 		ms = append(ms, fn()...)
 	}
 	for _, m := range ms {
 		var err error
 		switch m.Ident.Type {
-		case metric.Counter:
+		case domain.Counter:
 			_, err = ps.repo.Increase(ctx, m.Ident, 1)
-		case metric.Gauge:
-			_, err = ps.repo.Update(ctx, *m)
+		case domain.Gauge:
+			_, err = ps.repo.Update(ctx, m)
 		default:
 			err = common.ErrTypeNotExists
 		}
@@ -39,7 +39,7 @@ func (ps *Processing) UpdateMetrics(ctx context.Context) {
 	}
 }
 
-func NewProcessing(log *zap.SugaredLogger, config *config.Config, repo repositories.Repository, metricSources []metric_sources.MetricSource) *Processing {
+func NewProcessing(log *zap.SugaredLogger, config *config.Config, repo repo.Repository, metricSources []metric_sources.MetricSource) *Processing {
 	return &Processing{
 		config:        config,
 		repo:          repo,

@@ -4,15 +4,16 @@ import (
 	event_loop "screamer/internal/common/infrastructure/eventloop"
 	"screamer/internal/common/infrastructure/grpcclient"
 	"screamer/internal/common/infrastructure/logger"
-	"screamer/internal/server/application/events"
+	"screamer/internal/server/application/repo"
 	"screamer/internal/server/application/services"
 	config2 "screamer/internal/server/infrastructure/config"
 	"screamer/internal/server/infrastructure/db"
+	"screamer/internal/server/infrastructure/events"
 	"screamer/internal/server/infrastructure/grpc/grpcserver"
 	handlers2 "screamer/internal/server/infrastructure/http/handlers"
 	"screamer/internal/server/infrastructure/http/httpserver"
 	"screamer/internal/server/infrastructure/http/mux"
-	repositories2 "screamer/internal/server/infrastructure/repositories"
+	repositories2 "screamer/internal/server/infrastructure/store"
 
 	"go.uber.org/fx"
 	"go.uber.org/zap"
@@ -24,17 +25,17 @@ func InjectApp() fx.Option {
 		logger.NewLogger,
 		db.NewDB,
 
-		repositories2.NewDBRepository,
-		repositories2.NewFileRepository,
-		repositories2.NewMemoryRepository,
+		repositories2.NewDB,
+		repositories2.NewFile,
+		repositories2.NewMemory,
 
 		func(
 			c *config2.Config,
 			log *zap.SugaredLogger,
-			db *repositories2.DBRepository,
-			fr *repositories2.FileRepository,
-			mr *repositories2.MemoryRepository,
-		) repositories2.Repository {
+			db *repositories2.DB,
+			fr *repositories2.File,
+			mr *repositories2.Memory,
+		) repo.Repository {
 			switch true {
 			case len(c.DBAddress) > 0:
 				log.Info("DB as repo source")
