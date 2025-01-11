@@ -6,9 +6,10 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"screamer/internal/common/metric"
-	"screamer/internal/server/db"
-	"screamer/internal/server/repositories"
+	"screamer/internal/common/application/dto"
+	"screamer/internal/common/domain"
+	"screamer/internal/server/application/repo"
+	"screamer/internal/server/infrastructure/db"
 	"testing"
 
 	"github.com/go-chi/chi/v5"
@@ -17,7 +18,7 @@ import (
 
 func Test_updateBatchGaugeHandler(t *testing.T) {
 	type args struct {
-		t     metric.Type
+		t     domain.Type
 		name  string
 		value float64
 	}
@@ -29,12 +30,12 @@ func Test_updateBatchGaugeHandler(t *testing.T) {
 			name: "positive test #1",
 			args: []args{
 				{
-					t:     metric.Gauge,
+					t:     domain.Gauge,
 					name:  "test1",
 					value: 100,
 				},
 				{
-					t:     metric.Gauge,
+					t:     domain.Gauge,
 					name:  "test1",
 					value: 400,
 				},
@@ -44,12 +45,12 @@ func Test_updateBatchGaugeHandler(t *testing.T) {
 			name: "positive test #2",
 			args: []args{
 				{
-					t:     metric.Gauge,
+					t:     domain.Gauge,
 					name:  "test1",
 					value: 1232,
 				},
 				{
-					t:     metric.Gauge,
+					t:     domain.Gauge,
 					name:  "test1",
 					value: 23123,
 				},
@@ -58,11 +59,11 @@ func Test_updateBatchGaugeHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal([]metric.JSONMetric{
+				data, _ := json.Marshal([]dto.JsonMetric{
 					{
 						ID:    tt.args[0].name,
 						MType: tt.args[0].t.String(),
@@ -75,14 +76,14 @@ func Test_updateBatchGaugeHandler(t *testing.T) {
 					},
 				})
 
-				req, err := http.NewRequest("POST", "/update-batch", bytes.NewBuffer(data))
+				req, err := http.NewRequest("POST", "/updates", bytes.NewBuffer(data))
 				if err != nil {
 					t.Fatal(err)
 				}
 				rr := httptest.NewRecorder()
 				mux.ServeHTTP(rr, req)
 				assert.Equal(t, rr.Code, http.StatusOK)
-				m, err := repo.Get(ctx, metric.Ident{
+				m, err := repo.Get(ctx, domain.Ident{
 					Type: tt.args[0].t,
 					Name: tt.args[0].name,
 				})
@@ -97,7 +98,7 @@ func Test_updateBatchGaugeHandler(t *testing.T) {
 
 func Test_updateBatchCounterHandler(t *testing.T) {
 	type args struct {
-		t     metric.Type
+		t     domain.Type
 		name  string
 		delta int64
 	}
@@ -109,12 +110,12 @@ func Test_updateBatchCounterHandler(t *testing.T) {
 			name: "positive test #2",
 			args: []args{
 				{
-					t:     metric.Counter,
+					t:     domain.Counter,
 					name:  "test1",
 					delta: 42343,
 				},
 				{
-					t:     metric.Counter,
+					t:     domain.Counter,
 					name:  "test1",
 					delta: 22,
 				},
@@ -124,12 +125,12 @@ func Test_updateBatchCounterHandler(t *testing.T) {
 			name: "positive test #2",
 			args: []args{
 				{
-					t:     metric.Counter,
+					t:     domain.Counter,
 					name:  "test1",
 					delta: 4234,
 				},
 				{
-					t:     metric.Counter,
+					t:     domain.Counter,
 					name:  "test1",
 					delta: 3243,
 				},
@@ -138,11 +139,11 @@ func Test_updateBatchCounterHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal([]metric.JSONMetric{
+				data, _ := json.Marshal([]dto.JsonMetric{
 					{
 						ID:    tt.args[0].name,
 						MType: tt.args[0].t.String(),
@@ -162,7 +163,7 @@ func Test_updateBatchCounterHandler(t *testing.T) {
 				rr := httptest.NewRecorder()
 				mux.ServeHTTP(rr, req)
 				assert.Equal(t, rr.Code, http.StatusOK)
-				m, err := repo.Get(ctx, metric.Ident{
+				m, err := repo.Get(ctx, domain.Ident{
 					Type: tt.args[0].t,
 					Name: tt.args[0].name,
 				})
@@ -177,7 +178,7 @@ func Test_updateBatchCounterHandler(t *testing.T) {
 
 func Test_updateBatchNegativeTypeHandler(t *testing.T) {
 	type args struct {
-		t     metric.Type
+		t     domain.Type
 		name  string
 		delta int64
 	}
@@ -194,7 +195,7 @@ func Test_updateBatchNegativeTypeHandler(t *testing.T) {
 					delta: 42343,
 				},
 				{
-					t:     metric.Counter,
+					t:     domain.Counter,
 					name:  "test1",
 					delta: 22,
 				},
@@ -209,7 +210,7 @@ func Test_updateBatchNegativeTypeHandler(t *testing.T) {
 					delta: 4234,
 				},
 				{
-					t:     metric.Counter,
+					t:     domain.Counter,
 					name:  "test1",
 					delta: 3243,
 				},
@@ -218,11 +219,11 @@ func Test_updateBatchNegativeTypeHandler(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			initTest(t, func(mux *chi.Mux, repo repositories.Repository, db *db.DB) {
+			initTest(t, func(mux *chi.Mux, repo repo.Repository, db *db.DB) {
 				ctx := context.Background()
 				_ = flushDB(ctx, db)
 
-				data, _ := json.Marshal([]metric.JSONMetric{
+				data, _ := json.Marshal([]dto.JsonMetric{
 					{
 						ID:    tt.args[0].name,
 						MType: tt.args[0].t.String(),
