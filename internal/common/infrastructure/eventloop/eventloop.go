@@ -43,7 +43,7 @@ func (e *Event) CallCancel() {
 }
 
 func NewEvent(n string, s int, e FuncWithCtx, log *zap.SugaredLogger) *Event {
-	log.Info("Registered new event: ", n, " on every ", s, " sec")
+	log.Infof("Registered new event: %d on every %d sec", n, s)
 
 	return &Event{
 		Name:     n,

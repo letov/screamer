@@ -23,7 +23,7 @@ func NewRetryJob[T any](
 			return
 		}
 		d := time.Duration(i) * time.Second
-		log.Warn(name, "fail on try: ", inx+1, ", waiting ", d, "...\n", err)
+		log.Warnf("%s fail on try %d (%s)", name, inx, err)
 		if !isRetryError(err, retryErrors) || inx >= len(tryIntervals) {
 			return
 		}
