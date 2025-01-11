@@ -3,7 +3,7 @@ package grpcserver
 import (
 	"context"
 	"net"
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 	"screamer/internal/server/config"
 	"screamer/internal/server/services"
 	"strings"

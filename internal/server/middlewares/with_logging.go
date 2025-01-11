@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"net/http"
-	"screamer/internal/common/logger"
+	"screamer/internal/common/infrastructure/logger"
 	"time"
 
 	"github.com/go-chi/chi/v5/middleware"

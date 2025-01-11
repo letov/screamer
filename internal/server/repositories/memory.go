@@ -4,7 +4,7 @@ import (
 	"context"
 	"math"
 	"screamer/internal/common"
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 	"sync"
 )
 

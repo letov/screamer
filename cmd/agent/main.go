@@ -1,9 +1,9 @@
 package main
 
 import (
-	"screamer/internal/agent/app"
-	"screamer/internal/agent/di"
-	"screamer/internal/common/build"
+	"screamer/internal/agent/application/app"
+	"screamer/internal/agent/infrastructure/di"
+	"screamer/internal/common/helpers/build"
 
 	"go.uber.org/fx"
 )

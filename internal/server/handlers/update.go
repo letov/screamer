@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 	"screamer/internal/server/services"
 	"time"
 )

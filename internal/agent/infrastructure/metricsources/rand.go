@@ -2,7 +2,7 @@ package metricsources
 
 import (
 	"math/rand"
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 )
 
 const randomMetric = "RandomValue"

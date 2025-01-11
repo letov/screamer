@@ -6,7 +6,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 	"screamer/internal/server/db"
 	"screamer/internal/server/repositories"
 	"testing"

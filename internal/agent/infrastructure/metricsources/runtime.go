@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"runtime"
 	"screamer/internal/common"
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 )
 
 func getRuntimeMetrics() []*metric.Metric {

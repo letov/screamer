@@ -28,3 +28,5 @@ vendor/
 .env.agent.local
 .env.server.local
 /cmd/staticlint/main
+/proto/screamer.pb.go
+/proto/screamer_grpc.pb.go

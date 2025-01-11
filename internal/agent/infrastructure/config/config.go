@@ -2,7 +2,7 @@ package config
 
 import (
 	"reflect"
-	net_address "screamer/internal/common/netaddress"
+	net_address "screamer/internal/common/helpers/netaddress"
 )
 
 type configSource struct {

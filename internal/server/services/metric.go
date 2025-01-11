@@ -4,7 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
 	"strconv"

@@ -2,7 +2,7 @@ package events
 
 import (
 	"context"
-	event_loop "screamer/internal/common/eventloop"
+	event_loop "screamer/internal/common/infrastructure/eventloop"
 	"screamer/internal/server/config"
 	"screamer/internal/server/repositories"
 

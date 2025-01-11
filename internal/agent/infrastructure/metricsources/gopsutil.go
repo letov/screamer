@@ -1,7 +1,7 @@
 package metricsources
 
 import (
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 
 	"github.com/shirou/gopsutil/cpu"
 	"github.com/shirou/gopsutil/mem"

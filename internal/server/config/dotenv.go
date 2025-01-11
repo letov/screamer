@@ -2,7 +2,7 @@ package config
 
 import (
 	"os"
-	net_address "screamer/internal/common/netaddress"
+	net_address "screamer/internal/common/helpers/netaddress"
 	"strconv"
 
 	"github.com/joho/godotenv"

@@ -2,7 +2,7 @@ package app
 
 import (
 	"net/http"
-	event_loop "screamer/internal/common/eventloop"
+	event_loop "screamer/internal/common/infrastructure/eventloop"
 
 	"google.golang.org/grpc"
 )

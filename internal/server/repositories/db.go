@@ -4,8 +4,8 @@ import (
 	"context"
 	"math"
 	"screamer/internal/common"
-	"screamer/internal/common/metric"
-	"screamer/internal/common/retry"
+	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/helpers/retry"
 	"screamer/internal/server/db"
 
 	"github.com/jackc/pgx/v5"

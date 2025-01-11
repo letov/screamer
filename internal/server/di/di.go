@@ -1,9 +1,9 @@
 package di
 
 import (
-	event_loop "screamer/internal/common/eventloop"
-	"screamer/internal/common/grpcclient"
-	"screamer/internal/common/logger"
+	event_loop "screamer/internal/common/infrastructure/eventloop"
+	"screamer/internal/common/infrastructure/grpcclient"
+	"screamer/internal/common/infrastructure/logger"
 	"screamer/internal/server/config"
 	"screamer/internal/server/db"
 	"screamer/internal/server/events"

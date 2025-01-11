@@ -2,23 +2,23 @@ package services
 
 import (
 	"context"
-	"screamer/internal/agent/config"
-	metric_sources "screamer/internal/agent/metricsources"
-	"screamer/internal/agent/repositories"
+	"screamer/internal/agent/infrastructure/config"
+	metric_sources "screamer/internal/agent/infrastructure/metricsources"
+	"screamer/internal/agent/infrastructure/repositories"
 	"screamer/internal/common"
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 
 	"go.uber.org/zap"
 )
 
-type ProcessingService struct {
+type Processing struct {
 	config        *config.Config
 	repo          repositories.Repository
 	metricSources []metric_sources.MetricSource
 	log           *zap.SugaredLogger
 }
 
-func (ps *ProcessingService) UpdateMetrics(ctx context.Context) {
+func (ps *Processing) UpdateMetrics(ctx context.Context) {
 	ms := make([]*metric.Metric, 0)
 	for _, fn := range ps.metricSources {
 		ms = append(ms, fn()...)
@@ -39,8 +39,8 @@ func (ps *ProcessingService) UpdateMetrics(ctx context.Context) {
 	}
 }
 
-func NewProcessingService(log *zap.SugaredLogger, config *config.Config, repo repositories.Repository, metricSources []metric_sources.MetricSource) *ProcessingService {
-	return &ProcessingService{
+func NewProcessing(log *zap.SugaredLogger, config *config.Config, repo repositories.Repository, metricSources []metric_sources.MetricSource) *Processing {
+	return &Processing{
 		config:        config,
 		repo:          repo,
 		metricSources: metricSources,

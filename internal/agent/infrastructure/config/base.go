@@ -1,6 +1,8 @@
 package config
 
-import "screamer/internal/common/netaddress"
+import (
+	"screamer/internal/common/helpers/netaddress"
+)
 
 type Config struct {
 	NetAddress     netaddress.NetAddress

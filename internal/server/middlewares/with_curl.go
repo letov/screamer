@@ -2,7 +2,7 @@ package middlewares
 
 import (
 	"net/http"
-	"screamer/internal/common/logger"
+	"screamer/internal/common/infrastructure/logger"
 
 	"github.com/aoliveti/curling"
 )

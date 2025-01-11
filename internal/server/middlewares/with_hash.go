@@ -5,7 +5,7 @@ import (
 	"io"
 	"net/http"
 	"screamer/internal/common"
-	"screamer/internal/common/hash"
+	"screamer/internal/common/helpers/hash"
 	"screamer/internal/server/config"
 )
 

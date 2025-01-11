@@ -8,13 +8,13 @@ import (
 	"io"
 	"net"
 	"net/http"
-	"screamer/internal/agent/config"
-	"screamer/internal/agent/repositories"
+	"screamer/internal/agent/infrastructure/config"
+	"screamer/internal/agent/infrastructure/repositories"
 	"screamer/internal/common"
-	"screamer/internal/common/grpcclient"
-	"screamer/internal/common/hash"
-	"screamer/internal/common/metric"
-	"screamer/internal/common/retry"
+	"screamer/internal/common/domain/metric"
+	"screamer/internal/common/helpers/hash"
+	"screamer/internal/common/helpers/retry"
+	"screamer/internal/common/infrastructure/grpcclient"
 	"sync/atomic"
 	"time"
 
@@ -23,7 +23,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type SendingService struct {
+type Sending struct {
 	config     *config.Config
 	repo       repositories.Repository
 	log        *zap.SugaredLogger
@@ -32,7 +32,7 @@ type SendingService struct {
 	gc         *grpcclient.GRPCClient
 }
 
-func (ss *SendingService) SendMetrics(ctx context.Context) {
+func (ss *Sending) SendMetrics(ctx context.Context) {
 	ms := ss.repo.GetAll(ctx)
 
 	jobs := make(chan metric.Metric, len(ms))
@@ -48,13 +48,13 @@ func (ss *SendingService) SendMetrics(ctx context.Context) {
 	close(jobs)
 }
 
-func (ss *SendingService) worker(ctx context.Context, jobs <-chan metric.Metric) {
+func (ss *Sending) worker(ctx context.Context, jobs <-chan metric.Metric) {
 	for j := range jobs {
 		ss.requestOne(ctx, j)
 	}
 }
 
-func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
+func (ss *Sending) requestOne(ctx context.Context, m metric.Metric) {
 	url := fmt.Sprintf("http://%v/update", ss.config.NetAddress.String())
 	body, _ := m.Bytes()
 	if ss.encrypt != nil {
@@ -76,7 +76,7 @@ func (ss *SendingService) requestOne(ctx context.Context, m metric.Metric) {
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
 }
 
-func (ss *SendingService) getIp() string {
+func (ss *Sending) getIp() string {
 	ips, _ := net.LookupIP(ss.config.Host)
 	if len(ips) == 0 {
 		ss.log.Fatal("host lookup fail")
@@ -84,7 +84,7 @@ func (ss *SendingService) getIp() string {
 	return ips[0].String()
 }
 
-func (ss *SendingService) requestAll(ctx context.Context, ms []metric.Metric) {
+func (ss *Sending) requestAll(ctx context.Context, ms []metric.Metric) {
 	url := fmt.Sprintf("http://%v/updates", ss.config.NetAddress.String())
 	var jms []metric.JSONMetric
 
@@ -110,7 +110,7 @@ func (ss *SendingService) requestAll(ctx context.Context, ms []metric.Metric) {
 	_, _ = retry.NewRetryJob(ctxWithTimeout, "agent request", job, []error{}, []int{1, 2, 5}, ss.log)
 }
 
-func (ss *SendingService) requestJobHttp(
+func (ss *Sending) requestJobHttp(
 	body *[]byte,
 	url string,
 	aj *atomic.Int32,
@@ -152,7 +152,7 @@ func (ss *SendingService) requestJobHttp(
 	}
 }
 
-func (ss *SendingService) requestJobGrpc(
+func (ss *Sending) requestJobGrpc(
 	m metric.Metric,
 	gc *grpcclient.GRPCClient,
 	aj *atomic.Int32,
@@ -174,19 +174,19 @@ func (ss *SendingService) requestJobGrpc(
 	}
 }
 
-func NewSendingService(
+func NewSending(
 	lc fx.Lifecycle,
 	log *zap.SugaredLogger,
 	config *config.Config,
 	repo repositories.Repository,
 	gc *grpcclient.GRPCClient,
-) *SendingService {
+) *Sending {
 	var encrypt *hash.RSAEncrypt
 	if len(config.CryptoKey) != 0 {
 		encrypt = hash.NewRSAEncrypt(config.CryptoKey, log)
 	}
 
-	ss := &SendingService{
+	ss := &Sending{
 		config:  config,
 		repo:    repo,
 		log:     log,

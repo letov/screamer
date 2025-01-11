@@ -1,7 +1,7 @@
 package metricsources
 
 import (
-	"screamer/internal/common/metric"
+	"screamer/internal/common/domain/metric"
 )
 
 const pollCount = "PollCount"

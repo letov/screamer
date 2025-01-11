@@ -1,7 +1,7 @@
 package main
 
 import (
-	"screamer/internal/common/build"
+	"screamer/internal/common/helpers/build"
 	"screamer/internal/server/app"
 	"screamer/internal/server/di"
 
